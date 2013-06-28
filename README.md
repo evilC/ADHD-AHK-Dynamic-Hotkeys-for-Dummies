@@ -1,4 +1,4 @@
-AHK-Bindings-Template
+AHK-Dynamic-Hotkeys
 =====================
 
 An AutoHotKey GUI script template that allows you to easily create AHK macros.
