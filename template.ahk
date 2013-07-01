@@ -18,6 +18,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; ===== Do not edit the Header =================================================================================================
 #InstallKeybdHook
 #InstallMouseHook
+#MaxHotKeysPerInterval, 200
  
 OnExit, GuiClose
 
@@ -49,17 +50,30 @@ SetKeyDelay, 0, 50
 ;Hotkey, IfWinActive, ahk_class CryENGINE
 
 ; Set up the GUI
-Gui, Add, Text, x5 W70 Center, Name
+
+gui_w := 375
+gui_h := 200
+
+Gui, Add, Tab2, x0 w%gui_w% h%gui_h%, Main|Bindings|Profiles
+
+Gui, Tab, 1
+Gui, Add, Text, x5 y40 w%gui_w%, Add your settings here...`n`nFire rate, weapon selection etc
+
+Gui, Tab, 2
+
+Gui, Add, Text, x5 y40 W70 Center, Name
 Gui, Add, Text, xp+70 W70 Center, Keyboard
 Gui, Add, Text, xp+90 W70 Center, Mouse
 Gui, Add, Text, xp+92 W30 Center, Ctrl
 Gui, Add, Text, xp+30 W30 Center, Shift
 Gui, Add, Text, xp+30 W30 Center, Alt
 
+tabtop := 40
+row := tabtop + 20
 
 Loop, %num_hotkeys%
 {
-	Gui, Add, Text,x5 W70 yp+30,HotKey %A_Index%
+	Gui, Add, Text,x5 W70 y%row%,HotKey %A_Index%
 	
 	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKK%A_Index%, None
 	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
@@ -79,12 +93,20 @@ Loop, %num_hotkeys%
 	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKA%A_Index%, 0
 	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
 	GuiControl,, HKA%A_Index%, %tmp%
+	
+	row := row + 30
 }
 
-Gui, Add, Checkbox, x5 vProgramMode gProgramModeToggle, Program Mode
+Gui, Add, Checkbox, x5 yp+30 vProgramMode gProgramModeToggle, Program Mode
+
+Gui, Tab, 3
+row := tabtop + 20
+Gui, Add, Text,x5 W70 y%row%,Profile
+Gui, Add, DropDownList, xp+70 yp-5 W90, Default||
+
 
 ; Show the GUI =====================================
-Gui, Show, x%gui_x% y%gui_y%
+Gui, Show, x%gui_x% y%gui_y% w%gui_w% h%gui_h%
 
 Gui, Submit, NoHide	; Fire GuiSubmit while ignore_events is on to set all the variables
 ignore_events := 0
