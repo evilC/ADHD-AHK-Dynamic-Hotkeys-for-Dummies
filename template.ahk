@@ -64,7 +64,7 @@ Loop, %num_hotkeys%
 Gui, Show, x%gui_x% y%gui_y%
 ignore_events := 0
 
-Gosub, SetHotKeys
+;Gosub, SetHotKeys
 
 return
 
