@@ -47,11 +47,17 @@ SetKeyDelay, 0, 50
 
 ; Set up the GUI
 num_hotkeys := 2
+Gui, Add, Text, x5 W70 Center, Name
+Gui, Add, Text, xp+70 W70 Center, Keyboard
+Gui, Add, Text, xp+90 W70 Center, Mouse
+Gui, Add, Text, xp+92 W30 Center, Ctrl
+Gui, Add, Text, xp+30 W30 Center, Shift
+Gui, Add, Text, xp+30 W30 Center, Alt
 
-rh := 10
+
 Loop, %num_hotkeys%
 {
-	Gui, Add, Text,x5 yp+%rh%,HotKey %A_Index%
+	Gui, Add, Text,x5 W70 yp+30,HotKey %A_Index%
 	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKK%A_Index%, None
 	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
 	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKM%A_Index%, None
@@ -60,9 +66,6 @@ Loop, %num_hotkeys%
 	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
 	Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
 	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
-	
-	
-	rh := rh + 25
 }
 
 ; Show the GUI =====================================
