@@ -124,17 +124,21 @@ UIChanged:
 	return
 
 SetHotKeys:
-Loop, %num_hotkeys%
-{
-	tmp := HotKey%A_Index%
-	if (tmp != "Unset"){
-		Hotkey, ~%tmp% , HotKey%A_Index%
-		Hotkey, ~%tmp% up , HotKey%A_Index%_up
+	Loop, %num_hotkeys%
+	{
+		;soundplay, *16
+		tmp := HotKey%A_Index%
+		if (tmp != "Unset"){
+			Hotkey, ~%tmp% , HotKey%A_Index%
+			Hotkey, ~%tmp% , On
+			Hotkey, ~%tmp% up , HotKey%A_Index%_up
+			Hotkey, ~%tmp% up , On
+		}
 	}
 	return
-}
 
 EnableHotKeys:
+	;Tooltip, Hotkeys enabled
 	Loop, %num_hotkeys%
 	{
 		tmp := HotKey%A_Index%
@@ -146,12 +150,13 @@ EnableHotKeys:
 	return
 	
 DisableHotKeys:
+	;Tooltip, Hotkeys disabled
 	Loop, %num_hotkeys%
 	{
 		tmp := HotKey%A_Index%
 		if (tmp != "Unset"){
-			;Hotkey, ~%tmp% , Off
-			;Hotkey, ~%tmp% up , Off
+			Hotkey, ~%tmp% , Off
+			Hotkey, ~%tmp% up , Off
 		}
 	}
 	return
@@ -215,21 +220,16 @@ getInput(type){
 			Gosub, EnableHotKeys
 			return
 		}
-		; Remove old hotkey (If present)
-		GuiControlGet,HotKey%EditingHotKey%
-		if (HotKey%EditingHotKey% != "Unset"){
-			tmp := HotKey%EditingHotKey%
-			HotKey, ~%tmp%, Off
-			HotKey, ~%tmp% up, Off
-		}
-		
-		;GuiControl, 1:text, HotKey%EditingHotKey%, %val%
-		;Gosub, EnableHotKeys
-		NewHotKey := val
-		HotKey, ~%val% up, ProgrammedKeyReleased
 
-		; ToDo: re-enable hotkeys on up of pressed key?
-		
+		GuiControlGet,HotKey%EditingHotKey%
+		if (HotKey%EditingHotKey% != val){
+			; Remove old hotkey (If present)
+			RemoveHotKey(EditingHotKey)
+			; Only actually do the program if the key has not changed
+			NewHotKey := val
+			HotKey, ~%val% up, ProgrammedKeyReleased
+		}
+
 		; Disable detection of modifer keys
 		HotKey, ~Ctrl, Off
 
@@ -237,10 +237,24 @@ getInput(type){
 	}
 }
 
+RemoveHotKey(hk){
+	tmp := HotKey%hk%
+	if (tmp != "Unset"){
+		; ToDo: Is there a better way to remove a hotkey?
+		HotKey, ~%tmp%, DoNothing
+		HotKey, ~%tmp% up, DoNothing
+	}
+}
+
+; An empty stub to redirect unbound hotkeys to
+DoNothing:
+	return
+	
 ; The key just programmed was released
 ProgrammedKeyReleased:
+	;Tooltip, Released
 	;msgbox, here
-	;HotKey, %A_ThisHotkey%, Off
+	HotKey, %A_ThisHotkey%, Off
 	
 	; Set textbox to new hotkey - this will trigger saving and applying of hotkeys
 	GuiControl, 1:text, HotKey%EditingHotKey%, %NewHotKey%
