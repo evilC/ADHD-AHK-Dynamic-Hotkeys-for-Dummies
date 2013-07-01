@@ -224,28 +224,6 @@ DisableHotKeys:
 ; An empty stub to redirect unbound hotkeys to
 DoNothing:
 	return
-	
-
-ProgramModeToggle:
-	Gui, Submit, NoHide
-	if (ProgramMode == 1){
-		; Enable controls, stop hotkeys
-		GoSub, DisableHotKeys
-	} else {
-		; Disable controls, start hotkeys
-		GoSub, EnableHotKeys
-	}
-	return
-	
-ProgramHotKey:
-	ProgramHotKey(SubStr(A_GuiControl,4))
-	return
-
-ProgramHotKey(hk){
-	global EditingHotKey
-	EditingHotKey := hk
-	gosub, GetInput
-}
 
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 UpdateINI(key, section, value, default){
@@ -307,6 +285,27 @@ HotkeyCtrlHasFocus() {
 
 
 ; OLD CODE =======================================================================================================================
+
+ProgramModeToggle:
+	Gui, Submit, NoHide
+	if (ProgramMode == 1){
+		; Enable controls, stop hotkeys
+		GoSub, DisableHotKeys
+	} else {
+		; Disable controls, start hotkeys
+		GoSub, EnableHotKeys
+	}
+	return
+	
+ProgramHotKey:
+	ProgramHotKey(SubStr(A_GuiControl,4))
+	return
+
+ProgramHotKey(hk){
+	global EditingHotKey
+	EditingHotKey := hk
+	gosub, GetInput
+}
 
 ; UI Changed - save changes and bind keys
 UIChanged:
