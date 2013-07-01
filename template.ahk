@@ -20,7 +20,8 @@ OnExit, GuiClose
 debug := 0
 EditingHotKey := ""
 NewHotKey := ""
-MouseButtons := "Esc,LButton,RButton,MButton,XButton1,XButton2,WheelUp,WheelDown,WheelLeft,WheelRight"
+;MouseButtons := "Esc,LButton,RButton,MButton,XButton1,XButton2,WheelUp,WheelDown,WheelLeft,WheelRight"
+MouseButtons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 StateCtrl := ""
 StateAlt := ""
 StateShift := ""
@@ -47,17 +48,17 @@ SetKeyDelay, 0, 50
 ; Set up the GUI
 num_hotkeys := 2
 
+rh := 10
 Loop, %num_hotkeys%
 {
-	Gui, Add, Text,x5,HotKey %A_Index%
+	Gui, Add, Text,x5 yp+%rh%,HotKey %A_Index%
 	IniRead, HotKey%A_Index%, %A_ScriptName%.ini, HotKeys, HotKey%A_Index%, Unset
 	tmp := HotKey%A_Index%
-	;Gui, Add, Edit, yp-5 xp+70 W70 vHotKey%A_Index% gUIChanged ReadOnly, %tmp%
-	Gui, Add, Hotkey, yp-5 xp+70 W170 vHotKey%A_Index% gTest, %tmp%
-	;hkv := HotKey%A_Index%
-	;GuiControl,, HotKey%A_Index%, %hkv%
-
-	Gui, Add, Button, xp+175 yp-2 gProgramHotkey vPHK%A_Index%, Program
+	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
+	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
+	
+	
+	rh := rh + 25
 }
 
 ; Show the GUI =====================================
@@ -101,7 +102,7 @@ HotKey2_up:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
 
-Test:
+KeyChanged:
 	tmp := %A_GuiControl%
 	ctr := 0
 	max := StrLen(tmp)
@@ -121,8 +122,19 @@ Test:
 	if (ctr < max){
 		GuiControl,, %A_GuiControl%, None
 	}
+	else
+	{
+		tmp := SubStr(A_GuiControl,4)
+		; Set the mouse field to blank
+		GuiControl,ChooseString, HKM%tmp%, None
+	}
 	return
-	
+
+MouseChanged:
+	tmp := SubStr(A_GuiControl,4)
+	; Set the keyboard field to blank
+	GuiControl,, HKK%tmp%, None
+	return
 
 ProgramHotKey:
 	ProgramHotKey(SubStr(A_GuiControl,4))
