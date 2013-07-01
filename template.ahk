@@ -71,26 +71,29 @@ Gui, Add, Text, xp+30 W30 Center, Alt
 tabtop := 40
 row := tabtop + 20
 
+IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_ptofile, Default
+;msgbox, % CurrentProfile
+
 Loop, %num_hotkeys%
 {
 	Gui, Add, Text,x5 W70 y%row%,HotKey %A_Index%
 	
-	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKK%A_Index%, None
+	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
 	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
 	
-	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKM%A_Index%, None
+	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
 	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
 	GuiControl, ChooseString, HKM%A_Index%, %tmp%
 	
-	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKC%A_Index%, 0
+	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
 	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
 	GuiControl,, HKC%A_Index%, %tmp%
 	
-	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKS%A_Index%, 0
+	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
 	Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
 	GuiControl,, HKS%A_Index%, %tmp%
 	
-	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKA%A_Index%, 0
+	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
 	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
 	GuiControl,, HKA%A_Index%, %tmp%
 	
@@ -102,7 +105,7 @@ Gui, Add, Checkbox, x5 yp+30 vProgramMode gProgramModeToggle, Program Mode
 Gui, Tab, 3
 row := tabtop + 20
 Gui, Add, Text,x5 W70 y%row%,Profile
-Gui, Add, DropDownList, xp+70 yp-5 W90, Default||
+Gui, Add, DropDownList, xp+70 yp-5 W90 vCurrentProfile gProfileChanged, Default||Test
 
 
 ; Show the GUI =====================================
@@ -112,8 +115,6 @@ Gui, Submit, NoHide	; Fire GuiSubmit while ignore_events is on to set all the va
 ignore_events := 0
 
 GoSub, ProgramModeToggle
-
-;Gosub, SetHotKeys
 
 return
 ; ===== End Header ==============================================================================================================
@@ -155,6 +156,11 @@ HotKey2_up:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
 
+ProfileChanged:
+	Gui, Submit, NoHide
+	
+	return
+	
 KeyChanged:
 	tmp := %A_GuiControl%
 	ctr := 0
@@ -198,11 +204,11 @@ OptionChanged:
 		
 		Loop, %num_hotkeys%
 		{
-			UpdateINI("HKK" A_Index, "HotKeys", HKK%A_Index%, "")
-			UpdateINI("HKM" A_Index, "HotKeys", HKM%A_Index%, "None")
-			UpdateINI("HKC" A_Index, "HotKeys", HKC%A_Index%, 0)
-			UpdateINI("HKS" A_Index, "HotKeys", HKS%A_Index%, 0)
-			UpdateINI("HKA" A_Index, "HotKeys", HKA%A_Index%, 0)
+			UpdateINI("HKK" A_Index, CurrentProfile, HKK%A_Index%, "")
+			UpdateINI("HKM" A_Index, CurrentProfile, HKM%A_Index%, "None")
+			UpdateINI("HKC" A_Index, CurrentProfile, HKC%A_Index%, 0)
+			UpdateINI("HKS" A_Index, CurrentProfile, HKS%A_Index%, 0)
+			UpdateINI("HKA" A_Index, CurrentProfile, HKA%A_Index%, 0)
 		}
 	}	
 	return
@@ -214,6 +220,9 @@ EnableHotKeys:
 		tmp := HKK%A_Index%
 		if (tmp == ""){
 			tmp := HKM%A_Index%
+			if (tmp == "None"){
+				tmp := ""
+			}
 		}
 		if (tmp != ""){
 			set := pre tmp
