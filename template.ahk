@@ -195,11 +195,31 @@ AddProfile(name){
 
 	Gosub, ProfileChanged
 }
-	
-DeleteProfile:
 
+DeleteProfile:
+	if (CurrentProfile != "Default"){
+		StringSplit, tmp, ProfileList, |
+		out := ""
+		Loop, %tmp0%{
+			;if (tmp%a_index% != editing_profile){
+				if (out != ""){
+					out := out "|"
+				}
+				out := out tmp%a_index%
+			;}
+		}
+		ProfileList := out
+		
+		IniDelete, %tmp%, %CurrentProfile%
+		UpdateINI("profile_list", "Settings", profile_list, "")		
+		
+		GuiControl,, CurrentProfile, |Default||%ProfileList%
+		Gui, Submit, NoHide
+				
+		Gosub, ProfileChanged
+	}
 	return
-	
+
 DuplicateProfile:
 
 	return
