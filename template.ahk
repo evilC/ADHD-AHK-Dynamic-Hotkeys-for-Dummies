@@ -241,6 +241,7 @@ DuplicateProfile(name){
 	Loop, %num_hotkeys%
 	{
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
+		
 		GuiControl,,HKK%A_Index%, %tmp%
 		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
@@ -255,8 +256,8 @@ DuplicateProfile(name){
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
 		GuiControl,, HKA%A_Index%, %tmp%
 	}
-	Gosub, ProfileChanged
-
+	UpdateINI("current_profile", "Settings", name,"")
+	Gosub, OptionChanged
 	return
 }
 
