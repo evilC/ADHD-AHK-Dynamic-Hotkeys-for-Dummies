@@ -208,7 +208,7 @@ DeleteProfile:
 		}
 		ProfileList := out
 		
-		IniDelete, %tmp%, %CurrentProfile%
+		IniDelete, %A_ScriptName%.ini, %CurrentProfile%
 		UpdateINI("profile_list", "Settings", ProfileList, "")		
 		
 		GuiControl,, CurrentProfile, |Default||%ProfileList%
