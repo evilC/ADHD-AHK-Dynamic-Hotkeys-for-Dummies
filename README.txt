@@ -14,13 +14,8 @@ Features:
 * Supports up and key down events for each trigger button
 
 Usage:
-
 ; To add an extra hotkey, duplicate the lines between the vvv and ^^^ blocks
-
 ; vvvvvvvvv
-
 ; Like this
-
 ; ^^^^^^^^^
-
 ; And replace old name (eg HotKey2) with a new name - eg HotKey3
