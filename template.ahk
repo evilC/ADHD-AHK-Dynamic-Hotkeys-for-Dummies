@@ -19,6 +19,7 @@ OnExit, GuiClose
 
 debug := 0
 EditingHotKey := ""
+NewHotKey := ""
 MouseButtons := "Esc,LButton,RButton,MButton,XButton1,XButton2,WheelUp,WheelDown,WheelLeft,WheelRight"
 
 ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
@@ -59,7 +60,7 @@ Loop, %num_hotkeys%
 Gui, Show, x%gui_x% y%gui_y%
 ignore_events := 0
 
-Gosub, AddHotKeys
+Gosub, SetHotKeys
 
 return
 
@@ -94,6 +95,8 @@ HotKey2_up:
 	return
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
+
 ProgramHotKey:
 	ProgramHotKey(SubStr(A_GuiControl,4))
 	return
@@ -114,15 +117,44 @@ UIChanged:
 			UpdateINI("HotKey" A_Index, "HotKeys", HotKey%A_Index%, "Unset")
 			if (HotKey%A_Index% != "Unset"){
 				UpdateINI("HotKey" A_Index, "HotKeys", HotKey%A_Index%, "Unset")
-				tmp := HotKey%A_Index%
-				Hotkey, ~%tmp% , HotKey%A_Index%
-				Hotkey, ~%tmp% up , HotKey%A_Index%_up
 			}
 		}
+		Gosub, SetHotKeys
 	}
 	return
 
-; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
+SetHotKeys:
+Loop, %num_hotkeys%
+{
+	tmp := HotKey%A_Index%
+	if (tmp != "Unset"){
+		Hotkey, ~%tmp% , HotKey%A_Index%
+		Hotkey, ~%tmp% up , HotKey%A_Index%_up
+	}
+	return
+}
+
+EnableHotKeys:
+	Loop, %num_hotkeys%
+	{
+		tmp := HotKey%A_Index%
+		if (tmp != "Unset"){
+			Hotkey, ~%tmp% , On
+			Hotkey, ~%tmp% up , On
+		}
+	}
+	return
+	
+DisableHotKeys:
+	Loop, %num_hotkeys%
+	{
+		tmp := HotKey%A_Index%
+		if (tmp != "Unset"){
+			;Hotkey, ~%tmp% , Off
+			;Hotkey, ~%tmp% up , Off
+		}
+	}
+	return
 
 ; Program pressed - DO NOT DIRECTLY CALL WITH A BUTTON, SET EditingHotKey FIRST!
 GetInput:
@@ -148,6 +180,7 @@ GetMouse:
 getInput(type){
 	global debug
 	global EditingHotKey
+	global NewHotKey
 
 	Gui, 2:Destroy
 	gui, 2:-caption +0x40000
@@ -157,7 +190,8 @@ getInput(type){
 	WinSet, AlwaysOnTop, On, A
 
 	;Disable hotkeys whilst in program mode
-	Suspend, On
+	;Suspend, On
+	Gosub, DisableHotKeys
 	
 	; Add hotkeys to detect modifiers
 	HotKey, ~Ctrl, ModifierDown
@@ -177,8 +211,8 @@ getInput(type){
 		; Input detected
 		Gui, 2:Destroy
 		if (val == -2){
-			; Esc pressed - do nothing
-			Suspend, Off
+			; Esc pressed - exit
+			Gosub, EnableHotKeys
 			return
 		}
 		; Remove old hotkey (If present)
@@ -189,12 +223,12 @@ getInput(type){
 			HotKey, ~%tmp% up, Off
 		}
 		
-		; Set textbox to new hotkey - this will trigger saving and applying of hotkey
-		GuiControl, 1:text, HotKey%EditingHotKey%, %val%
-		
+		;GuiControl, 1:text, HotKey%EditingHotKey%, %val%
+		;Gosub, EnableHotKeys
+		NewHotKey := val
+		HotKey, ~%val% up, ProgrammedKeyReleased
+
 		; ToDo: re-enable hotkeys on up of pressed key?
-		;Re-enable hotkeys
-		Suspend, Off
 		
 		; Disable detection of modifer keys
 		HotKey, ~Ctrl, Off
@@ -203,13 +237,27 @@ getInput(type){
 	}
 }
 
+; The key just programmed was released
+ProgrammedKeyReleased:
+	;msgbox, here
+	;HotKey, %A_ThisHotkey%, Off
+	
+	; Set textbox to new hotkey - this will trigger saving and applying of hotkeys
+	GuiControl, 1:text, HotKey%EditingHotKey%, %NewHotKey%
+	;GUI, submit, nohide
+	
+	;Re-enable hotkeys
+	Suspend, Off
+	Gosub, EnableHotKeys
+	
+	return
+
+
 ModifierDown:
-	Suspend		; Allows this label to work in program mode
 	; detect modifier keus (ctrl, alt etc)
 	return
 
 ModifierUp:
-	Suspend
 	; Modifier released - use to detect "press" of a modifier and thus binding
 	return
 
