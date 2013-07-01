@@ -197,6 +197,14 @@ EnableHotKeys:
 			set := pre tmp
 			Hotkey, ~%set% , HotKey%A_Index%
 			Hotkey, ~%set% up , HotKey%A_Index%_up
+			/*
+			; Up event does not fire for wheel "buttons", but cannot bind two events to one hotkey ;(
+			if (tmp == "WheelUp" || tmp == "WheelDown" || tmp == "WheelLeft" || tmp == "WheelRight"){
+				Hotkey, ~%set% , HotKey%A_Index%_up
+			} else {
+				Hotkey, ~%set% up , HotKey%A_Index%_up
+			}
+			*/
 		}
 		GuiControl, Disable, HKK%A_Index%
 		GuiControl, Disable, HKM%A_Index%
