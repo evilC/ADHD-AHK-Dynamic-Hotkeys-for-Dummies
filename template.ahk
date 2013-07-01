@@ -201,17 +201,17 @@ DeleteProfile:
 		StringSplit, tmp, ProfileList, |
 		out := ""
 		Loop, %tmp0%{
-			;if (tmp%a_index% != editing_profile){
+			if (tmp%a_index% != CurrentProfile){
 				if (out != ""){
 					out := out "|"
 				}
 				out := out tmp%a_index%
-			;}
+			}
 		}
 		ProfileList := out
 		
 		IniDelete, %tmp%, %CurrentProfile%
-		UpdateINI("profile_list", "Settings", profile_list, "")		
+		UpdateINI("profile_list", "Settings", ProfileList, "")		
 		
 		GuiControl,, CurrentProfile, |Default||%ProfileList%
 		Gui, Submit, NoHide
