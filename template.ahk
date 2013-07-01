@@ -81,13 +81,17 @@ Loop, %num_hotkeys%
 	GuiControl,, HKA%A_Index%, %tmp%
 }
 
+Gui, Add, Checkbox, x5 vProgramMode gProgramModeToggle, Program Mode
+
 ; Show the GUI =====================================
 Gui, Show, x%gui_x% y%gui_y%
 
 Gui, Submit, NoHide	; Fire GuiSubmit while ignore_events is on to set all the variables
 ignore_events := 0
 
-Gosub, SetHotKeys
+GoSub, ProgramModeToggle
+
+;Gosub, SetHotKeys
 
 return
 ; ===== End Header ==============================================================================================================
@@ -181,7 +185,7 @@ OptionChanged:
 	}	
 	return
 
-SetHotKeys:
+EnableHotKeys:
 	Loop, %num_hotkeys%
 	{
 		;soundplay, *16
@@ -195,6 +199,33 @@ SetHotKeys:
 	}
 	return
 
+DisableHotKeys:
+	Loop, %num_hotkeys%
+	{
+		tmp := HKK%A_Index%
+		if (tmp != ""){
+			; ToDo: Is there a better way to remove a hotkey?
+			HotKey, ~%tmp%, DoNothing
+			HotKey, ~%tmp% up, DoNothing
+		}
+	}
+	return
+
+; An empty stub to redirect unbound hotkeys to
+DoNothing:
+	return
+	
+
+ProgramModeToggle:
+	Gui, Submit, NoHide
+	if (ProgramMode == 1){
+		; Enable controls, stop hotkeys
+		GoSub, DisableHotKeys
+	} else {
+		; Disable controls, start hotkeys
+		GoSub, EnableHotKeys
+	}
+	return
 	
 ProgramHotKey:
 	ProgramHotKey(SubStr(A_GuiControl,4))
@@ -222,7 +253,6 @@ UIChanged:
 	}
 	return
 
-/*
 SetHotKeys:
 	Loop, %num_hotkeys%
 	{
@@ -236,8 +266,8 @@ SetHotKeys:
 		}
 	}
 	return
-*/
 
+/*
 EnableHotKeys:
 	;Tooltip, Hotkeys enabled
 	Loop, %num_hotkeys%
@@ -261,6 +291,7 @@ DisableHotKeys:
 		}
 	}
 	return
+*/
 
 ; Program pressed - DO NOT DIRECTLY CALL WITH A BUTTON, SET EditingHotKey FIRST!
 GetInput:
@@ -401,10 +432,12 @@ RemoveHotKey(hk){
 	}
 }
 
+/*
 ; An empty stub to redirect unbound hotkeys to
 DoNothing:
 	return
-	
+*/
+
 ModifierDown:
 	; detect modifier keys (ctrl, alt etc)
 	StateCtrl := "^"
