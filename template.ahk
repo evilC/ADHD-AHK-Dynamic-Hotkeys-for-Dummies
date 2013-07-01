@@ -246,7 +246,68 @@ ProgramHotKey(hk){
 	EditingHotKey := hk
 	gosub, GetInput
 }
-	
+
+; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
+UpdateINI(key, section, value, default){
+	tmp := A_ScriptName ".ini"
+	if (value != default){
+		IniWrite,  %value%, %tmp%, %section%, %key%
+	} else {
+		IniDelete, %tmp%, %section%, %key%
+	}
+}
+
+; Kill the macro if the GUI is closed
+GuiClose:
+	Gui, +Hwndgui_id
+	WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
+	IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
+	IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
+	ExitApp
+	return
+
+; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
+#MenuMaskKey vk07                 ;Requires AHK_L 38+
+#If ctrl := HotkeyCtrlHasFocus()
+	*AppsKey::                       ;Add support for these special keys,
+	*BackSpace::                     ;  which the hotkey control does not normally allow.
+	*Delete::
+	*Enter::
+	*Escape::
+	*Pause::
+	*PrintScreen::
+	*Space::
+	*Tab::
+	; Can use mouse hotkeys like this - it detects them but does not display them
+	;~*WheelUp::
+	modifier := ""
+	If GetKeyState("Shift","P")
+		modifier .= "+"
+	If GetKeyState("Ctrl","P")
+		modifier .= "^"
+	If GetKeyState("Alt","P")
+		modifier .= "!"
+	Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
+	If (A_ThisHotkey == "*BackSpace" && %ctrl% && !modifier)	;If the control has text but no modifiers held,
+		GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
+	Else                                                     	;Otherwise,
+		GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
+	;validateHK(ctrl)
+	Gosub, OptionChanged
+	return
+#If
+
+HotkeyCtrlHasFocus() {
+	GuiControlGet, ctrl, Focus       ;ClassNN
+	If InStr(ctrl,"hotkey") {
+		GuiControlGet, ctrl, FocusV     ;Associated variable
+	Return, ctrl
+}
+}
+
+
+; OLD CODE =======================================================================================================================
+
 ; UI Changed - save changes and bind keys
 UIChanged:
 	if (ignore_events != 1){
@@ -494,62 +555,4 @@ getMouse(){
 		}
 	}
 	return -1
-}
-
-; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
-UpdateINI(key, section, value, default){
-	tmp := A_ScriptName ".ini"
-	if (value != default){
-		IniWrite,  %value%, %tmp%, %section%, %key%
-	} else {
-		IniDelete, %tmp%, %section%, %key%
-	}
-}
-
-; Kill the macro if the GUI is closed
-GuiClose:
-	Gui, +Hwndgui_id
-	WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
-	IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
-	IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
-	ExitApp
-	return
-
-; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
-#MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If ctrl := HotkeyCtrlHasFocus()
- *AppsKey::                       ;Add support for these special keys,
- *BackSpace::                     ;  which the hotkey control does not normally allow.
- *Delete::
- *Enter::
- *Escape::
- *Pause::
- *PrintScreen::
- *Space::
- *Tab::
- ; Can use mouse hotkeys like this - it detects them but does not display them
- ;~*WheelUp::
-  modifier := ""
-  If GetKeyState("Shift","P")
-   modifier .= "+"
-  If GetKeyState("Ctrl","P")
-   modifier .= "^"
-  If GetKeyState("Alt","P")
-   modifier .= "!"
-  Gui, Submit, NoHide             ;If BackSpace is the first key press, Gui has never been submitted.
-  If (A_ThisHotkey == "*BackSpace" && %ctrl% && !modifier)   ;If the control has text but no modifiers held,
-   GuiControl,,%ctrl%                                       ;  allow BackSpace to clear that text.
-  Else                                                     ;Otherwise,
-   GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)  ;  show the hotkey.
-  ;validateHK(ctrl)
-  Gosub, OptionChanged
- return
-#If
-
-HotkeyCtrlHasFocus() {
- GuiControlGet, ctrl, Focus       ;ClassNN
- If InStr(ctrl,"hotkey") {
-  GuiControlGet, ctrl, FocusV     ;Associated variable
-  Return, ctrl
- }
 }
