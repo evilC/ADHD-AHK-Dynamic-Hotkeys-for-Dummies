@@ -21,6 +21,9 @@ debug := 0
 EditingHotKey := ""
 NewHotKey := ""
 MouseButtons := "Esc,LButton,RButton,MButton,XButton1,XButton2,WheelUp,WheelDown,WheelLeft,WheelRight"
+StateCtrl := ""
+StateAlt := ""
+StateShift := ""
 
 ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
 
@@ -186,6 +189,8 @@ getInput(type){
 	global debug
 	global EditingHotKey
 	global NewHotKey
+	Global StateCtrl
+	Global StateAlt
 
 	Gui, 2:Destroy
 	gui, 2:-caption +0x40000
@@ -201,6 +206,7 @@ getInput(type){
 	; Add hotkeys to detect modifiers
 	HotKey, ~Ctrl, ModifierDown
 	HotKey, ~Ctrl up, ModifierUp
+	StateCtrl := ""		; initialize just in case
 	
 	Loop
 	{
@@ -220,7 +226,18 @@ getInput(type){
 			Gosub, EnableHotKeys
 			return
 		}
-
+		; Transforming the result thusly turns ctrl-c into c
+		; We are detecting Ctrl state,so we can add it back.
+		; This is a solution to ctrl-c etc not being readable
+		Transform, val, Asc, %val%
+		if (StateCtrl == "^"){
+			soundplay, *16
+			val := val + 96
+		}
+		Transform, val, Chr, %val%
+		val := StateCtrl val
+		Tooltip, % val
+		;Tooltip, % "*" StateCtrl "*"
 		GuiControlGet,HotKey%EditingHotKey%
 		if (HotKey%EditingHotKey% != val){
 			; Remove old hotkey (If present)
@@ -229,13 +246,28 @@ getInput(type){
 			NewHotKey := val
 			HotKey, ~%val% up, ProgrammedKeyReleased
 		}
-
-		; Disable detection of modifer keys
-		HotKey, ~Ctrl, Off
-
 		return
 	}
 }
+
+; The key just programmed was released
+ProgrammedKeyReleased:
+	; Disable detection of modifer keys
+	HotKey, ~Ctrl, Off
+	HotKey, ~Ctrl up, Off
+		
+	HotKey, %A_ThisHotkey%, Off
+	
+	; Set textbox to new hotkey - this will trigger saving and applying of hotkeys
+	GuiControl, 1:text, HotKey%EditingHotKey%, %NewHotKey%
+	;GUI, submit, nohide
+	
+	;Re-enable hotkeys
+	Suspend, Off
+	Gosub, EnableHotKeys
+	
+	return
+
 
 RemoveHotKey(hk){
 	tmp := HotKey%hk%
@@ -250,34 +282,20 @@ RemoveHotKey(hk){
 DoNothing:
 	return
 	
-; The key just programmed was released
-ProgrammedKeyReleased:
-	;Tooltip, Released
-	;msgbox, here
-	HotKey, %A_ThisHotkey%, Off
-	
-	; Set textbox to new hotkey - this will trigger saving and applying of hotkeys
-	GuiControl, 1:text, HotKey%EditingHotKey%, %NewHotKey%
-	;GUI, submit, nohide
-	
-	;Re-enable hotkeys
-	Suspend, Off
-	Gosub, EnableHotKeys
-	
-	return
-
-
 ModifierDown:
-	; detect modifier keus (ctrl, alt etc)
+	; detect modifier keys (ctrl, alt etc)
+	StateCtrl := "^"
+	Send {LCtrl up}
 	return
 
 ModifierUp:
 	; Modifier released - use to detect "press" of a modifier and thus binding
+	StateCtrl := ""
 	return
 
 ; Detect Keyboard input
 getKey(){
-	Input, bp, L1, T0.1
+	Input, bp, L1 M, T0.1
 	if (bp == "")
 	{
 		return -2
