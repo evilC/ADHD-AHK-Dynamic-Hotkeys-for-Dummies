@@ -188,7 +188,7 @@ OptionChanged:
 EnableHotKeys:
 	Loop, %num_hotkeys%
 	{
-		;soundplay, *16
+		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
 		if (tmp != ""){
 			Hotkey, ~%tmp% , HotKey%A_Index%
@@ -225,6 +225,22 @@ DisableHotKeys:
 DoNothing:
 	return
 
+BuildPrefix(hk){
+	out := ""
+	tmp = HKC%hk%
+	GuiControlGet,%tmp%
+	if (HKC%hk% == 1){
+		out := out "^"
+	}
+	if (HKA%hk% == 1){
+		out := out "!"
+	}
+	if (HKS%hk% == 1){
+		out := out "+"
+	}
+	msgbox, % out
+}
+	
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 UpdateINI(key, section, value, default){
 	tmp := A_ScriptName ".ini"
