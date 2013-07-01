@@ -8,10 +8,12 @@ Key bindings and other settings are stored in an INI file and are remembered bet
 
 
 Features:
-* Bind any single key or any single mouse button to each macro
+* Bind any key or mouse button (With optional Ctrl, Shift, Alt modifiers) to each macro
 * Supports 7 mouse buttons (L,R,M,WheelUp/Down/Left/Right,Extra buttons 1+2) 
 * Library to handle loading and saving of settings, with with default settings removed from INI
 * Supports up and key down events for each trigger button
+* Profile support
+
 
 Usage:
 ; To add an extra hotkey, duplicate the lines between the vvv and ^^^ blocks
