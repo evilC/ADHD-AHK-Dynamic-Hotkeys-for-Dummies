@@ -240,8 +240,7 @@ DuplicateProfile(name){
 	
 	Loop, %num_hotkeys%
 	{
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
-		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 	
 		GuiControl,,HKK%A_Index%, %tmp%
 		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
@@ -258,6 +257,8 @@ DuplicateProfile(name){
 	}
 	UpdateINI("current_profile", "Settings", name,"")
 	Gosub, OptionChanged
+	;Gosub, ProfileChanged
+
 	return
 }
 
@@ -315,6 +316,7 @@ OptionChanged:
 	return
 
 EnableHotKeys:
+	Gui, Submit, NoHide
 	Loop, %num_hotkeys%
 	{
 		pre := BuildPrefix(A_Index)
@@ -325,6 +327,7 @@ EnableHotKeys:
 				tmp := ""
 			}
 		}
+		;soundplay, *16
 		if (tmp != ""){
 			set := pre tmp
 			Hotkey, ~%set% , HotKey%A_Index%
