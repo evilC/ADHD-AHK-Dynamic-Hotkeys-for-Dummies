@@ -77,26 +77,11 @@ IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_profile, Default
 Loop, %num_hotkeys%
 {
 	Gui, Add, Text,x5 W70 y%row%,HotKey %A_Index%
-	
-	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
-	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
-	
-	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
+	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged
 	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
-	GuiControl, ChooseString, HKM%A_Index%, %tmp%
-	
-	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
 	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
-	GuiControl,, HKC%A_Index%, %tmp%
-	
-	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
 	Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
-	GuiControl,, HKS%A_Index%, %tmp%
-	
-	IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
 	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
-	GuiControl,, HKA%A_Index%, %tmp%
-	
 	row := row + 30
 }
 
@@ -116,6 +101,7 @@ Gui, Submit, NoHide	; Fire GuiSubmit while ignore_events is on to set all the va
 ignore_events := 0
 
 GoSub, ProgramModeToggle
+Gosub, ProfileChanged
 
 return
 ; ===== End Header ==============================================================================================================
