@@ -81,9 +81,11 @@ Loop, %num_hotkeys%
 
 ; Show the GUI =====================================
 Gui, Show, x%gui_x% y%gui_y%
+
+Gui, Submit, NoHide	; Fire GuiSubmit while ignore_events is on to set all the variables
 ignore_events := 0
 
-;Gosub, SetHotKeys
+Gosub, SetHotKeys
 
 return
 ; ===== End Header ==============================================================================================================
@@ -172,11 +174,22 @@ OptionChanged:
 			UpdateINI("HKC" A_Index, "HotKeys", HKC%A_Index%, 0)
 			UpdateINI("HKS" A_Index, "HotKeys", HKS%A_Index%, 0)
 			UpdateINI("HKA" A_Index, "HotKeys", HKA%A_Index%, 0)
-			if (HKK%A_Index% != "None"){
-				
-			}
 		}
 	}	
+	return
+
+SetHotKeys:
+	Loop, %num_hotkeys%
+	{
+		;soundplay, *16
+		tmp := HKK%A_Index%
+		if (tmp != ""){
+			Hotkey, ~%tmp% , HotKey%A_Index%
+			;Hotkey, ~%tmp% , On
+			Hotkey, ~%tmp% up , HotKey%A_Index%_up
+			;Hotkey, ~%tmp% up , On
+		}
+	}
 	return
 
 	
@@ -206,6 +219,7 @@ UIChanged:
 	}
 	return
 
+/*
 SetHotKeys:
 	Loop, %num_hotkeys%
 	{
@@ -219,6 +233,7 @@ SetHotKeys:
 		}
 	}
 	return
+*/
 
 EnableHotKeys:
 	;Tooltip, Hotkeys enabled
