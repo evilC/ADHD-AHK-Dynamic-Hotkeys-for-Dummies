@@ -18,5 +18,4 @@ Usage:
 ; vvvvvvvvv
 ; Like this
 ; ^^^^^^^^^
-; These blocks should come in pairs - one for each hotkey
-; And replace old name (eg HotKeyOne) with a new name - eg HotKeyThree
+; And replace old name (eg HotKey2) with a new name - eg HotKey3
