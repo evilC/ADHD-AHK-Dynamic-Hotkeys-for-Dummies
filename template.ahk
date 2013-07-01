@@ -160,27 +160,24 @@ HotKey2_up:
 ProfileChanged:
 	Gosub, DisableHotKeys
 	Gui, Submit, NoHide
+	;msgbox, % CurrentProfile
+	UpdateINI("current_profile", "Settings", CurrentProfile,"")
+
 	Loop, %num_hotkeys%
 	{
-		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
-		;Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
 		GuiControl,,HKK%A_Index%, %tmp%
 		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
-		;Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
 		GuiControl, ChooseString, HKM%A_Index%, %tmp%
 		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
-		;Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
 		GuiControl,, HKC%A_Index%, %tmp%
 		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
-		;Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
 		GuiControl,, HKS%A_Index%, %tmp%
 		
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
-		;Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
 		GuiControl,, HKA%A_Index%, %tmp%
 	}
 
@@ -236,8 +233,8 @@ OptionChanged:
 			UpdateINI("HKC" A_Index, CurrentProfile, HKC%A_Index%, 0)
 			UpdateINI("HKS" A_Index, CurrentProfile, HKS%A_Index%, 0)
 			UpdateINI("HKA" A_Index, CurrentProfile, HKA%A_Index%, 0)
-			UpdateINI(profile_list, Setttings, ProfileList,"")
 		}
+		UpdateINI("profile_list", "Settings", ProfileList,"")
 	}	
 	return
 
