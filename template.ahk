@@ -190,6 +190,9 @@ EnableHotKeys:
 	{
 		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
+		if (tmp == ""){
+			tmp := HKM%A_Index%
+		}
 		if (tmp != ""){
 			set := pre tmp
 			Hotkey, ~%set% , HotKey%A_Index%
@@ -208,6 +211,9 @@ DisableHotKeys:
 	{
 		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
+		if (tmp == ""){
+			tmp := HKM%A_Index%
+		}
 		if (tmp != ""){
 			set := pre tmp
 			; ToDo: Is there a better way to remove a hotkey?
@@ -262,6 +268,7 @@ GuiClose:
 	return
 
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
+; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
 #If ctrl := HotkeyCtrlHasFocus()
 	*AppsKey::                       ;Add support for these special keys,
