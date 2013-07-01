@@ -1,6 +1,8 @@
 AHK-Dynamic-Hotkeys
 =====================
 
+By Clive Galway - evilc@evilc.com
+
 An AutoHotKey GUI script template that allows you to easily create AHK macros.
 Provides functionality to allow the user to configure which button triggers a macro via a GUI.
 Similar to binding a key to a function in a game's options.
