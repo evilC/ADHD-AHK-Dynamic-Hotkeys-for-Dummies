@@ -52,11 +52,12 @@ Loop, %num_hotkeys%
 	Gui, Add, Text,x5,HotKey %A_Index%
 	IniRead, HotKey%A_Index%, %A_ScriptName%.ini, HotKeys, HotKey%A_Index%, Unset
 	tmp := HotKey%A_Index%
-	Gui, Add, Edit, yp-5 xp+70 W70 vHotKey%A_Index% gUIChanged ReadOnly, %tmp%
+	;Gui, Add, Edit, yp-5 xp+70 W70 vHotKey%A_Index% gUIChanged ReadOnly, %tmp%
+	Gui, Add, Hotkey, yp-5 xp+70 W170 vHotKey%A_Index% gTest, %tmp%
 	;hkv := HotKey%A_Index%
 	;GuiControl,, HotKey%A_Index%, %hkv%
 
-	Gui, Add, Button, xp+75 yp-2 gProgramHotkey vPHK%A_Index%, Program
+	Gui, Add, Button, xp+175 yp-2 gProgramHotkey vPHK%A_Index%, Program
 }
 
 ; Show the GUI =====================================
@@ -99,6 +100,29 @@ HotKey2_up:
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
+
+Test:
+	tmp := %A_GuiControl%
+	ctr := 0
+	max := StrLen(tmp)
+	Loop, %max%
+	{
+		chr := substr(tmp,ctr,1)
+		if (chr != "^" && chr != "!" && chr != "+"){
+			ctr := ctr + 1
+		}
+	}
+	; Only modifier keys pressed?
+	if (ctr == 0){
+		return
+	}
+	
+	; key pressed
+	if (ctr < max){
+		GuiControl,, %A_GuiControl%, None
+	}
+	return
+	
 
 ProgramHotKey:
 	ProgramHotKey(SubStr(A_GuiControl,4))
@@ -373,3 +397,41 @@ GuiClose:
 	IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
 	ExitApp
 	return
+
+; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
+#MenuMaskKey vk07                 ;Requires AHK_L 38+
+#If ctrl := HotkeyCtrlHasFocus()
+ *AppsKey::                       ;Add support for these special keys,
+ *BackSpace::                     ;  which the hotkey control does not normally allow.
+ *Delete::
+ *Enter::
+ *Escape::
+ *Pause::
+ *PrintScreen::
+ *Space::
+ *Tab::
+ ; Can use mouse hotkeys like this - it detects them but does not display them
+ ;~*WheelUp::
+  modifier := ""
+  If GetKeyState("Shift","P")
+   modifier .= "+"
+  If GetKeyState("Ctrl","P")
+   modifier .= "^"
+  If GetKeyState("Alt","P")
+   modifier .= "!"
+  Gui, Submit, NoHide             ;If BackSpace is the first key press, Gui has never been submitted.
+  If (A_ThisHotkey == "*BackSpace" && %ctrl% && !modifier)   ;If the control has text but no modifiers held,
+   GuiControl,,%ctrl%                                       ;  allow BackSpace to clear that text.
+  Else                                                     ;Otherwise,
+   GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)  ;  show the hotkey.
+  ;validateHK(ctrl)
+ return
+#If
+
+HotkeyCtrlHasFocus() {
+ GuiControlGet, ctrl, Focus       ;ClassNN
+ If InStr(ctrl,"hotkey") {
+  GuiControlGet, ctrl, FocusV     ;Associated variable
+  Return, ctrl
+ }
+}
