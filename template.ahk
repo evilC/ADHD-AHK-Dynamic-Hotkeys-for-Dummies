@@ -71,8 +71,8 @@ Gui, Add, Text, xp+30 W30 Center, Alt
 tabtop := 40
 row := tabtop + 20
 
-IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_ptofile, Default
-;msgbox, % CurrentProfile
+IniRead, ProfileList, %A_ScriptName%.ini, Settings, profile_list, Default
+IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_profile, Default
 
 Loop, %num_hotkeys%
 {
@@ -105,7 +105,8 @@ Gui, Add, Checkbox, x5 yp+30 vProgramMode gProgramModeToggle, Program Mode
 Gui, Tab, 3
 row := tabtop + 20
 Gui, Add, Text,x5 W70 y%row%,Profile
-Gui, Add, DropDownList, xp+70 yp-5 W90 vCurrentProfile gProfileChanged, Default||Test
+Gui, Add, DropDownList, xp+70 yp-5 W90 vCurrentProfile gProfileChanged, Default||%ProfileList%
+GuiControl,ChooseString, CurrentProfile, %CurrentProfile%
 
 
 ; Show the GUI =====================================
@@ -157,7 +158,33 @@ HotKey2_up:
 ; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
 
 ProfileChanged:
+	Gosub, DisableHotKeys
 	Gui, Submit, NoHide
+	Loop, %num_hotkeys%
+	{
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
+		;Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
+		GuiControl,,HKK%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
+		;Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
+		GuiControl, ChooseString, HKM%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
+		;Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
+		GuiControl,, HKC%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
+		;Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
+		GuiControl,, HKS%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
+		;Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
+		GuiControl,, HKA%A_Index%, %tmp%
+	}
+
+	Gosub, EnableHotKeys
 	
 	return
 	
@@ -209,6 +236,7 @@ OptionChanged:
 			UpdateINI("HKC" A_Index, CurrentProfile, HKC%A_Index%, 0)
 			UpdateINI("HKS" A_Index, CurrentProfile, HKS%A_Index%, 0)
 			UpdateINI("HKA" A_Index, CurrentProfile, HKA%A_Index%, 0)
+			UpdateINI(profile_list, Setttings, ProfileList,"")
 		}
 	}	
 	return
@@ -252,6 +280,9 @@ DisableHotKeys:
 		tmp := HKK%A_Index%
 		if (tmp == ""){
 			tmp := HKM%A_Index%
+			if (tmp == "None"){
+				tmp := ""
+			}
 		}
 		if (tmp != ""){
 			set := pre tmp
