@@ -204,8 +204,8 @@ getInput(type){
 	Gosub, DisableHotKeys
 	
 	; Add hotkeys to detect modifiers
-	HotKey, ~Ctrl, ModifierDown
-	HotKey, ~Ctrl up, ModifierUp
+	HotKey, *~Ctrl, ModifierDown
+	HotKey, *~Ctrl up, ModifierUp
 	StateCtrl := ""		; initialize just in case
 	
 	Loop
@@ -226,25 +226,48 @@ getInput(type){
 			Gosub, EnableHotKeys
 			return
 		}
-		; Transforming the result thusly turns ctrl-c into c
-		; We are detecting Ctrl state,so we can add it back.
-		; This is a solution to ctrl-c etc not being readable
-		Transform, val, Asc, %val%
-		if (StateCtrl == "^"){
-			soundplay, *16
-			val := val + 96
+		; Preserve state of Modifiers early - they may change a modifier key goes up while processing
+		sc := StateCtrl
+		
+		if (type == 1){
+			tmp := sc val
+			;msgbox, % tmp
+		} else {
+			; Transforming the result thusly turns ctrl-c into c
+			; We are detecting Ctrl state,so we can add it back.
+			; This is a solution to ctrl-c etc not being readable
+			Transform, tmp, Asc, %tmp%
+			if (sc == "^"){
+				soundplay, *16
+				tmp := tmp + 96
+			}
+			Transform, tmp, Chr, %val%
+			tmp := sc val
 		}
-		Transform, val, Chr, %val%
-		val := StateCtrl val
-		Tooltip, % val
-		;Tooltip, % "*" StateCtrl "*"
+		;Tooltip, % val
+		;Tooltip, % "*" sc "*"
 		GuiControlGet,HotKey%EditingHotKey%
 		if (HotKey%EditingHotKey% != val){
 			; Remove old hotkey (If present)
 			RemoveHotKey(EditingHotKey)
 			; Only actually do the program if the key has not changed
-			NewHotKey := val
-			HotKey, ~%val% up, ProgrammedKeyReleased
+			;NewHotKey := val
+			NewHotKey := tmp
+			if (type == 1){
+				/*
+				Tooltip, %tmp%
+				HotKey, ~%tmp% up, ProgrammedKeyReleased
+				HotKey, ~%tmp% up, On
+				*/
+				Tooltip, *%sc%%val%/%tmp%*
+				test := sc val
+				HotKey, ~%tmp% up, ProgrammedKeyReleased
+				;HotKey, ~^MButton up, On
+			}
+			else
+			{
+				HotKey, ~%val% up, ProgrammedKeyReleased
+			}
 		}
 		return
 	}
@@ -252,9 +275,10 @@ getInput(type){
 
 ; The key just programmed was released
 ProgrammedKeyReleased:
+	;soundplay, *16
 	; Disable detection of modifer keys
-	HotKey, ~Ctrl, Off
-	HotKey, ~Ctrl up, Off
+	;HotKey, ~Ctrl, Off
+	;HotKey, ~Ctrl up, Off
 		
 	HotKey, %A_ThisHotkey%, Off
 	
@@ -266,6 +290,7 @@ ProgrammedKeyReleased:
 	Suspend, Off
 	Gosub, EnableHotKeys
 	
+	NewHotKey := ""
 	return
 
 
@@ -285,12 +310,15 @@ DoNothing:
 ModifierDown:
 	; detect modifier keys (ctrl, alt etc)
 	StateCtrl := "^"
-	Send {LCtrl up}
+	;Send {LCtrl up}
 	return
 
 ModifierUp:
 	; Modifier released - use to detect "press" of a modifier and thus binding
 	StateCtrl := ""
+	;if (NewHotKey != ""){
+	;	Gosub, ProgrammedKeyReleased
+	;}
 	return
 
 ; Detect Keyboard input
@@ -316,7 +344,7 @@ getMouse(){
 	
 	Loop, parse, MouseButtons, `,
 	{
-		if (getkeystate(A_LoopField,"P")){
+		if (getkeystate(A_LoopField)){
 			if (A_LoopField == "Esc"){
 				return -2
 			} else {
