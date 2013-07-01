@@ -89,8 +89,11 @@ Gui, Add, Checkbox, x5 yp+30 vProgramMode gProgramModeToggle, Program Mode
 
 Gui, Tab, 3
 row := tabtop + 20
-Gui, Add, Text,x5 W70 y%row%,Profile
-Gui, Add, DropDownList, xp+70 yp-5 W90 vCurrentProfile gProfileChanged, Default||%ProfileList%
+Gui, Add, Text,x5 W40 y%row%,Profile
+Gui, Add, DropDownList, xp+40 yp-5 W150 vCurrentProfile gProfileChanged, Default||%ProfileList%
+Gui, Add, Button, xp+160 yp-2 , Add
+Gui, Add, Button, xp+40 yp , Delete
+Gui, Add, Button, xp+50 yp , Duplicate
 GuiControl,ChooseString, CurrentProfile, %CurrentProfile%
 
 
