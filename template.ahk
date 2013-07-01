@@ -91,9 +91,9 @@ Gui, Tab, 3
 row := tabtop + 20
 Gui, Add, Text,x5 W40 y%row%,Profile
 Gui, Add, DropDownList, xp+40 yp-5 W150 vCurrentProfile gProfileChanged, Default||%ProfileList%
-Gui, Add, Button, xp+160 yp-2 , Add
-Gui, Add, Button, xp+40 yp , Delete
-Gui, Add, Button, xp+50 yp , Duplicate
+Gui, Add, Button, xp+160 yp-2 gAddProfile, Add
+Gui, Add, Button, xp+40 yp gDeleteProfile, Delete
+Gui, Add, Button, xp+50 yp gDuplicateProfile, Duplicate
 GuiControl,ChooseString, CurrentProfile, %CurrentProfile%
 
 
@@ -172,6 +172,36 @@ ProfileChanged:
 
 	Gosub, EnableHotKeys
 	
+	return
+
+AddProfile:
+	InputBox, tmp, Profile Name, Please enter a profile name
+	AddProfile(tmp)
+	return
+
+AddProfile(name){
+	global ProfileList
+	if (ProfileList == ""){
+		ProfileList := name
+	} else {
+		ProfileList := ProfileList "|" name
+	}
+	Sort, ProfileList, D|
+	
+	GuiControl,, CurrentProfile, |Default||%ProfileList%
+	GuiControl,ChooseString, CurrentProfile, %name%
+	
+	UpdateINI("profile_list", "Settings", ProfileList, "")
+
+	Gosub, ProfileChanged
+}
+	
+DeleteProfile:
+
+	return
+	
+DuplicateProfile:
+
 	return
 	
 KeyChanged:
