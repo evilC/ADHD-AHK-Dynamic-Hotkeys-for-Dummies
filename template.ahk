@@ -8,12 +8,14 @@
 ; Change the number of hotkeys here
 num_hotkeys := 2
 
-; ===== Do not edit the Header =================================================================================================
+; You *may* need to edit some of these settings - eg Sendmode for some games
+
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 ; #Warn  ; Enable warnings to assist with detecting common errors.
 ;SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+; ===== Do not edit the Header =================================================================================================
 #InstallKeybdHook
 #InstallMouseHook
  
@@ -98,13 +100,13 @@ return
 
 ; Fired on key down
 HotKey1:
-	;msgbox, 1
+	tooltip, 1 down
 	;Send 1
 	return
 
 ; Fired on key up
 HotKey1_up:
-	msgbox, 1 up
+	tooltip, 1 up
 	;Send q
 	return
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -114,12 +116,13 @@ HotKey1_up:
 
 ; Fired on key down
 HotKey2:
-	msgbox, 2
+	tooltip, 2 down
 	;Send 2
 	return
 
 ; Fired on key up
 HotKey2_up:
+	tooltip, 2 up
 	;Send w
 	return
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -496,6 +499,7 @@ GuiClose:
   Else                                                     ;Otherwise,
    GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)  ;  show the hotkey.
   ;validateHK(ctrl)
+  Gosub, OptionChanged
  return
 #If
 
