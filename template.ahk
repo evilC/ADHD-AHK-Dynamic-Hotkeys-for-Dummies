@@ -45,19 +45,21 @@ num_hotkeys := 2
 
 Loop, %num_hotkeys%
 {
-Gui, Add, Text,x5,HotKey %A_Index%
-IniRead, HotKey%A_Index%, %A_ScriptName%.ini, HotKeys, HotKey%A_Index%, Unset
-tmp := HotKey%A_Index%
-Gui, Add, Edit, yp-5 xp+70 W70 vHotKey%A_Index% gUIChanged ReadOnly, %tmp%
-;hkv := HotKey%A_Index%
-;GuiControl,, HotKey%A_Index%, %hkv%
+	Gui, Add, Text,x5,HotKey %A_Index%
+	IniRead, HotKey%A_Index%, %A_ScriptName%.ini, HotKeys, HotKey%A_Index%, Unset
+	tmp := HotKey%A_Index%
+	Gui, Add, Edit, yp-5 xp+70 W70 vHotKey%A_Index% gUIChanged ReadOnly, %tmp%
+	;hkv := HotKey%A_Index%
+	;GuiControl,, HotKey%A_Index%, %hkv%
 
-Gui, Add, Button, xp+75 yp-2 gProgramHotkey vPHK%A_Index%, Program
+	Gui, Add, Button, xp+75 yp-2 gProgramHotkey vPHK%A_Index%, Program
 }
 
 ; Show the GUI =====================================
 Gui, Show, x%gui_x% y%gui_y%
 ignore_events := 0
+
+Gosub, AddHotKeys
 
 return
 
@@ -113,8 +115,8 @@ UIChanged:
 			if (HotKey%A_Index% != "Unset"){
 				UpdateINI("HotKey" A_Index, "HotKeys", HotKey%A_Index%, "Unset")
 				tmp := HotKey%A_Index%
-				Hotkey, %tmp% , HotKey%A_Index%
-				Hotkey, %tmp% up , HotKey%A_Index%_up
+				Hotkey, ~%tmp% , HotKey%A_Index%
+				Hotkey, ~%tmp% up , HotKey%A_Index%_up
 			}
 		}
 	}
@@ -157,6 +159,10 @@ getInput(type){
 	;Disable hotkeys whilst in program mode
 	Suspend, On
 	
+	; Add hotkeys to detect modifiers
+	HotKey, ~Ctrl, ModifierDown
+	HotKey, ~Ctrl up, ModifierUp
+	
 	Loop
 	{
 		if (type == 0){
@@ -172,16 +178,40 @@ getInput(type){
 		Gui, 2:Destroy
 		if (val == -2){
 			; Esc pressed - do nothing
+			Suspend, Off
 			return
 		}
+		; Remove old hotkey (If present)
+		GuiControlGet,HotKey%EditingHotKey%
+		if (HotKey%EditingHotKey% != "Unset"){
+			tmp := HotKey%EditingHotKey%
+			HotKey, ~%tmp%, Off
+			HotKey, ~%tmp% up, Off
+		}
+		
+		; Set textbox to new hotkey - this will trigger saving and applying of hotkey
 		GuiControl, 1:text, HotKey%EditingHotKey%, %val%
 		
+		; ToDo: re-enable hotkeys on up of pressed key?
 		;Re-enable hotkeys
 		Suspend, Off
+		
+		; Disable detection of modifer keys
+		HotKey, ~Ctrl, Off
 
 		return
 	}
 }
+
+ModifierDown:
+	Suspend		; Allows this label to work in program mode
+	; detect modifier keus (ctrl, alt etc)
+	return
+
+ModifierUp:
+	Suspend
+	; Modifier released - use to detect "press" of a modifier and thus binding
+	return
 
 ; Detect Keyboard input
 getKey(){
