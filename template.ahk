@@ -3,7 +3,7 @@
 ; vvvvvvvvv
 ; Like this
 ; ^^^^^^^^^
-; And replace old name (eg HotKeyOne) with a new name - eg HotKeyThree
+; And replace old name (eg HotKey2) with a new name - eg HotKey3
 
 
 ; ===== Do not edit the Header ======
@@ -41,26 +41,19 @@ SetKeyDelay, 0, 50
 ;Hotkey, IfWinActive, ahk_class CryENGINE
 
 ; Set up the GUI
+num_hotkeys := 2
 
-; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; Add the GUI for HotKeyOne
-Gui, Add, Text,x5,HotKey One
-Gui, Add, Edit, yp-5 xp+70 W70 vHotKeyOne gUIChanged ReadOnly, Unset
-IniRead, HotKeyOne, %A_ScriptName%.ini, HotKeys, HotKeyOne, Unset
-GuiControl,, HotKeyOne, %HotKeyOne%
+Loop, %num_hotkeys%
+{
+Gui, Add, Text,x5,HotKey %A_Index%
+IniRead, HotKey%A_Index%, %A_ScriptName%.ini, HotKeys, HotKey%A_Index%, Unset
+tmp := HotKey%A_Index%
+Gui, Add, Edit, yp-5 xp+70 W70 vHotKey%A_Index% gUIChanged ReadOnly, %tmp%
+;hkv := HotKey%A_Index%
+;GuiControl,, HotKey%A_Index%, %hkv%
 
-Gui, Add, Button, xp+75 yp-2 gProgramHotKeyOne, Program
-; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; Add the GUI for HotKeyTwo
-Gui, Add, Text,x5,HotKey Two
-Gui, Add, Edit, yp-5 xp+70 W70 vHotKeyTwo gUIChanged ReadOnly, Unset
-IniRead, HotKeyTwo, %A_ScriptName%.ini, HotKeys, HotKeyTwo, Unset
-GuiControl,, HotKeyTwo, %HotKeyTwo%
-
-Gui, Add, Button, xp+75 yp-2 gProgramHotKeyTwo, Program
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Gui, Add, Button, xp+75 yp-2 gProgramHotkey vPHK%A_Index%, Program
+}
 
 ; Show the GUI =====================================
 Gui, Show, x%gui_x% y%gui_y%
@@ -69,67 +62,61 @@ ignore_events := 0
 return
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; Set up HotKeyOne
+; Set up HotKey 1
 
 ; Fired on key down
-HotKeyOne:
-	Send 1
+HotKey1:
+	;msgbox, 1
+	;Send 1
 	return
 
 ; Fired on key up
-HotKeyOneUp:
-	Send q
-	return
-
-; Button for Program HotKeyOne pressed
-ProgramHotKeyOne:
-	EditingHotKey := "HotKeyOne"
-	gosub, GetInput
+HotKey1_up:
+	msgbox, 1 up
+	;Send q
 	return
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; Set up HotKeyTwo
+; Set up HotKey 2
 
 ; Fired on key down
-HotKeyTwo:
-	Send 2
+HotKey2:
+	msgbox, 2
+	;Send 2
 	return
 
 ; Fired on key up
-HotKeyTwoUp:
-	Send w
-	return
-
-; Button for Program HotKeyTwo pressed
-ProgramHotKeyTwo:
-	EditingHotKey := "HotKeyTwo"
-	gosub, GetInput
+HotKey2_up:
+	;Send w
 	return
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+ProgramHotKey:
+	ProgramHotKey(SubStr(A_GuiControl,4))
+	return
+
+ProgramHotKey(hk){
+	global EditingHotKey
+	EditingHotKey := hk
+	gosub, GetInput
+}
+	
 ; UI Changed - save changes and bind keys
 UIChanged:
 	if (ignore_events != 1){
 		Gui, Submit, NoHide
 		
-		; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-		UpdateINI("HotKeyOne", "HotKeys", HotKeyOne, "Unset")
-		if (HotKeyOne != "Unset"){
-			UpdateINI("HotKeyOne", "HotKeys", HotKeyOne, "Unset")
-			Hotkey, %HotKeyOne%, HotKeyOne
-			Hotkey, %HotKeyOne% up, HotKeyOneUp
+		Loop, %num_hotkeys%
+		{
+			UpdateINI("HotKey" A_Index, "HotKeys", HotKey%A_Index%, "Unset")
+			if (HotKey%A_Index% != "Unset"){
+				UpdateINI("HotKey" A_Index, "HotKeys", HotKey%A_Index%, "Unset")
+				tmp := HotKey%A_Index%
+				Hotkey, %tmp% , HotKey%A_Index%
+				Hotkey, %tmp% up , HotKey%A_Index%_up
+			}
 		}
-		;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		
-		; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-		if (HotKeyTwo != "Unset"){
-			UpdateINI("HotKeyTwo", "HotKeys", HotKeyTwo, "Unset")
-			Hotkey, %HotKeyTwo%, HotKeyTwo
-			Hotkey, %HotKeyTwo% up, HotKeyTwoUp
-		}
-		;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 	}
 	return
 
@@ -167,7 +154,7 @@ getInput(type){
 	WinGet, GuiID, ID, A
 	WinSet, AlwaysOnTop, On, A
 
-	// Disable hotkeys whilst in program mode
+	;Disable hotkeys whilst in program mode
 	Suspend, On
 	
 	Loop
@@ -187,10 +174,9 @@ getInput(type){
 			; Esc pressed - do nothing
 			return
 		}
-		guicontrol, 1:text, %EditingHotKey%, %val%
-		Gui, Submit, NoHide
-
-		// Re-enable hotkeys
+		GuiControl, 1:text, HotKey%EditingHotKey%, %val%
+		
+		;Re-enable hotkeys
 		Suspend, Off
 
 		return
