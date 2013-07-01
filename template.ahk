@@ -196,6 +196,11 @@ EnableHotKeys:
 			Hotkey, ~%tmp% up , HotKey%A_Index%_up
 			;Hotkey, ~%tmp% up , On
 		}
+		GuiControl, Disable, HKK%A_Index%
+		GuiControl, Disable, HKM%A_Index%
+		GuiControl, Disable, HKC%A_Index%
+		GuiControl, Disable, HKS%A_Index%
+		GuiControl, Disable, HKA%A_Index%
 	}
 	return
 
@@ -208,6 +213,11 @@ DisableHotKeys:
 			HotKey, ~%tmp%, DoNothing
 			HotKey, ~%tmp% up, DoNothing
 		}
+		GuiControl, Enable, HKK%A_Index%
+		GuiControl, Enable, HKM%A_Index%
+		GuiControl, Enable, HKC%A_Index%
+		GuiControl, Enable, HKS%A_Index%
+		GuiControl, Enable, HKA%A_Index%
 	}
 	return
 
