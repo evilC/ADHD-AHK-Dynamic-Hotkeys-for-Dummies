@@ -52,10 +52,14 @@ rh := 10
 Loop, %num_hotkeys%
 {
 	Gui, Add, Text,x5 yp+%rh%,HotKey %A_Index%
-	IniRead, HotKey%A_Index%, %A_ScriptName%.ini, HotKeys, HotKey%A_Index%, Unset
-	tmp := HotKey%A_Index%
+	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKK%A_Index%, None
+	;tmp := HKK%A_Index%
+	;msgbox, % tmp
 	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
 	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
+	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
+	Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
+	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
 	
 	
 	rh := rh + 25
@@ -121,12 +125,14 @@ KeyChanged:
 	; key pressed
 	if (ctr < max){
 		GuiControl,, %A_GuiControl%, None
+		Gosub, OptionChanged
 	}
 	else
 	{
 		tmp := SubStr(A_GuiControl,4)
 		; Set the mouse field to blank
 		GuiControl,ChooseString, HKM%tmp%, None
+		Gosub, OptionChanged
 	}
 	return
 
@@ -134,8 +140,24 @@ MouseChanged:
 	tmp := SubStr(A_GuiControl,4)
 	; Set the keyboard field to blank
 	GuiControl,, HKK%tmp%, None
+	Gosub, OptionChanged
 	return
 
+OptionChanged:
+	if (ignore_events != 1){
+		Gui, Submit, NoHide
+		
+		Loop, %num_hotkeys%
+		{
+			UpdateINI("HKK" A_Index, "HotKeys", HKK%A_Index%, "")
+			if (HKK%A_Index% != "None"){
+				
+			}
+		}
+	}	
+	return
+
+	
 ProgramHotKey:
 	ProgramHotKey(SubStr(A_GuiControl,4))
 	return
