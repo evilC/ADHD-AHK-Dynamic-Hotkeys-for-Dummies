@@ -53,10 +53,10 @@ Loop, %num_hotkeys%
 {
 	Gui, Add, Text,x5 yp+%rh%,HotKey %A_Index%
 	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKK%A_Index%, None
-	;tmp := HKK%A_Index%
-	;msgbox, % tmp
 	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged, %tmp%
+	IniRead, tmp, %A_ScriptName%.ini, HotKeys, HKM%A_Index%, None
 	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
+	GuiControl, ChooseString, HKM%A_Index%, %tmp%
 	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
 	Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
 	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
@@ -150,6 +150,7 @@ OptionChanged:
 		Loop, %num_hotkeys%
 		{
 			UpdateINI("HKK" A_Index, "HotKeys", HKK%A_Index%, "")
+			UpdateINI("HKM" A_Index, "HotKeys", HKM%A_Index%, "None")
 			if (HKK%A_Index% != "None"){
 				
 			}
