@@ -149,7 +149,6 @@ HotKey2_up:
 ProfileChanged:
 	Gosub, DisableHotKeys
 	Gui, Submit, NoHide
-	;msgbox, % CurrentProfile
 	UpdateINI("current_profile", "Settings", CurrentProfile,"")
 
 	Loop, %num_hotkeys%
@@ -177,6 +176,7 @@ ProfileChanged:
 AddProfile:
 	InputBox, tmp, Profile Name, Please enter a profile name
 	AddProfile(tmp)
+	Gosub, ProfileChanged
 	return
 
 AddProfile(name){
@@ -192,8 +192,6 @@ AddProfile(name){
 	GuiControl,ChooseString, CurrentProfile, %name%
 	
 	UpdateINI("profile_list", "Settings", ProfileList, "")
-
-	Gosub, ProfileChanged
 }
 
 DeleteProfile:
@@ -221,9 +219,47 @@ DeleteProfile:
 	return
 
 DuplicateProfile:
+	InputBox, tmp, Profile Name, Please enter a profile name
+	DuplicateProfile(tmp)
+	return
+
+DuplicateProfile(name){
+	global ProfileList
+	global CurrentProfile
+	
+	if (ProfileList == ""){
+		ProfileList := name
+	} else {
+		ProfileList := ProfileList "|" name
+	}
+	Sort, ProfileList, D|
+	
+	GuiControl,, CurrentProfile, |Default||%ProfileList%
+	GuiControl,ChooseString, CurrentProfile, %name%
+	UpdateINI("profile_list", "Settings", ProfileList, "")
+	
+	Loop, %num_hotkeys%
+	{
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
+		GuiControl,,HKK%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
+		GuiControl, ChooseString, HKM%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
+		GuiControl,, HKC%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
+		GuiControl,, HKS%A_Index%, %tmp%
+		
+		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
+		GuiControl,, HKA%A_Index%, %tmp%
+	}
+	Gosub, ProfileChanged
 
 	return
-	
+}
+
 KeyChanged:
 	tmp := %A_GuiControl%
 	ctr := 0
