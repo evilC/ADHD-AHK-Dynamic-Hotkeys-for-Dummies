@@ -191,10 +191,9 @@ EnableHotKeys:
 		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
 		if (tmp != ""){
-			Hotkey, ~%tmp% , HotKey%A_Index%
-			;Hotkey, ~%tmp% , On
-			Hotkey, ~%tmp% up , HotKey%A_Index%_up
-			;Hotkey, ~%tmp% up , On
+			set := pre tmp
+			Hotkey, ~%set% , HotKey%A_Index%
+			Hotkey, ~%set% up , HotKey%A_Index%_up
 		}
 		GuiControl, Disable, HKK%A_Index%
 		GuiControl, Disable, HKM%A_Index%
@@ -207,11 +206,13 @@ EnableHotKeys:
 DisableHotKeys:
 	Loop, %num_hotkeys%
 	{
+		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
 		if (tmp != ""){
+			set := pre tmp
 			; ToDo: Is there a better way to remove a hotkey?
-			HotKey, ~%tmp%, DoNothing
-			HotKey, ~%tmp% up, DoNothing
+			HotKey, ~%set%, DoNothing
+			HotKey, ~%set% up, DoNothing
 		}
 		GuiControl, Enable, HKK%A_Index%
 		GuiControl, Enable, HKM%A_Index%
@@ -238,7 +239,7 @@ BuildPrefix(hk){
 	if (HKS%hk% == 1){
 		out := out "+"
 	}
-	msgbox, % out
+	return out
 }
 	
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
