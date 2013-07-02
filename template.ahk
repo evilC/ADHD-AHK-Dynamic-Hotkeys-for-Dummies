@@ -7,7 +7,7 @@
 
 ; Change the number of hotkeys here
 num_hotkeys := 2
-HotKeyNames := "Fire, Toggle"
+HotKeyNames := "Fire, Toggle fire rate"
 
 ; You *may* need to edit some of these settings - eg Sendmode for some games
 
@@ -62,10 +62,10 @@ Gui, Add, Text, x5 y40 w%gui_w%, Add your settings here...`n`nFire rate, weapon 
 
 Gui, Tab, 2
 
-Gui, Add, Text, x5 y40 W70 Center, Name
-Gui, Add, Text, xp+70 W70 Center, Keyboard
+Gui, Add, Text, x5 y40 W100 Center, Name
+Gui, Add, Text, xp+100 W70 Center, Keyboard
 Gui, Add, Text, xp+90 W70 Center, Mouse
-Gui, Add, Text, xp+92 W30 Center, Ctrl
+Gui, Add, Text, xp+82 W30 Center, Ctrl
 Gui, Add, Text, xp+30 W30 Center, Shift
 Gui, Add, Text, xp+30 W30 Center, Alt
 
@@ -86,12 +86,12 @@ Loop, %num_hotkeys%
 	} else {
 		tmpname := "HotKey" %A_Index%
 	}
-	Gui, Add, Text,x5 W70 y%row%, %tmpname%
-	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged
+	Gui, Add, Text,x5 W100 y%row%, %tmpname%
+	Gui, Add, Hotkey, yp-5 xp+100 W70 vHKK%A_Index% gKeyChanged
 	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
-	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
-	Gui, Add, CheckBox, xp+30 yp W30 vHKS%A_Index% gOptionChanged
-	Gui, Add, CheckBox, xp+30 yp W30 vHKA%A_Index% gOptionChanged
+	Gui, Add, CheckBox, xp+100 yp+5 W25 vHKC%A_Index% gOptionChanged
+	Gui, Add, CheckBox, xp+30 yp W25 vHKS%A_Index% gOptionChanged
+	Gui, Add, CheckBox, xp+30 yp W25 vHKA%A_Index% gOptionChanged
 	row := row + 30
 }
 
