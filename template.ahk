@@ -183,6 +183,7 @@ FireRateUp:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
+; Profile management - functions to manage preserving user settings
 adh_profile_changed:
 	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
@@ -299,6 +300,24 @@ adh_duplicate_profile(name){
 	return
 }
 
+adh_option_changed:
+	if (adh_ignore_events != 1){
+		Gui, Submit, NoHide
+		
+		Loop, %adh_num_hotkeys%
+		{
+			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
+			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
+			adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
+			adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
+			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+		}
+		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+	}	
+	return
+
+; End profile management
+
 adh_key_changed:
 	adh_tmp := %A_GuiControl%
 	adh_ctr := 0
@@ -334,22 +353,6 @@ adh_mouse_changed:
 	; Set the keyboard field to blank
 	GuiControl,, adh_hk_k_%adh_tmp%, None
 	Gosub, adh_option_changed
-	return
-
-adh_option_changed:
-	if (adh_ignore_events != 1){
-		Gui, Submit, NoHide
-		
-		Loop, %adh_num_hotkeys%
-		{
-			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
-			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
-			adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
-			adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
-			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
-		}
-		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
-	}	
 	return
 
 adh_enable_hotkeys:
