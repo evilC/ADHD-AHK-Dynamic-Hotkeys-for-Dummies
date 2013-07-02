@@ -188,19 +188,19 @@ adh_mouse_move()
     If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
     {
         ToolTip  ; Turn off any previous tooltip.
-        SetTimer, DisplayToolTip, 1000
+        SetTimer, adh_display_tooltip, 1000
         PrevControl := CurrControl
     }
     return
 
-    DisplayToolTip:
-    SetTimer, DisplayToolTip, Off
+    adh_display_tooltip:
+    SetTimer, adh_display_tooltip, Off
     ToolTip % %CurrControl%_TT  ; The leading percent sign tell it to use an expression.
-    SetTimer, RemoveToolTip, 10000
+    SetTimer, adh_remove_tooltip, 10000
     return
 
-    RemoveToolTip:
-    SetTimer, RemoveToolTip, Off
+    adh_remove_tooltip:
+    SetTimer, adh_remove_tooltip, Off
     ToolTip
     return
 }
