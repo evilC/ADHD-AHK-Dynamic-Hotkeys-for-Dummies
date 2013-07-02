@@ -32,7 +32,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #InstallMouseHook
 #MaxHotKeysPerInterval, 200
  
-OnExit, GuiClose
+OnExit, adh_gui_close
 
 adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
@@ -86,16 +86,16 @@ if (adh_hotkey_names != null){
 Loop, %adh_num_hotkeys%
 {
 	if (adh_hotkey_names%A_Index% != null){
-		tmpname := trim(adh_hotkey_names%A_Index%)
+		adh_tmpname := trim(adh_hotkey_names%A_Index%)
 	} else {
-		tmpname := "HotKey" %A_Index%
+		adh_tmpname := "HotKey" %A_Index%
 	}
-	Gui, Add, Text,x5 W100 y%adh_current_row%, %tmpname%
-	Gui, Add, Hotkey, yp-5 xp+100 W70 vHKK%A_Index% gadh_key_changed
-	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
-	Gui, Add, CheckBox, xp+100 yp+5 W25 vHKC%A_Index% gadh_option_changed
-	Gui, Add, CheckBox, xp+30 yp W25 vHKS%A_Index% gadh_option_changed
-	Gui, Add, CheckBox, xp+30 yp W25 vHKA%A_Index% gadh_option_changed
+	Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
+	Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
+	Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
+	Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
+	Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
+	Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_a_%A_Index% gadh_option_changed
 	adh_current_row := adh_current_row + 30
 }
 
@@ -171,24 +171,24 @@ HotKey2_up:
 adh_profile_changed:
 	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
-	UpdateINI("current_profile", "Settings", adh_current_profile,"")
+	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
 
 	Loop, %adh_num_hotkeys%
 	{
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKK%A_Index%, 
-		GuiControl,,HKK%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, 
+		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKM%A_Index%, None
-		GuiControl, ChooseString, HKM%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
+		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKC%A_Index%, 0
-		GuiControl,, HKC%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
+		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKS%A_Index%, 0
-		GuiControl,, HKS%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
+		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKA%A_Index%, 0
-		GuiControl,, HKA%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
+		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 	}
 
 	Gosub, adh_enable_hotkeys
@@ -213,7 +213,7 @@ adh_add_profile(name){
 	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
 	GuiControl,ChooseString, adh_current_profile, %name%
 	
-	UpdateINI("profile_list", "Settings", adh_profile_list, "")
+	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
 }
 
 adh_delete_profile:
@@ -231,7 +231,7 @@ adh_delete_profile:
 		adh_profile_list := adh_out
 		
 		IniDelete, %A_ScriptName%.ini, %adh_current_profile%
-		UpdateINI("profile_list", "Settings", adh_profile_list, "")		
+		adh_update_ini("profile_list", "Settings", adh_profile_list, "")		
 		
 		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
 		Gui, Submit, NoHide
@@ -258,26 +258,26 @@ adh_duplicate_profile(name){
 	
 	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
 	GuiControl,ChooseString, adh_current_profile, %name%
-	UpdateINI("profile_list", "Settings", adh_profile_list, "")
+	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
 	
 	Loop, %adh_num_hotkeys%
 	{
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKK%A_Index%, 	
-		GuiControl,,HKK%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, 	
+		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKM%A_Index%, None
-		GuiControl, ChooseString, HKM%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
+		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKC%A_Index%, 0
-		GuiControl,, HKC%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
+		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKS%A_Index%, 0
-		GuiControl,, HKS%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
+		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKA%A_Index%, 0
-		GuiControl,, HKA%A_Index%, %adh_tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
+		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 	}
-	UpdateINI("current_profile", "Settings", name,"")
+	adh_update_ini("current_profile", "Settings", name,"")
 	Gosub, adh_option_changed
 	;Gosub, adh_profile_changed
 
@@ -309,7 +309,7 @@ adh_key_changed:
 	{
 		adh_tmp := SubStr(A_GuiControl,4)
 		; Set the mouse field to blank
-		GuiControl,ChooseString, HKM%adh_tmp%, None
+		GuiControl,ChooseString, adh_hk_m_%adh_tmp%, None
 		Gosub, adh_option_changed
 	}
 	return
@@ -317,7 +317,7 @@ adh_key_changed:
 adh_mouse_changed:
 	adh_tmp := SubStr(A_GuiControl,4)
 	; Set the keyboard field to blank
-	GuiControl,, HKK%adh_tmp%, None
+	GuiControl,, adh_hk_k_%adh_tmp%, None
 	Gosub, adh_option_changed
 	return
 
@@ -327,13 +327,13 @@ adh_option_changed:
 		
 		Loop, %adh_num_hotkeys%
 		{
-			UpdateINI("HKK" A_Index, adh_current_profile, HKK%A_Index%, "")
-			UpdateINI("HKM" A_Index, adh_current_profile, HKM%A_Index%, "None")
-			UpdateINI("HKC" A_Index, adh_current_profile, HKC%A_Index%, 0)
-			UpdateINI("HKS" A_Index, adh_current_profile, HKS%A_Index%, 0)
-			UpdateINI("HKA" A_Index, adh_current_profile, HKA%A_Index%, 0)
+			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
+			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
+			adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
+			adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
+			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
 		}
-		UpdateINI("profile_list", "Settings", adh_profile_list,"")
+		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
 	}	
 	return
 
@@ -341,10 +341,10 @@ adh_enable_hotkeys:
 	Gui, Submit, NoHide
 	Loop, %adh_num_hotkeys%
 	{
-		adh_pre := BuildPrefix(A_Index)
-		adh_tmp := HKK%A_Index%
+		adh_pre := adh_build_prefix(A_Index)
+		adh_tmp := adh_hk_k_%A_Index%
 		if (adh_tmp == ""){
-			adh_tmp := HKM%A_Index%
+			adh_tmp := adh_hk_m_%A_Index%
 			if (adh_tmp == "None"){
 				adh_tmp := ""
 			}
@@ -363,21 +363,21 @@ adh_enable_hotkeys:
 			}
 			*/
 		}
-		GuiControl, Disable, HKK%A_Index%
-		GuiControl, Disable, HKM%A_Index%
-		GuiControl, Disable, HKC%A_Index%
-		GuiControl, Disable, HKS%A_Index%
-		GuiControl, Disable, HKA%A_Index%
+		GuiControl, Disable, adh_hk_k_%A_Index%
+		GuiControl, Disable, adh_hk_m_%A_Index%
+		GuiControl, Disable, adh_hk_c_%A_Index%
+		GuiControl, Disable, adh_hk_s_%A_Index%
+		GuiControl, Disable, adh_hk_a_%A_Index%
 	}
 	return
 
 adh_disable_hotkeys:
 	Loop, %adh_num_hotkeys%
 	{
-		adh_pre := BuildPrefix(A_Index)
-		adh_tmp := HKK%A_Index%
+		adh_pre := adh_build_prefix(A_Index)
+		adh_tmp := adh_hk_k_%A_Index%
 		if (adh_tmp == ""){
-			adh_tmp := HKM%A_Index%
+			adh_tmp := adh_hk_m_%A_Index%
 			if (adh_tmp == "None"){
 				adh_tmp := ""
 			}
@@ -385,39 +385,39 @@ adh_disable_hotkeys:
 		if (adh_tmp != ""){
 			adh_set := adh_pre adh_tmp
 			; ToDo: Is there a better way to remove a hotkey?
-			HotKey, ~%adh_set%, DoNothing
-			HotKey, ~%adh_set% up, DoNothing
+			HotKey, ~%adh_set%, adh_do_nothing
+			HotKey, ~%adh_set% up, adh_do_nothing
 		}
-		GuiControl, Enable, HKK%A_Index%
-		GuiControl, Enable, HKM%A_Index%
-		GuiControl, Enable, HKC%A_Index%
-		GuiControl, Enable, HKS%A_Index%
-		GuiControl, Enable, HKA%A_Index%
+		GuiControl, Enable, adh_hk_k_%A_Index%
+		GuiControl, Enable, adh_hk_m_%A_Index%
+		GuiControl, Enable, adh_hk_c_%A_Index%
+		GuiControl, Enable, adh_hk_s_%A_Index%
+		GuiControl, Enable, adh_hk_a_%A_Index%
 	}
 	return
 
 ; An empty stub to redirect unbound hotkeys to
-DoNothing:
+adh_do_nothing:
 	return
 
-BuildPrefix(hk){
+adh_build_prefix(hk){
 	adh_out := ""
-	adh_tmp = HKC%hk%
+	adh_tmp = adh_hk_c_%hk%
 	GuiControlGet,%adh_tmp%
-	if (HKC%hk% == 1){
+	if (adh_hk_c_%hk% == 1){
 		adh_out := adh_out "^"
 	}
-	if (HKA%hk% == 1){
+	if (adh_hk_a_%hk% == 1){
 		adh_out := adh_out "!"
 	}
-	if (HKS%hk% == 1){
+	if (adh_hk_s_%hk% == 1){
 		adh_out := adh_out "+"
 	}
 	return adh_out
 }
 	
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
-UpdateINI(key, section, value, default){
+adh_update_ini(key, section, value, default){
 	adh_tmp := A_ScriptName ".ini"
 	if (value != default){
 		IniWrite,  %value%, %adh_tmp%, %section%, %key%
@@ -427,7 +427,7 @@ UpdateINI(key, section, value, default){
 }
 
 ; Kill the macro if the GUI is closed
-GuiClose:
+adh_gui_close:
 	Gui, +Hwndgui_id
 	WinGetPos, adh_gui_x, adh_gui_y,,, ahk_id %gui_id%
 	IniWrite, %adh_gui_x%, %A_ScriptName%.ini, Settings, gui_x
@@ -438,7 +438,7 @@ GuiClose:
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If ctrl := HotkeyCtrlHasFocus()
+#If ctrl := adh_hotkey_ctrl_has_focus()
 	*AppsKey::                       ;Add support for these special keys,
 	*BackSpace::                     ;  which the hotkey control does not normally allow.
 	*Delete::
@@ -467,7 +467,7 @@ GuiClose:
 	return
 #If
 
-HotkeyCtrlHasFocus() {
+adh_hotkey_ctrl_has_focus() {
 	GuiControlGet, ctrl, Focus       ;ClassNN
 	If InStr(ctrl,"hotkey") {
 		GuiControlGet, ctrl, FocusV     ;Associated variable
