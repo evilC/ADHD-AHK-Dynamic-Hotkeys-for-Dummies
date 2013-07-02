@@ -8,13 +8,12 @@ adh_core_version := 0.1
 
 ; ToDo:
 ; Rename all variables and functions to have a prefix, so user can code without worry
-; Set up homepage on evilC.com for instructions etc
 
-adh_macro_name := "My Macro"	; Change this to your macro name
-adh_version := 0.1				; The version number of your script
-adh_author := "Insert Name Here"			; Your Name
+adh_macro_name := "My Macro"			; Change this to your macro name
+adh_version := 0.1						; The version number of your script
+adh_author := "Insert Name Here"		; Your Name
 adh_link_text := "HomePage"				; The text of a link to your page about this macro
-adh_link_url := "http://google.com"				; The URL for the homepage of your script
+adh_link_url := "http://google.com"		; The URL for the homepage of your script
 
 ; Change the number of hotkeys here
 num_hotkeys := 2
@@ -63,12 +62,12 @@ SetKeyDelay, 0, 50
 ; Set up the GUI
 
 gui_w := 375
-gui_h := 200
+gui_h := 150
 
 Gui, Add, Tab2, x0 w%gui_w% h%gui_h%, Main|Bindings|Profiles|About
 
 Gui, Tab, 1
-Gui, Add, Text, x5 y40 w%gui_w%, Add your settings here...`n`nFire rate, weapon selection etc
+Gui, Add, Text, x5 y40, Add your settings here...`n`nFire rate, weapon selection etc
 
 Gui, Tab, 2
 
@@ -118,9 +117,9 @@ GuiControl,ChooseString, CurrentProfile, %CurrentProfile%
 
 Gui, Tab, 4
 row := tabtop + 10
-Gui, Add, Link,x5 y%row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
+Gui, Add, Link,x5 y%tabtop%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
-Gui, Add, Link,x5 yp+40, This macro ("%adh_macro_name%") was created by %adh_author%
+Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
 Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
 
 
