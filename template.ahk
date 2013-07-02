@@ -7,6 +7,7 @@
 
 ; Change the number of hotkeys here
 num_hotkeys := 2
+HotKeyNames := "Fire, Toggle"
 
 ; You *may* need to edit some of these settings - eg Sendmode for some games
 
@@ -74,9 +75,18 @@ row := tabtop + 20
 IniRead, ProfileList, %A_ScriptName%.ini, Settings, profile_list, Default
 IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_profile, Default
 
+if (HotKeyNames != null){
+	StringSplit, HotKeyNames, HotKeyNames, `,
+}
+
 Loop, %num_hotkeys%
 {
-	Gui, Add, Text,x5 W70 y%row%,HotKey %A_Index%
+	if (HotKeyNames%A_Index% != null){
+		tmpname := trim(HotKeyNames%A_Index%)
+	} else {
+		tmpname := "HotKey" %A_Index%
+	}
+	Gui, Add, Text,x5 W70 y%row%, %tmpname%
 	Gui, Add, Hotkey, yp-5 xp+70 W70 vHKK%A_Index% gKeyChanged
 	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
 	Gui, Add, CheckBox, xp+110 yp+5 W30 vHKC%A_Index% gOptionChanged
