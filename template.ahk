@@ -16,8 +16,8 @@ adh_link_text := "HomePage"				; The text of a link to your page about this macr
 adh_link_url := "http://google.com"		; The URL for the homepage of your script
 
 ; Change the number of hotkeys here
-num_hotkeys := 2
-HotKeyNames := "Fire, Toggle fire rate"
+adh_num_hotkeys := 2
+adh_hotkey_names := "Fire, Toggle fire rate"
 
 ; You *may* need to edit some of these settings - eg Sendmode for some games
 
@@ -33,15 +33,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
  
 OnExit, GuiClose
 
-debug := 0
-EditingHotKey := ""
-NewHotKey := ""
-MouseButtons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
-StateCtrl := ""
-StateAlt := ""
-StateShift := ""
+adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
-ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
+adh_ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
 
 IniRead, gui_x, %A_ScriptName%.ini, Settings, gui_x, 0
 IniRead, gui_y, %A_ScriptName%.ini, Settings, gui_y, 0
@@ -84,20 +78,20 @@ row := tabtop + 20
 IniRead, ProfileList, %A_ScriptName%.ini, Settings, profile_list, Default
 IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_profile, Default
 
-if (HotKeyNames != null){
-	StringSplit, HotKeyNames, HotKeyNames, `,
+if (adh_hotkey_names != null){
+	StringSplit, adh_hotkey_names, adh_hotkey_names, `,
 }
 
-Loop, %num_hotkeys%
+Loop, %adh_num_hotkeys%
 {
-	if (HotKeyNames%A_Index% != null){
-		tmpname := trim(HotKeyNames%A_Index%)
+	if (adh_hotkey_names%A_Index% != null){
+		tmpname := trim(adh_hotkey_names%A_Index%)
 	} else {
 		tmpname := "HotKey" %A_Index%
 	}
 	Gui, Add, Text,x5 W100 y%row%, %tmpname%
 	Gui, Add, Hotkey, yp-5 xp+100 W70 vHKK%A_Index% gKeyChanged
-	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%MouseButtons%
+	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%adh_mouse_buttons%
 	Gui, Add, CheckBox, xp+100 yp+5 W25 vHKC%A_Index% gOptionChanged
 	Gui, Add, CheckBox, xp+30 yp W25 vHKS%A_Index% gOptionChanged
 	Gui, Add, CheckBox, xp+30 yp W25 vHKA%A_Index% gOptionChanged
@@ -127,8 +121,8 @@ Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
 ; Show the GUI =====================================
 Gui, Show, x%gui_x% y%gui_y% w%gui_w% h%gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
 
-Gui, Submit, NoHide	; Fire GuiSubmit while ignore_events is on to set all the variables
-ignore_events := 0
+Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
+adh_ignore_events := 0
 
 GoSub, ProgramModeToggle
 Gosub, ProfileChanged
@@ -178,7 +172,7 @@ ProfileChanged:
 	Gui, Submit, NoHide
 	UpdateINI("current_profile", "Settings", CurrentProfile,"")
 
-	Loop, %num_hotkeys%
+	Loop, %adh_num_hotkeys%
 	{
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
 		GuiControl,,HKK%A_Index%, %tmp%
@@ -265,7 +259,7 @@ DuplicateProfile(name){
 	GuiControl,ChooseString, CurrentProfile, %name%
 	UpdateINI("profile_list", "Settings", ProfileList, "")
 	
-	Loop, %num_hotkeys%
+	Loop, %adh_num_hotkeys%
 	{
 		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 	
 		GuiControl,,HKK%A_Index%, %tmp%
@@ -327,10 +321,10 @@ MouseChanged:
 	return
 
 OptionChanged:
-	if (ignore_events != 1){
+	if (adh_ignore_events != 1){
 		Gui, Submit, NoHide
 		
-		Loop, %num_hotkeys%
+		Loop, %adh_num_hotkeys%
 		{
 			UpdateINI("HKK" A_Index, CurrentProfile, HKK%A_Index%, "")
 			UpdateINI("HKM" A_Index, CurrentProfile, HKM%A_Index%, "None")
@@ -344,7 +338,7 @@ OptionChanged:
 
 EnableHotKeys:
 	Gui, Submit, NoHide
-	Loop, %num_hotkeys%
+	Loop, %adh_num_hotkeys%
 	{
 		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
@@ -377,7 +371,7 @@ EnableHotKeys:
 	return
 
 DisableHotKeys:
-	Loop, %num_hotkeys%
+	Loop, %adh_num_hotkeys%
 	{
 		pre := BuildPrefix(A_Index)
 		tmp := HKK%A_Index%
