@@ -107,6 +107,9 @@ Loop, %adh_num_hotkeys%
 }
 
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
+Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
+Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application
+adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open`nUse the AutoIT window spy that comes with AutoHotkey to find the ahk_class of your application"
 
 Gui, Tab, 3
 adh_current_row := adh_tabtop + 20
@@ -128,6 +131,8 @@ Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
 
 ; Show the GUI =====================================
 Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
+
+OnMessage(0x200, "adh_mouse_move")
 
 Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
 adh_ignore_events := 0
@@ -174,6 +179,32 @@ HotKey2_up:
 
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
+
+; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry529556
+adh_mouse_move()
+{
+    static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
+    CurrControl := A_GuiControl
+    If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+    {
+        ToolTip  ; Turn off any previous tooltip.
+        SetTimer, DisplayToolTip, 1000
+        PrevControl := CurrControl
+    }
+    return
+
+    DisplayToolTip:
+    SetTimer, DisplayToolTip, Off
+    ToolTip % %CurrControl%_TT  ; The leading percent sign tell it to use an expression.
+    SetTimer, RemoveToolTip, 10000
+    return
+
+    RemoveToolTip:
+    SetTimer, RemoveToolTip, Off
+    ToolTip
+    return
+}
+
 
 adh_profile_changed:
 	Gosub, adh_disable_hotkeys
