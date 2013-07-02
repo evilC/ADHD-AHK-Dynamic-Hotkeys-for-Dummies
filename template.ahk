@@ -38,7 +38,6 @@ adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 ; Add option to limit controls to only a specific window
 ;Hotkey, IfWinActive, ahk_class CryENGINE
 ; Add way for macro authors to hook into profile syatem
-; Allow custom labels (eg Fire:) to be used as trigger targets
 ; Give macro authors a way to find out what hotkey is bound to a function (eg to send hotkey up when doing autofire)
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
