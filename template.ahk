@@ -183,19 +183,19 @@ HotKey2_up:
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry529556
 adh_mouse_move()
 {
-    static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
-    CurrControl := A_GuiControl
-    If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+    static adh_curr_control, adh_prev_control, _TT  ; _TT is kept blank for use by the ToolTip command below.
+    adh_curr_control := A_GuiControl
+    If (adh_curr_control <> adh_prev_control and not InStr(adh_curr_control, " "))
     {
         ToolTip  ; Turn off any previous tooltip.
         SetTimer, adh_display_tooltip, 1000
-        PrevControl := CurrControl
+        adh_prev_control := adh_curr_control
     }
     return
 
     adh_display_tooltip:
     SetTimer, adh_display_tooltip, Off
-    ToolTip % %CurrControl%_TT  ; The leading percent sign tell it to use an expression.
+    ToolTip % %adh_curr_control%_TT  ; The leading percent sign tell it to use an expression.
     SetTimer, adh_remove_tooltip, 10000
     return
 
