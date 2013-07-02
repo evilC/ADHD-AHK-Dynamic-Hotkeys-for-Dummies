@@ -28,7 +28,7 @@ adh_gui_h := 150
 ; Number of Hotkeys
 adh_num_hotkeys := 2
 ; Comma separated list of hotkey names (What the hotkey is called in the UI)
-adh_hotkey_names := "Fire,Toggle Fire Rate"
+adh_hotkey_names := ["Fire","Toggle","Fire Rate"]
 ; Comma separated list of hotkey labels (The subroutine name to be called when that hotkey triggers)
 adh_hotkey_labels := "Fire,ToggleFireRate"
 
@@ -71,6 +71,7 @@ if (adh_gui_y == ""){
 Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h%, Main|Bindings|Profiles|About
 
 Gui, Tab, 1
+; MAIN TAB
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE CUSTOM GUI ITEMS IN HERE
 
@@ -78,7 +79,7 @@ Gui, Add, Text, x5 y40, Add your settings here...`n`nFire rate, weapon selection
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
-
+; BINDINGS TAB
 Gui, Add, Text, x5 y40 W100 Center, Name
 Gui, Add, Text, xp+100 W70 Center, Keyboard
 Gui, Add, Text, xp+90 W70 Center, Mouse
@@ -97,6 +98,8 @@ if (adh_hotkey_names != null){
 }
 
 StringSplit, adh_hotkey_names, adh_hotkey_names, `,
+adh_tmp := adh_hotkey_names.MaxIndex()
+;msgbox, % tmp
 
 Loop, %adh_num_hotkeys%
 {
@@ -117,9 +120,11 @@ Loop, %adh_num_hotkeys%
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
 Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application
-adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open`nUse the AutoIT window spy that comes with AutoHotkey to find the ahk_class of your application"
+Gui, Add, Button, xp+101 yp W10 gadh_show_window_spy, ?
+adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
 
 Gui, Tab, 3
+; PROFILES TAB
 adh_current_row := adh_tabtop + 20
 Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
 Gui, Add, DropDownList, xp+40 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
@@ -129,6 +134,7 @@ Gui, Add, Button, xp+50 yp gadh_duplicate_profile, Duplicate
 GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
 
 Gui, Tab, 4
+; ABOUT TAB
 adh_current_row := adh_tabtop + 10
 Gui, Add, Link,x5 y%adh_tabtop%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
@@ -454,6 +460,17 @@ adh_gui_close:
 	IniWrite, %adh_gui_y%, %A_ScriptName%.ini, Settings, gui_y
 	ExitApp
 	return
+
+adh_show_window_spy:
+	adh_show_window_spy()
+	return
+
+adh_show_window_spy(){
+	SplitPath, A_AhkPath,,tmp
+	tmp := tmp "\AU3_Spy.exe"
+	IfExist, %tmp%
+		Run, %tmp%
+}
 
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
