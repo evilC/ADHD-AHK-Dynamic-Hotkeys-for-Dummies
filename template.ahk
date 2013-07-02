@@ -37,13 +37,13 @@ adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDow
 
 adh_ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
 
-IniRead, gui_x, %A_ScriptName%.ini, Settings, gui_x, 0
-IniRead, gui_y, %A_ScriptName%.ini, Settings, gui_y, 0
-if (gui_x == ""){
-	gui_x := 0	; in case of crash empty values can get written
+IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, 0
+IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, 0
+if (adh_gui_x == ""){
+	adh_gui_x := 0	; in case of crash empty values can get written
 }
-if (gui_y == ""){
-	gui_y := 0
+if (adh_gui_y == ""){
+	adh_gui_y := 0
 }
 
 ; You may need to edit these depending on game
@@ -55,10 +55,10 @@ SetKeyDelay, 0, 50
 
 ; Set up the GUI
 
-gui_w := 375
-gui_h := 150
+adh_gui_w := 375
+adh_gui_h := 150
 
-Gui, Add, Tab2, x0 w%gui_w% h%gui_h%, Main|Bindings|Profiles|About
+Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h%, Main|Bindings|Profiles|About
 
 Gui, Tab, 1
 Gui, Add, Text, x5 y40, Add your settings here...`n`nFire rate, weapon selection etc
@@ -72,10 +72,10 @@ Gui, Add, Text, xp+82 W30 Center, Ctrl
 Gui, Add, Text, xp+30 W30 Center, Shift
 Gui, Add, Text, xp+30 W30 Center, Alt
 
-tabtop := 40
-row := tabtop + 20
+adh_tabtop := 40
+row := adh_tabtop + 20
 
-IniRead, ProfileList, %A_ScriptName%.ini, Settings, profile_list, Default
+IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
 IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_profile, Default
 
 if (adh_hotkey_names != null){
@@ -101,17 +101,17 @@ Loop, %adh_num_hotkeys%
 Gui, Add, Checkbox, x5 yp+30 vProgramMode gProgramModeToggle, Program Mode
 
 Gui, Tab, 3
-row := tabtop + 20
+row := adh_tabtop + 20
 Gui, Add, Text,x5 W40 y%row%,Profile
-Gui, Add, DropDownList, xp+40 yp-5 W150 vCurrentProfile gProfileChanged, Default||%ProfileList%
+Gui, Add, DropDownList, xp+40 yp-5 W150 vCurrentProfile gProfileChanged, Default||%adh_profile_list%
 Gui, Add, Button, xp+160 yp-2 gAddProfile, Add
 Gui, Add, Button, xp+40 yp gDeleteProfile, Delete
 Gui, Add, Button, xp+50 yp gDuplicateProfile, Duplicate
 GuiControl,ChooseString, CurrentProfile, %CurrentProfile%
 
 Gui, Tab, 4
-row := tabtop + 10
-Gui, Add, Link,x5 y%tabtop%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
+row := adh_tabtop + 10
+Gui, Add, Link,x5 y%adh_tabtop%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
 Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
 Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
@@ -119,7 +119,7 @@ Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
 
 
 ; Show the GUI =====================================
-Gui, Show, x%gui_x% y%gui_y% w%gui_w% h%gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
+Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
 
 Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
 adh_ignore_events := 0
@@ -201,23 +201,23 @@ AddProfile:
 	return
 
 AddProfile(name){
-	global ProfileList
-	if (ProfileList == ""){
-		ProfileList := name
+	global adh_profile_list
+	if (adh_profile_list == ""){
+		adh_profile_list := name
 	} else {
-		ProfileList := ProfileList "|" name
+		adh_profile_list := adh_profile_list "|" name
 	}
-	Sort, ProfileList, D|
+	Sort, adh_profile_list, D|
 	
-	GuiControl,, CurrentProfile, |Default||%ProfileList%
+	GuiControl,, CurrentProfile, |Default||%adh_profile_list%
 	GuiControl,ChooseString, CurrentProfile, %name%
 	
-	UpdateINI("profile_list", "Settings", ProfileList, "")
+	UpdateINI("profile_list", "Settings", adh_profile_list, "")
 }
 
 DeleteProfile:
 	if (CurrentProfile != "Default"){
-		StringSplit, tmp, ProfileList, |
+		StringSplit, tmp, adh_profile_list, |
 		out := ""
 		Loop, %tmp0%{
 			if (tmp%a_index% != CurrentProfile){
@@ -227,12 +227,12 @@ DeleteProfile:
 				out := out tmp%a_index%
 			}
 		}
-		ProfileList := out
+		adh_profile_list := out
 		
 		IniDelete, %A_ScriptName%.ini, %CurrentProfile%
-		UpdateINI("profile_list", "Settings", ProfileList, "")		
+		UpdateINI("profile_list", "Settings", adh_profile_list, "")		
 		
-		GuiControl,, CurrentProfile, |Default||%ProfileList%
+		GuiControl,, CurrentProfile, |Default||%adh_profile_list%
 		Gui, Submit, NoHide
 				
 		Gosub, ProfileChanged
@@ -245,19 +245,19 @@ DuplicateProfile:
 	return
 
 DuplicateProfile(name){
-	global ProfileList
+	global adh_profile_list
 	global CurrentProfile
 	
-	if (ProfileList == ""){
-		ProfileList := name
+	if (adh_profile_list == ""){
+		adh_profile_list := name
 	} else {
-		ProfileList := ProfileList "|" name
+		adh_profile_list := adh_profile_list "|" name
 	}
-	Sort, ProfileList, D|
+	Sort, adh_profile_list, D|
 	
-	GuiControl,, CurrentProfile, |Default||%ProfileList%
+	GuiControl,, CurrentProfile, |Default||%adh_profile_list%
 	GuiControl,ChooseString, CurrentProfile, %name%
-	UpdateINI("profile_list", "Settings", ProfileList, "")
+	UpdateINI("profile_list", "Settings", adh_profile_list, "")
 	
 	Loop, %adh_num_hotkeys%
 	{
@@ -332,7 +332,7 @@ OptionChanged:
 			UpdateINI("HKS" A_Index, CurrentProfile, HKS%A_Index%, 0)
 			UpdateINI("HKA" A_Index, CurrentProfile, HKA%A_Index%, 0)
 		}
-		UpdateINI("profile_list", "Settings", ProfileList,"")
+		UpdateINI("profile_list", "Settings", adh_profile_list,"")
 	}	
 	return
 
@@ -428,9 +428,9 @@ UpdateINI(key, section, value, default){
 ; Kill the macro if the GUI is closed
 GuiClose:
 	Gui, +Hwndgui_id
-	WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
-	IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
-	IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
+	WinGetPos, adh_gui_x, adh_gui_y,,, ahk_id %gui_id%
+	IniWrite, %adh_gui_x%, %A_ScriptName%.ini, Settings, gui_x
+	IniWrite, %adh_gui_y%, %A_ScriptName%.ini, Settings, gui_y
 	ExitApp
 	return
 
