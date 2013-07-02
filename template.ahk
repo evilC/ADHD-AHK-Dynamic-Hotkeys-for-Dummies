@@ -41,7 +41,8 @@ adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 ; Allow custom labels (eg Fire:) to be used as trigger targets
 ; Give macro authors a way to find out what hotkey is bound to a function (eg to send hotkey up when doing autofire)
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
-; Make subroutine name setting work
+; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
+; Add explanation somewhere that all hotkeys are passthroughs
 
 adh_core_version := 0.1
 
