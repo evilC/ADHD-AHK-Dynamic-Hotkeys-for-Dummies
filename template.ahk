@@ -5,6 +5,8 @@
 ; Like this
 ; ^^^^^^^^^
 
+; When writing code, as long as none of your function or variable names begin with adh_ then you should not have any conflicts!
+
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; SETUP SECTION
 
