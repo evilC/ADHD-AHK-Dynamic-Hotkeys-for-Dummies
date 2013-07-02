@@ -8,6 +8,7 @@ adh_core_version := 0.1
 
 ; ToDo:
 ; Rename all variables and functions to have a prefix, so user can code without worry
+; Add option to limit controls to only a specific window
 
 adh_macro_name := "My Macro"			; Change this to your macro name
 adh_version := 0.1						; The version number of your script
@@ -73,10 +74,10 @@ Gui, Add, Text, xp+30 W30 Center, Shift
 Gui, Add, Text, xp+30 W30 Center, Alt
 
 adh_tabtop := 40
-row := adh_tabtop + 20
+adh_current_row := adh_tabtop + 20
 
 IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
-IniRead, CurrentProfile, %A_ScriptName%.ini, Settings, current_profile, Default
+IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
 
 if (adh_hotkey_names != null){
 	StringSplit, adh_hotkey_names, adh_hotkey_names, `,
@@ -89,28 +90,28 @@ Loop, %adh_num_hotkeys%
 	} else {
 		tmpname := "HotKey" %A_Index%
 	}
-	Gui, Add, Text,x5 W100 y%row%, %tmpname%
-	Gui, Add, Hotkey, yp-5 xp+100 W70 vHKK%A_Index% gKeyChanged
-	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gMouseChanged, None||%adh_mouse_buttons%
-	Gui, Add, CheckBox, xp+100 yp+5 W25 vHKC%A_Index% gOptionChanged
-	Gui, Add, CheckBox, xp+30 yp W25 vHKS%A_Index% gOptionChanged
-	Gui, Add, CheckBox, xp+30 yp W25 vHKA%A_Index% gOptionChanged
-	row := row + 30
+	Gui, Add, Text,x5 W100 y%adh_current_row%, %tmpname%
+	Gui, Add, Hotkey, yp-5 xp+100 W70 vHKK%A_Index% gadh_key_changed
+	Gui, Add, DropDownList, yp xp+80 W90 vHKM%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
+	Gui, Add, CheckBox, xp+100 yp+5 W25 vHKC%A_Index% gadh_option_changed
+	Gui, Add, CheckBox, xp+30 yp W25 vHKS%A_Index% gadh_option_changed
+	Gui, Add, CheckBox, xp+30 yp W25 vHKA%A_Index% gadh_option_changed
+	adh_current_row := adh_current_row + 30
 }
 
-Gui, Add, Checkbox, x5 yp+30 vProgramMode gProgramModeToggle, Program Mode
+Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 
 Gui, Tab, 3
-row := adh_tabtop + 20
-Gui, Add, Text,x5 W40 y%row%,Profile
-Gui, Add, DropDownList, xp+40 yp-5 W150 vCurrentProfile gProfileChanged, Default||%adh_profile_list%
-Gui, Add, Button, xp+160 yp-2 gAddProfile, Add
-Gui, Add, Button, xp+40 yp gDeleteProfile, Delete
-Gui, Add, Button, xp+50 yp gDuplicateProfile, Duplicate
-GuiControl,ChooseString, CurrentProfile, %CurrentProfile%
+adh_current_row := adh_tabtop + 20
+Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
+Gui, Add, DropDownList, xp+40 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
+Gui, Add, Button, xp+160 yp-2 gadh_add_profile, Add
+Gui, Add, Button, xp+40 yp gadh_delete_profile, Delete
+Gui, Add, Button, xp+50 yp gadh_duplicate_profile, Duplicate
+GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
 
 Gui, Tab, 4
-row := adh_tabtop + 10
+adh_current_row := adh_tabtop + 10
 Gui, Add, Link,x5 y%adh_tabtop%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
 Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
@@ -124,8 +125,8 @@ Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name%
 Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
 adh_ignore_events := 0
 
-GoSub, ProgramModeToggle
-Gosub, ProfileChanged
+GoSub, adh_program_mode_toggle
+Gosub, adh_profile_changed
 
 return
 ; ===== End Header ==============================================================================================================
@@ -167,40 +168,40 @@ HotKey2_up:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
 
-ProfileChanged:
-	Gosub, DisableHotKeys
+adh_profile_changed:
+	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
-	UpdateINI("current_profile", "Settings", CurrentProfile,"")
+	UpdateINI("current_profile", "Settings", adh_current_profile,"")
 
 	Loop, %adh_num_hotkeys%
 	{
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 
-		GuiControl,,HKK%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKK%A_Index%, 
+		GuiControl,,HKK%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
-		GuiControl, ChooseString, HKM%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKM%A_Index%, None
+		GuiControl, ChooseString, HKM%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
-		GuiControl,, HKC%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKC%A_Index%, 0
+		GuiControl,, HKC%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
-		GuiControl,, HKS%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKS%A_Index%, 0
+		GuiControl,, HKS%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
-		GuiControl,, HKA%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKA%A_Index%, 0
+		GuiControl,, HKA%A_Index%, %adh_tmp%
 	}
 
-	Gosub, EnableHotKeys
+	Gosub, adh_enable_hotkeys
 	
 	return
 
-AddProfile:
-	InputBox, tmp, Profile Name, Please enter a profile name
-	AddProfile(tmp)
-	Gosub, ProfileChanged
+adh_add_profile:
+	InputBox, adh_tmp, Profile Name, Please enter a profile name
+	adh_add_profile(adh_tmp)
+	Gosub, adh_profile_changed
 	return
 
-AddProfile(name){
+adh_add_profile(name){
 	global adh_profile_list
 	if (adh_profile_list == ""){
 		adh_profile_list := name
@@ -209,44 +210,44 @@ AddProfile(name){
 	}
 	Sort, adh_profile_list, D|
 	
-	GuiControl,, CurrentProfile, |Default||%adh_profile_list%
-	GuiControl,ChooseString, CurrentProfile, %name%
+	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+	GuiControl,ChooseString, adh_current_profile, %name%
 	
 	UpdateINI("profile_list", "Settings", adh_profile_list, "")
 }
 
-DeleteProfile:
-	if (CurrentProfile != "Default"){
-		StringSplit, tmp, adh_profile_list, |
-		out := ""
-		Loop, %tmp0%{
-			if (tmp%a_index% != CurrentProfile){
-				if (out != ""){
-					out := out "|"
+adh_delete_profile:
+	if (adh_current_profile != "Default"){
+		StringSplit, adh_tmp, adh_profile_list, |
+		adh_out := ""
+		Loop, %adh_tmp0%{
+			if (adh_tmp%a_index% != adh_current_profile){
+				if (adh_out != ""){
+					adh_out := adh_out "|"
 				}
-				out := out tmp%a_index%
+				adh_out := adh_out adh_tmp%a_index%
 			}
 		}
-		adh_profile_list := out
+		adh_profile_list := adh_out
 		
-		IniDelete, %A_ScriptName%.ini, %CurrentProfile%
+		IniDelete, %A_ScriptName%.ini, %adh_current_profile%
 		UpdateINI("profile_list", "Settings", adh_profile_list, "")		
 		
-		GuiControl,, CurrentProfile, |Default||%adh_profile_list%
+		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
 		Gui, Submit, NoHide
 				
-		Gosub, ProfileChanged
+		Gosub, adh_profile_changed
 	}
 	return
 
-DuplicateProfile:
-	InputBox, tmp, Profile Name, Please enter a profile name
-	DuplicateProfile(tmp)
+adh_duplicate_profile:
+	InputBox, adh_tmp, Profile Name, Please enter a profile name
+	adh_duplicate_profile(adh_tmp)
 	return
 
-DuplicateProfile(name){
+adh_duplicate_profile(name){
 	global adh_profile_list
-	global CurrentProfile
+	global adh_current_profile
 	
 	if (adh_profile_list == ""){
 		adh_profile_list := name
@@ -255,110 +256,110 @@ DuplicateProfile(name){
 	}
 	Sort, adh_profile_list, D|
 	
-	GuiControl,, CurrentProfile, |Default||%adh_profile_list%
-	GuiControl,ChooseString, CurrentProfile, %name%
+	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+	GuiControl,ChooseString, adh_current_profile, %name%
 	UpdateINI("profile_list", "Settings", adh_profile_list, "")
 	
 	Loop, %adh_num_hotkeys%
 	{
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKK%A_Index%, 	
-		GuiControl,,HKK%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKK%A_Index%, 	
+		GuiControl,,HKK%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKM%A_Index%, None
-		GuiControl, ChooseString, HKM%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKM%A_Index%, None
+		GuiControl, ChooseString, HKM%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKC%A_Index%, 0
-		GuiControl,, HKC%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKC%A_Index%, 0
+		GuiControl,, HKC%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKS%A_Index%, 0
-		GuiControl,, HKS%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKS%A_Index%, 0
+		GuiControl,, HKS%A_Index%, %adh_tmp%
 		
-		IniRead, tmp, %A_ScriptName%.ini, %CurrentProfile%, HKA%A_Index%, 0
-		GuiControl,, HKA%A_Index%, %tmp%
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, HKA%A_Index%, 0
+		GuiControl,, HKA%A_Index%, %adh_tmp%
 	}
 	UpdateINI("current_profile", "Settings", name,"")
-	Gosub, OptionChanged
-	;Gosub, ProfileChanged
+	Gosub, adh_option_changed
+	;Gosub, adh_profile_changed
 
 	return
 }
 
-KeyChanged:
-	tmp := %A_GuiControl%
-	ctr := 0
-	max := StrLen(tmp)
-	Loop, %max%
+adh_key_changed:
+	adh_tmp := %A_GuiControl%
+	adh_ctr := 0
+	adh_max := StrLen(adh_tmp)
+	Loop, %adh_max%
 	{
-		chr := substr(tmp,ctr,1)
+		chr := substr(adh_tmp,adh_ctr,1)
 		if (chr != "^" && chr != "!" && chr != "+"){
-			ctr := ctr + 1
+			adh_ctr := adh_ctr + 1
 		}
 	}
 	; Only modifier keys pressed?
-	if (ctr == 0){
+	if (adh_ctr == 0){
 		return
 	}
 	
 	; key pressed
-	if (ctr < max){
+	if (adh_ctr < adh_max){
 		GuiControl,, %A_GuiControl%, None
-		Gosub, OptionChanged
+		Gosub, adh_option_changed
 	}
 	else
 	{
-		tmp := SubStr(A_GuiControl,4)
+		adh_tmp := SubStr(A_GuiControl,4)
 		; Set the mouse field to blank
-		GuiControl,ChooseString, HKM%tmp%, None
-		Gosub, OptionChanged
+		GuiControl,ChooseString, HKM%adh_tmp%, None
+		Gosub, adh_option_changed
 	}
 	return
 
-MouseChanged:
-	tmp := SubStr(A_GuiControl,4)
+adh_mouse_changed:
+	adh_tmp := SubStr(A_GuiControl,4)
 	; Set the keyboard field to blank
-	GuiControl,, HKK%tmp%, None
-	Gosub, OptionChanged
+	GuiControl,, HKK%adh_tmp%, None
+	Gosub, adh_option_changed
 	return
 
-OptionChanged:
+adh_option_changed:
 	if (adh_ignore_events != 1){
 		Gui, Submit, NoHide
 		
 		Loop, %adh_num_hotkeys%
 		{
-			UpdateINI("HKK" A_Index, CurrentProfile, HKK%A_Index%, "")
-			UpdateINI("HKM" A_Index, CurrentProfile, HKM%A_Index%, "None")
-			UpdateINI("HKC" A_Index, CurrentProfile, HKC%A_Index%, 0)
-			UpdateINI("HKS" A_Index, CurrentProfile, HKS%A_Index%, 0)
-			UpdateINI("HKA" A_Index, CurrentProfile, HKA%A_Index%, 0)
+			UpdateINI("HKK" A_Index, adh_current_profile, HKK%A_Index%, "")
+			UpdateINI("HKM" A_Index, adh_current_profile, HKM%A_Index%, "None")
+			UpdateINI("HKC" A_Index, adh_current_profile, HKC%A_Index%, 0)
+			UpdateINI("HKS" A_Index, adh_current_profile, HKS%A_Index%, 0)
+			UpdateINI("HKA" A_Index, adh_current_profile, HKA%A_Index%, 0)
 		}
 		UpdateINI("profile_list", "Settings", adh_profile_list,"")
 	}	
 	return
 
-EnableHotKeys:
+adh_enable_hotkeys:
 	Gui, Submit, NoHide
 	Loop, %adh_num_hotkeys%
 	{
-		pre := BuildPrefix(A_Index)
-		tmp := HKK%A_Index%
-		if (tmp == ""){
-			tmp := HKM%A_Index%
-			if (tmp == "None"){
-				tmp := ""
+		adh_pre := BuildPrefix(A_Index)
+		adh_tmp := HKK%A_Index%
+		if (adh_tmp == ""){
+			adh_tmp := HKM%A_Index%
+			if (adh_tmp == "None"){
+				adh_tmp := ""
 			}
 		}
 		;soundplay, *16
-		if (tmp != ""){
-			set := pre tmp
-			Hotkey, ~%set% , HotKey%A_Index%
-			Hotkey, ~%set% up , HotKey%A_Index%_up
+		if (adh_tmp != ""){
+			adh_set := adh_pre adh_tmp
+			Hotkey, ~%adh_set% , HotKey%A_Index%
+			Hotkey, ~%adh_set% up , HotKey%A_Index%_up
 			/*
 			; Up event does not fire for wheel "buttons", but cannot bind two events to one hotkey ;(
-			if (tmp == "WheelUp" || tmp == "WheelDown" || tmp == "WheelLeft" || tmp == "WheelRight"){
-				Hotkey, ~%set% , HotKey%A_Index%_up
+			if (adh_tmp == "WheelUp" || adh_tmp == "WheelDown" || adh_tmp == "WheelLeft" || adh_tmp == "WheelRight"){
+				Hotkey, ~%adh_set% , HotKey%A_Index%_up
 			} else {
-				Hotkey, ~%set% up , HotKey%A_Index%_up
+				Hotkey, ~%adh_set% up , HotKey%A_Index%_up
 			}
 			*/
 		}
@@ -370,22 +371,22 @@ EnableHotKeys:
 	}
 	return
 
-DisableHotKeys:
+adh_disable_hotkeys:
 	Loop, %adh_num_hotkeys%
 	{
-		pre := BuildPrefix(A_Index)
-		tmp := HKK%A_Index%
-		if (tmp == ""){
-			tmp := HKM%A_Index%
-			if (tmp == "None"){
-				tmp := ""
+		adh_pre := BuildPrefix(A_Index)
+		adh_tmp := HKK%A_Index%
+		if (adh_tmp == ""){
+			adh_tmp := HKM%A_Index%
+			if (adh_tmp == "None"){
+				adh_tmp := ""
 			}
 		}
-		if (tmp != ""){
-			set := pre tmp
+		if (adh_tmp != ""){
+			adh_set := adh_pre adh_tmp
 			; ToDo: Is there a better way to remove a hotkey?
-			HotKey, ~%set%, DoNothing
-			HotKey, ~%set% up, DoNothing
+			HotKey, ~%adh_set%, DoNothing
+			HotKey, ~%adh_set% up, DoNothing
 		}
 		GuiControl, Enable, HKK%A_Index%
 		GuiControl, Enable, HKM%A_Index%
@@ -400,28 +401,28 @@ DoNothing:
 	return
 
 BuildPrefix(hk){
-	out := ""
-	tmp = HKC%hk%
-	GuiControlGet,%tmp%
+	adh_out := ""
+	adh_tmp = HKC%hk%
+	GuiControlGet,%adh_tmp%
 	if (HKC%hk% == 1){
-		out := out "^"
+		adh_out := adh_out "^"
 	}
 	if (HKA%hk% == 1){
-		out := out "!"
+		adh_out := adh_out "!"
 	}
 	if (HKS%hk% == 1){
-		out := out "+"
+		adh_out := adh_out "+"
 	}
-	return out
+	return adh_out
 }
 	
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 UpdateINI(key, section, value, default){
-	tmp := A_ScriptName ".ini"
+	adh_tmp := A_ScriptName ".ini"
 	if (value != default){
-		IniWrite,  %value%, %tmp%, %section%, %key%
+		IniWrite,  %value%, %adh_tmp%, %section%, %key%
 	} else {
-		IniDelete, %tmp%, %section%, %key%
+		IniDelete, %adh_tmp%, %section%, %key%
 	}
 }
 
@@ -449,20 +450,20 @@ GuiClose:
 	*Tab::
 	; Can use mouse hotkeys like this - it detects them but does not display them
 	;~*WheelUp::
-	modifier := ""
+	adh_modifier := ""
 	If GetKeyState("Shift","P")
-		modifier .= "+"
+		adh_modifier .= "+"
 	If GetKeyState("Ctrl","P")
-		modifier .= "^"
+		adh_modifier .= "^"
 	If GetKeyState("Alt","P")
-		modifier .= "!"
+		adh_modifier .= "!"
 	Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
-	If (A_ThisHotkey == "*BackSpace" && %ctrl% && !modifier)	;If the control has text but no modifiers held,
+	If (A_ThisHotkey == "*BackSpace" && %ctrl% && !adh_modifier)	;If the control has text but no modifiers held,
 		GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
 	Else                                                     	;Otherwise,
-		GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
+		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
 	;validateHK(ctrl)
-	Gosub, OptionChanged
+	Gosub, adh_option_changed
 	return
 #If
 
@@ -474,14 +475,14 @@ HotkeyCtrlHasFocus() {
 	}
 }
 
-ProgramModeToggle:
+adh_program_mode_toggle:
 	Gui, Submit, NoHide
-	if (ProgramMode == 1){
+	if (adh_program_mode == 1){
 		; Enable controls, stop hotkeys
-		GoSub, DisableHotKeys
+		GoSub, adh_disable_hotkeys
 	} else {
 		; Disable controls, start hotkeys
-		GoSub, EnableHotKeys
+		GoSub, adh_enable_hotkeys
 	}
 	return
 	
