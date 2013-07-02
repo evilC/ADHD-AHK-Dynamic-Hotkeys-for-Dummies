@@ -44,6 +44,8 @@ adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 ; Add explanation somewhere that all hotkeys are passthroughs
 
 adh_core_version := 0.1
+; Variable Name, Default Value
+adh_ini_vars := []
 
 #InstallKeybdHook
 #InstallMouseHook
@@ -71,12 +73,18 @@ if (adh_gui_y == ""){
 
 Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h%, Main|Bindings|Profiles|About
 
+adh_tabtop := 40
+adh_current_row := adh_tabtop + 20
+
 Gui, Tab, 1
 ; MAIN TAB
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE CUSTOM GUI ITEMS IN HERE
 
-Gui, Add, Text, x5 y40, Add your settings here...`n`nFire rate, weapon selection etc
+Gui, Add, Text, x5 y%adh_tabtop%, Weapon Group
+Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1||2|3|4|5|6
+; Add the previous control to adh_ini_vars so it gets stored in the INI file
+adh_ini_vars.Insert(["WeaponGroup",1])
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
@@ -87,9 +95,6 @@ Gui, Add, Text, xp+90 W70 Center, Mouse
 Gui, Add, Text, xp+82 W30 Center, Ctrl
 Gui, Add, Text, xp+30 W30 Center, Shift
 Gui, Add, Text, xp+30 W30 Center, Alt
-
-adh_tabtop := 40
-adh_current_row := adh_tabtop + 20
 
 IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
 IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
@@ -313,6 +318,12 @@ adh_option_changed:
 			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
 		}
 		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+		; Add user vars to ini
+		Loop, % adh_ini_vars.MaxIndex()
+		{
+			adh_tmp := adh_ini_vars[A_Index,1]
+			adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,2])
+		}
 	}	
 	return
 
