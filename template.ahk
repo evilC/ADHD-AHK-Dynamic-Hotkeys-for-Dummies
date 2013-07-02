@@ -323,7 +323,7 @@ adh_key_changed:
 	}
 	else
 	{
-		adh_tmp := SubStr(A_GuiControl,4)
+		adh_tmp := SubStr(A_GuiControl,10)
 		; Set the mouse field to blank
 		GuiControl,ChooseString, adh_hk_m_%adh_tmp%, None
 		Gosub, adh_option_changed
@@ -331,7 +331,7 @@ adh_key_changed:
 	return
 
 adh_mouse_changed:
-	adh_tmp := SubStr(A_GuiControl,4)
+	adh_tmp := SubStr(A_GuiControl,10)
 	; Set the keyboard field to blank
 	GuiControl,, adh_hk_k_%adh_tmp%, None
 	Gosub, adh_option_changed
