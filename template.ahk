@@ -28,9 +28,7 @@ adh_gui_h := 150
 ; Number of Hotkeys
 adh_num_hotkeys := 2
 ; Comma separated list of hotkey names (What the hotkey is called in the UI)
-adh_hotkey_names := ["Fire","Toggle","Fire Rate"]
-; Comma separated list of hotkey labels (The subroutine name to be called when that hotkey triggers)
-adh_hotkey_labels := "Fire,ToggleFireRate"
+adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -93,21 +91,9 @@ adh_current_row := adh_tabtop + 20
 IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
 IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
 
-; Perform error checking to see if hotkeys are configured correctly
-if (adh_hotkey_names != null){
-}
-
-StringSplit, adh_hotkey_names, adh_hotkey_names, `,
-adh_tmp := adh_hotkey_names.MaxIndex()
-;msgbox, % tmp
-
-Loop, %adh_num_hotkeys%
+Loop, % adh_hotkeys.MaxIndex()
 {
-	if (adh_hotkey_names%A_Index% != null){
-		adh_tmpname := trim(adh_hotkey_names%A_Index%)
-	} else {
-		adh_tmpname := "HotKey" %A_Index%
-	}
+	adh_tmpname := adh_hotkeys[A_Index,1]
 	Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
 	Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
 	Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
