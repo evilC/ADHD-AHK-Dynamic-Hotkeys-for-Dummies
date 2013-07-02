@@ -27,7 +27,9 @@ adh_gui_h := 150
 
 ; Number of Hotkeys
 adh_num_hotkeys := 2
-; Comma separated list of hotkey names (What the hotkey is called in the UI)
+; Defines your hotkeys 
+; The first item in each pair is what to display to the user in the UI
+; The second item in each pair is the name of the subroutine called when it is triggered
 adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,6 +41,7 @@ adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 ; Allow custom labels (eg Fire:) to be used as trigger targets
 ; Give macro authors a way to find out what hotkey is bound to a function (eg to send hotkey up when doing autofire)
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
+; Make subroutine name setting work
 
 adh_core_version := 0.1
 
@@ -145,18 +148,18 @@ return
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE YOUR HOTKEY DEFINITIONS HERE
 
-; Keep them called HotKey1, HotKey2_up etc even if you give them a custom label such as "Fire"
+; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
 
 ; Set up HotKey 1
 
 ; Fired on key down
-HotKey1:
+Fire:
 	tooltip, 1 down
 	;Send 1
 	return
 
 ; Fired on key up
-HotKey1_up:
+FireUp:
 	tooltip, 1 up
 	;Send q
 	return
@@ -164,13 +167,13 @@ HotKey1_up:
 ; Set up HotKey 2
 
 ; Fired on key down
-HotKey2:
+FireRate:
 	tooltip, 2 down
 	;Send 2
 	return
 
 ; Fired on key up
-HotKey2_up:
+FireRateUp:
 	tooltip, 2 up
 	;Send w
 	return
@@ -361,19 +364,12 @@ adh_enable_hotkeys:
 				adh_tmp := ""
 			}
 		}
-		;soundplay, *16
 		if (adh_tmp != ""){
 			adh_set := adh_pre adh_tmp
-			Hotkey, ~%adh_set% , HotKey%A_Index%
-			Hotkey, ~%adh_set% up , HotKey%A_Index%_up
-			/*
-			; Up event does not fire for wheel "buttons", but cannot bind two events to one hotkey ;(
-			if (adh_tmp == "WheelUp" || adh_tmp == "WheelDown" || adh_tmp == "WheelLeft" || adh_tmp == "WheelRight"){
-				Hotkey, ~%adh_set% , HotKey%A_Index%_up
-			} else {
-				Hotkey, ~%adh_set% up , HotKey%A_Index%_up
-			}
-			*/
+			adh_hotkey_sub := adh_hotkeys[A_Index,2]
+			Hotkey, ~%adh_set% , %adh_hotkey_sub%
+			Hotkey, ~%adh_set% up , %adh_hotkey_sub%Up
+			; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 		}
 		GuiControl, Disable, adh_hk_k_%A_Index%
 		GuiControl, Disable, adh_hk_m_%A_Index%
