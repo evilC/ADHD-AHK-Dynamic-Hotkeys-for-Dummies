@@ -1,36 +1,47 @@
 ﻿; evilC's Macro Template
-; To add an extra hotkey, duplicate the lines between the vvv and ^^^ blocks
+
+; Macro authors should only edit blocks between the vvv and ^^^ lines
 ; vvvvvvvvv
 ; Like this
 ; ^^^^^^^^^
-; And replace old name (eg HotKey2) with a new name - eg HotKey3
-adh_core_version := 0.1
 
-; ToDo:
-; Rename all variables and functions to have a prefix, so user can code without worry
-; Add option to limit controls to only a specific window
+; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+; SETUP SECTION
 
+; You may need to edit these depending on game
+SendMode, Event
+SetKeyDelay, 0, 50
+
+; Stuff for the About box
 adh_macro_name := "My Macro"			; Change this to your macro name
 adh_version := 0.1						; The version number of your script
 adh_author := "Insert Name Here"		; Your Name
 adh_link_text := "HomePage"				; The text of a link to your page about this macro
 adh_link_url := "http://google.com"		; The URL for the homepage of your script
 
-; Change the number of hotkeys here
+; GUI size
+adh_gui_w := 375
+adh_gui_h := 150
+
+; Number of Hotkeys
 adh_num_hotkeys := 2
+; Comma separated list of hotkey labels
 adh_hotkey_names := "Fire, Toggle fire rate"
 
-; You *may* need to edit some of these settings - eg Sendmode for some games
+; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-; #Warn  ; Enable warnings to assist with detecting common errors.
-;SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+; ToDo:
+; Add option to limit controls to only a specific window
+;Hotkey, IfWinActive, ahk_class CryENGINE
 
-; ===== Do not edit the Header =================================================================================================
+adh_core_version := 0.1
+
 #InstallKeybdHook
 #InstallMouseHook
 #MaxHotKeysPerInterval, 200
+
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
  
 OnExit, adh_gui_close
 
@@ -47,23 +58,17 @@ if (adh_gui_y == ""){
 	adh_gui_y := 0
 }
 
-; You may need to edit these depending on game
-SendMode, Event
-SetKeyDelay, 0, 50
-
-; Uncomment and alter to limit hotkeys to one specific program
-;Hotkey, IfWinActive, ahk_class CryENGINE
-
 ; Set up the GUI
-
-adh_gui_w := 375
-adh_gui_h := 150
 
 Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h%, Main|Bindings|Profiles|About
 
 Gui, Tab, 1
+; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+; PLACE CUSTOM GUI ITEMS IN HERE
+
 Gui, Add, Text, x5 y40, Add your settings here...`n`nFire rate, weapon selection etc
 
+; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
 
 Gui, Add, Text, x5 y40 W100 Center, Name
@@ -129,12 +134,12 @@ GoSub, adh_program_mode_toggle
 Gosub, adh_profile_changed
 
 return
-; ===== End Header ==============================================================================================================
-
-
-
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+; PLACE YOUR HOTKEY DEFINITIONS HERE
+
+; Keep them called HotKey1, HotKey2_up etc even if you give them a custom label such as "Fire"
+
 ; Set up HotKey 1
 
 ; Fired on key down
@@ -148,9 +153,7 @@ HotKey1_up:
 	tooltip, 1 up
 	;Send q
 	return
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; Set up HotKey 2
 
 ; Fired on key down
@@ -164,9 +167,11 @@ HotKey2_up:
 	tooltip, 2 up
 	;Send w
 	return
+	
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-; === SHOULD NOT NEED TO EDIT BELOW HERE!===========================================================================
+
+; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
 adh_profile_changed:
 	Gosub, adh_disable_hotkeys
