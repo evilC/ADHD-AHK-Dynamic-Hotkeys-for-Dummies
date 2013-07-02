@@ -27,14 +27,20 @@ adh_gui_h := 150
 
 ; Number of Hotkeys
 adh_num_hotkeys := 2
-; Comma separated list of hotkey labels
-adh_hotkey_names := "Fire, Toggle fire rate"
+; Comma separated list of hotkey names (What the hotkey is called in the UI)
+adh_hotkey_names := "Fire,Toggle Fire Rate"
+; Comma separated list of hotkey labels (The subroutine name to be called when that hotkey triggers)
+adh_hotkey_labels := "Fire,ToggleFireRate"
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; ToDo:
 ; Add option to limit controls to only a specific window
 ;Hotkey, IfWinActive, ahk_class CryENGINE
+; Add way for macro authors to hook into profile syatem
+; Allow custom labels (eg Fire:) to be used as trigger targets
+; Give macro authors a way to find out what hotkey is bound to a function (eg to send hotkey up when doing autofire)
+; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 
 adh_core_version := 0.1
 
@@ -86,9 +92,11 @@ adh_current_row := adh_tabtop + 20
 IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
 IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
 
+; Perform error checking to see if hotkeys are configured correctly
 if (adh_hotkey_names != null){
-	StringSplit, adh_hotkey_names, adh_hotkey_names, `,
 }
+
+StringSplit, adh_hotkey_names, adh_hotkey_names, `,
 
 Loop, %adh_num_hotkeys%
 {
@@ -179,32 +187,6 @@ HotKey2_up:
 
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
-
-; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry529556
-adh_mouse_move()
-{
-    static adh_curr_control, adh_prev_control, _TT  ; _TT is kept blank for use by the ToolTip command below.
-    adh_curr_control := A_GuiControl
-    If (adh_curr_control <> adh_prev_control and not InStr(adh_curr_control, " "))
-    {
-        ToolTip  ; Turn off any previous tooltip.
-        SetTimer, adh_display_tooltip, 1000
-        adh_prev_control := adh_curr_control
-    }
-    return
-
-    adh_display_tooltip:
-    SetTimer, adh_display_tooltip, Off
-    ToolTip % %adh_curr_control%_TT  ; The leading percent sign tell it to use an expression.
-    SetTimer, adh_remove_tooltip, 10000
-    return
-
-    adh_remove_tooltip:
-    SetTimer, adh_remove_tooltip, Off
-    ToolTip
-    return
-}
-
 
 adh_profile_changed:
 	Gosub, adh_disable_hotkeys
@@ -524,3 +506,25 @@ adh_program_mode_toggle:
 	}
 	return
 	
+; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
+adh_mouse_move(){
+	static CurrControl, PrevControl, _TT
+	CurrControl := A_GuiControl
+	If (CurrControl <> PrevControl){
+			SetTimer, DisplayToolTip, -300 	; shorter wait, shows the tooltip faster
+			PrevControl := CurrControl
+	}
+	return
+	
+	DisplayToolTip:
+	try
+			ToolTip % %CurrControl%_TT
+	catch
+			ToolTip
+	SetTimer, RemoveToolTip, -10000
+	return
+	
+	RemoveToolTip:
+	ToolTip
+	return
+}
