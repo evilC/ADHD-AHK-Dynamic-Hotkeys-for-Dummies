@@ -15,8 +15,8 @@ SendMode, Event
 SetKeyDelay, 0, 50
 
 ; Stuff for the About box
-adh_macro_name := "My Macro"			; Change this to your macro name
-adh_version := 0.1						; The version number of your script
+adh_macro_name := "Example Rapid Fire Macro"			; Change this to your macro name
+adh_version := 1.0						; The version number of your script
 adh_author := "Insert Name Here"		; Your Name
 adh_link_text := "HomePage"				; The text of a link to your page about this macro
 adh_link_url := "http://google.com"		; The URL for the homepage of your script
