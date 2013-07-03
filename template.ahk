@@ -104,6 +104,9 @@ Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed
 adh_ini_vars.Insert(["FireRate","Edit",100])
 
+Gui, Add, Text, x5 yp+20, Instructions:`nBind controls to Fire and Change Fire Rate in the Bindings tab.`nThen set Fire Rate above to the speed to fire at.`nThen set Weapon Group lets you use keys 1-6 to fire.`nUsing the Change Fire Rate button doubles the fire speed.
+
+
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
 ; BINDINGS TAB
