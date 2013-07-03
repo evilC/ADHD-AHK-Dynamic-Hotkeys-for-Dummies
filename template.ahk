@@ -65,8 +65,6 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; BUGS:
 
 ; Before next release:
-; Tidy up UI ahk class overwriting box
-; Screenshots for joomla page(s)
 
 ; Features:
 
@@ -76,7 +74,7 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 
 ; Start ADH init vars and settings
-adh_core_version := 0.1
+adh_core_version := 0.2
 
 ; Variables to be stored in the INI file - will be populated by code later
 ; [Variable Name, Control Type, Default Value]
