@@ -42,6 +42,7 @@ adh_hotkeys := [["Fire","Fire"],["Change Fire Rate","ChangeFireRate"]]
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add explanation somewhere that all hotkeys are passthroughs
 ; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
+; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 
 adh_core_version := 0.1
 ; [Variable Name, Control Type, Default Value]
@@ -369,6 +370,11 @@ adh_control_name_to_set_method(name){
 	} else {
 		return ""
 	}
+}
+
+adh_get_string_for_hotkey(hk){
+	tmp := adh_hk_m_1
+	return %tmp%
 }
 
 adh_key_changed:
