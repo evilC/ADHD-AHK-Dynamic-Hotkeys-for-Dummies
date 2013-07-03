@@ -69,7 +69,6 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; LimitFire in INI to limit_fire
 
 ; Features:
-; Add option to set default option for limit to application, eg CryENGINE
 
 ; Long-term:
 ; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
