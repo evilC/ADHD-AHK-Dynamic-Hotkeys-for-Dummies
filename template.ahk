@@ -125,14 +125,17 @@ Gui, Tab, 1
 ; make adh_profile_changed use same prefix build code as above
 
 Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
-
-Gui, Add, Edit, xp+80 yp W100 vFireSequence gadh_option_changed,
+Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
 adh_ini_vars.Insert(["FireSequence","Edit",""])
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
-Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed,
+Gui, Add, Edit, xp+120 yp W120 vFireRate gadh_option_changed,
 adh_ini_vars.Insert(["FireRate","Edit",100])
+
+Gui, Add, Text, x5 yp+25, Weapon Toggle group
+Gui, Add, DropDownList, xp+120 yp-2 W50 vWeaponToggle gadh_mouse_changed, None|1|2|3|4|5|6
+adh_ini_vars.Insert(["WeaponToggle","DropDownList","None"])
 
 Gui, Add, CheckBox, x5 yp+25 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
 adh_ini_vars.Insert(["LimitFire","CheckBox",0])
