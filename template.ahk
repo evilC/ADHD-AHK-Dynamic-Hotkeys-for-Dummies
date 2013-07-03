@@ -30,7 +30,7 @@ adh_num_hotkeys := 2
 ; Defines your hotkeys 
 ; The first item in each pair is what to display to the user in the UI
 ; The second item in each pair is the name of the subroutine called when it is triggered
-adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
+adh_hotkeys := [["Fire","Fire"],["Change Fire Rate","ChangeFireRate"]]
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -41,6 +41,7 @@ adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add explanation somewhere that all hotkeys are passthroughs
+; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
 
 adh_core_version := 0.1
 ; [Variable Name, Control Type, Default Value]
@@ -84,7 +85,12 @@ Gui, Tab, 1
 Gui, Add, Text, x5 y%adh_tabtop%, Weapon Group
 Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1||2|3|4|5|6
 ; Add the previous control to adh_ini_vars so it gets stored in the INI file
+; The format is Name, Control Type, Default Value
 adh_ini_vars.Insert(["WeaponGroup","DropDownList",1])
+
+Gui, Add, Text, x5 yp+25, Fire Rate (ms)
+Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed
+adh_ini_vars.Insert(["FireRate","Edit",100])
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
@@ -172,13 +178,13 @@ FireUp:
 ; Set up HotKey 2
 
 ; Fired on key down
-FireRate:
+ChangeFireRate:
 	tooltip, 2 down
 	;Send 2
 	return
 
 ; Fired on key up
-FireRateUp:
+ChangeFireRateUp:
 	tooltip, 2 up
 	;Send w
 	return
