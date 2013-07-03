@@ -48,6 +48,8 @@ adh_core_version := 0.1
 ; [Variable Name, Control Type, Default Value]
 ; eg ["MyControl","Edit","None"]
 adh_ini_vars := []
+; Holds a REFERENCE copy of the hotkeys so authors can access the info (to eg send a keyup after the trigger key is pressed)
+;adh_hotkey_mappings := []
 
 #InstallKeybdHook
 #InstallMouseHook
@@ -86,6 +88,7 @@ Gui, Tab, 1
 ; adh_ini_vars.Insert(["MyControl","DropDownList",1])
 ; The format is Name, Control Type, Default Value
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
+; Remove adh_num_hotkeys - base on count of adh_hotkeys
 
 Gui, Add, Text, x5 y%adh_tabtop%, Weapon Group
 Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1|2|3|4|5|6
@@ -157,6 +160,26 @@ adh_ignore_events := 0
 GoSub, adh_program_mode_toggle
 Gosub, adh_profile_changed
 
+;msgbox, % adh_get_string_for_hotkey(1)
+;adh_hotkey_mappings := [{kb: "Hello", mouse: "Goodbye"}]
+tmp := adh_hotkey_mappings[1]["mouse"]
+msgbox, % tmp
+;adh_test := []
+;adh_test[1] := {kb: "Hello"}
+;msgbox, % adh_test[1,"kb"]
+
+;adh_test := Object()
+;adh_test.kb := "h"
+;msgbox, % adh_test.kb
+
+;adh_test := []
+;adh_test[1] := {}
+;adh_test[1].kb := "h"
+;msgbox, % adh_test[1].kb
+
+;adh_test := []
+;adh_test[1] := {kb:"h"}
+;msgbox, % adh_test[1]["kb"]
 return
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -204,23 +227,32 @@ adh_profile_changed:
 	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
 	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
-
+	
+	adh_hotkey_mappings := []
+	
 	Loop, %adh_num_hotkeys%
 	{
+		adh_hotkey_mappings[A_Index] := {}
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, 
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
+		adh_hotkey_mappings[A_Index]["kb"] := adh_tmp
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
 		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
+		adh_hotkey_mappings[A_Index]["mouse"] := adh_tmp
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
 		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
+		adh_hotkey_mappings[A_Index]["ctrl"] := adh_tmp
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
 		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
+		adh_hotkey_mappings[A_Index]["shift"] := adh_tmp
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
 		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
+		adh_hotkey_mappings[A_Index]["alt"] := adh_tmp
+		
 	}
 	; Get user vars from ini
 	Loop, % adh_ini_vars.MaxIndex()
