@@ -45,6 +45,7 @@ fire_divider := 1
 ; Add explanation somewhere that all hotkeys are passthroughs
 ; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
+; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 
 adh_core_version := 0.1
 
@@ -136,7 +137,7 @@ Loop, % adh_hotkeys.MaxIndex()
 
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
-Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application
+Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application gadh_option_changed
 Gui, Add, Button, xp+101 yp W10 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
 
@@ -318,6 +319,9 @@ if (adh_ignore_events != 1){
 		adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
 	}
 	adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+	
+	adh_update_ini("limit_app", adh_current_profile, adh_limit_application, "")
+	
 	; Add author vars to ini
 	Loop, % adh_ini_vars.MaxIndex()
 	{
