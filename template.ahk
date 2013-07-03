@@ -49,9 +49,8 @@ Loop, % adh_hotkeys.MaxIndex()
 
 }
 
-adh_num_hotkeys := adh_hotkeys.MaxIndex()
-
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+adh_num_hotkeys := adh_hotkeys.MaxIndex()
 
 ; ToDo:
 ; BUGS:
