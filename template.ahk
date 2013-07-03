@@ -28,7 +28,11 @@ adh_gui_h := 150
 ; Defines your hotkeys 
 ; The first item in each pair is what to display to the user in the UI
 ; The second item in each pair is the name of the subroutine called when it is triggered
-adh_hotkeys := [["Fire","Fire"],["Change Fire Rate","ChangeFireRate"]]
+adh_hotkeys := [{uiname: "Fire", subroutine: "Fire"},{uiname: "Change Fire Rate", subroutine: "ChangeFireRate"}]
+;msgbox, % adh_hotkeys[1,"uiname"]
+;ExitApp
+
+
 if (adh_hotkeys.MaxIndex() < 1){
 	msgbox, No Actions defined, Exiting...
 	ExitApp
@@ -36,8 +40,8 @@ if (adh_hotkeys.MaxIndex() < 1){
 Loop, % adh_hotkeys.MaxIndex()
 {
 	;msgbox, % adh_hotkeys[A_Index,2]
-	If (IsLabel(adh_hotkeys[A_Index,2]) == false){
-		msgbox, % "The label`n`n" adh_hotkeys[A_Index,2] ":`n`n does not appear in the script.`nExiting..."
+	If (IsLabel(adh_hotkeys[A_Index,"subroutine"]) == false){
+		msgbox, % "The label`n`n" adh_hotkeys[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
 		ExitApp
 	}
 
@@ -52,6 +56,7 @@ fire_divider := 1
 
 ; ToDo:
 ; Add option to set default option for limit to application, eg CryENGINE
+; Add option to toggle Application Limit on or off
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
@@ -148,7 +153,7 @@ IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Def
 
 Loop, % adh_hotkeys.MaxIndex()
 {
-	adh_tmpname := adh_hotkeys[A_Index,1]
+	adh_tmpname := adh_hotkeys[A_Index,"uiname"]
 	Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
 	Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
 	Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
@@ -322,17 +327,17 @@ adh_profile_changed:
 	
 	Loop, %adh_num_hotkeys%
 	{
-		adh_hotkey_mappings[adh_hotkeys[A_Index,2]] := {}
-		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["index"] := A_Index
+		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
+		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
-		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"] := adh_tmp
+		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
 		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
 		if (adh_tmp != "None"){
-			adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"] := adh_tmp
+			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
 		}
 		
 		adh_modstring := ""
@@ -353,7 +358,7 @@ adh_profile_changed:
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "!"
 		}
-		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"]
+		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
 	}
 	adh_tmp := ""
 	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, %A_Space%
@@ -607,7 +612,7 @@ adh_enable_hotkeys:
 		}
 		if (adh_tmp != ""){
 			adh_set := adh_pre adh_tmp
-			adh_hotkey_sub := adh_hotkeys[A_Index,2]
+			adh_hotkey_sub := adh_hotkeys[A_Index,"subroutine"]
 			if (adh_limit_application !=""){
 				Hotkey, IfWinActive, ahk_class %adh_limit_application%
 			}
