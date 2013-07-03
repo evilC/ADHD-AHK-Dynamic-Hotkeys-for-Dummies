@@ -18,8 +18,8 @@ Features:
 
 
 Usage:
-; To add an extra hotkey, duplicate the lines between the vvv and ^^^ blocks
+; Instructions are included, you should only need to look between blocks between vvv and ^^^
 ; vvvvvvvvv
 ; Like this
 ; ^^^^^^^^^
-; And replace old name (eg HotKey2) with a new name - eg HotKey3
+
