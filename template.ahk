@@ -50,12 +50,12 @@ Loop, % adh_hotkeys.MaxIndex()
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 adh_num_hotkeys := adh_hotkeys.MaxIndex()
+adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 ; ToDo:
 ; BUGS:
 
 ; Features
-; Disable timers and toggle on leave of app. + Reset state?
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 
@@ -215,10 +215,8 @@ return
 ; When writing code, DO NOT create variables or functions starting adh_
 ; You can use the existing ones obviously
 
-; This is fired when settings change (including on load). Use it to pre-calculate values etc.
-; DO NOT delete it entirely or remove it. It can be empty though
+; Initialize your variables and stuff here
 adh_init_author_vars:
-	; Set up vars used in your macro
 	fire_array := []
 	current_weapon := 1
 	fire_divider := 1
@@ -227,6 +225,8 @@ adh_init_author_vars:
 	Gosub, DisableToggle
 	return
 	
+; This is fired when settings change (including on load). Use it to pre-calculate values etc.
+; DO NOT delete it entirely or remove it. It can be empty though
 adh_change_event:
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	Gosub, adh_init_author_vars
@@ -813,7 +813,7 @@ adh_program_mode_toggle:
 	return
 
 adh_enable_heartbeat:
-	if (adh_limit_application_on == 1){
+	if (adh_limit_application_on == 1 && adh_limit_application != ""){
 		SetTimer, adh_heartbeat, 500
 	}
 	return
@@ -825,7 +825,35 @@ adh_disable_heartbeat:
 adh_heartbeat:
 	; Check current app here.
 	; Not used to enable or disable hotkeys, used to start or stop author macros etc
+	adh_tmp := "ahk_class " adh_limit_application
+	IfWinActive, % "ahk_class " adh_limit_application
+	{
+		adh_app_active(1)
+	}
+	else
+	{
+		adh_app_active(0)
+	}
 	return
+
+adh_app_active(act){
+	Global adh_app_act_curr
+	if (act){
+		if (adh_app_act_curr != 1){
+			; Changing from inactive to active
+			adh_app_act_curr := 1
+		}
+	} else {
+		if (adh_app_act_curr != 0){
+			; Changing from active to inactive
+			; Stop Author Timers
+			Gosub, adh_disable_author_timers
+			; Reset author macro
+			Gosub, adh_init_author_vars
+			adh_app_act_curr := 0
+		}
+	}
+}
 	
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
 adh_mouse_move(){
