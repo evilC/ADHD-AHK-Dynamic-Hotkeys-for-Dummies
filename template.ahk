@@ -117,6 +117,11 @@ if (adh_gui_y == ""){
 	adh_gui_y := 0
 }
 
+; Get list of profiles
+IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
+; Get current profile
+IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
+
 ; Set up the GUI ====================================================
 Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
 
@@ -164,9 +169,7 @@ Gui, Add, Text, xp+82 W30 Center, Ctrl
 Gui, Add, Text, xp+30 W30 Center, Shift
 Gui, Add, Text, xp+30 W30 Center, Alt
 
-IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
-IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
-
+; Add hotkeys
 Loop, % adh_hotkeys.MaxIndex()
 {
 	adh_tmpname := adh_hotkeys[A_Index,"uiname"]
@@ -179,10 +182,15 @@ Loop, % adh_hotkeys.MaxIndex()
 	adh_current_row := adh_current_row + 30
 }
 
+; Program mode toggle
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
+
+; Limit application toggle
 Gui, Add, CheckBox, xp+90 yp vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
 Gui, Add, Edit, xp+160 yp-5 W100 vadh_limit_application gadh_option_changed,
+
+; Launch window spy
 Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
 
@@ -217,7 +225,10 @@ Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name%
 ;Hook for Tooltips
 OnMessage(0x200, "adh_mouse_move")
 
-Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
+; Fire GuiSubmit while adh_ignore_events is on to set all the variables
+Gui, Submit, NoHide
+
+; Finished startup, allow change of controls to fire events
 adh_ignore_events := 0
 
 ; Finish setup =====================================
