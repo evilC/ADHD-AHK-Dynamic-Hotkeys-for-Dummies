@@ -45,6 +45,7 @@ fire_divider := 1
 ; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
+; Exit program mode on tab switch
 
 adh_core_version := 0.1
 
@@ -152,10 +153,11 @@ Gui, Tab, 3
 ; PROFILES TAB
 adh_current_row := adh_tabtop + 20
 Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
-Gui, Add, DropDownList, xp+40 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
-Gui, Add, Button, xp+160 yp-2 gadh_add_profile, Add
-Gui, Add, Button, xp+40 yp gadh_delete_profile, Delete
-Gui, Add, Button, xp+50 yp gadh_duplicate_profile, Duplicate
+Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
+Gui, Add, Button, xp+152 yp-1 gadh_add_profile, Add
+Gui, Add, Button, xp+35 yp gadh_delete_profile, Delete
+Gui, Add, Button, xp+47 yp gadh_duplicate_profile, Copy
+Gui, Add, Button, xp+40 yp gadh_rename_profile, Rename
 GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
 
 Gui, Tab, 4
@@ -361,8 +363,10 @@ return
 
 adh_add_profile:
 	InputBox, adh_tmp, Profile Name, Please enter a profile name
-	adh_add_profile(adh_tmp)
-	Gosub, adh_profile_changed
+	if (!ErrorLevel){
+		adh_add_profile(adh_tmp)
+		Gosub, adh_profile_changed
+	}
 	return
 
 adh_add_profile(name){
@@ -380,12 +384,20 @@ adh_add_profile(name){
 	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
 }
 
+; Delete Profile pressed
 adh_delete_profile:
-	if (adh_current_profile != "Default"){
+	adh_delete_profile(adh_current_profile)
+	return
+
+adh_delete_profile(name, gotoprofile = "Default"){
+	Global adh_profile_list
+	Global adh_current_profile
+	
+	if (name != "Default"){
 		StringSplit, adh_tmp, adh_profile_list, |
 		adh_out := ""
 		Loop, %adh_tmp0%{
-			if (adh_tmp%a_index% != adh_current_profile){
+			if (adh_tmp%a_index% != name){
 				if (adh_out != ""){
 					adh_out := adh_out "|"
 				}
@@ -394,19 +406,29 @@ adh_delete_profile:
 		}
 		adh_profile_list := adh_out
 		
-		IniDelete, %A_ScriptName%.ini, %adh_current_profile%
+		IniDelete, %A_ScriptName%.ini, %name%
 		adh_update_ini("profile_list", "Settings", adh_profile_list, "")		
 		
-		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+		; Set new contents of list
+		GuiControl,, adh_current_profile, |Default|%adh_profile_list%
+		
+		; Select the desired new current profile
+		GuiControl, ChooseString, adh_current_profile, %gotoprofile%
+		
+		; Trigger save
 		Gui, Submit, NoHide
-				
+		
+		; Trigger Author Event
 		Gosub, adh_profile_changed
 	}
 	return
+}
 
 adh_duplicate_profile:
 	InputBox, adh_tmp, Profile Name, Please enter a profile name
-	adh_duplicate_profile(adh_tmp)
+	if (!ErrorLevel){
+		adh_duplicate_profile(adh_tmp)
+	}
 	return
 
 adh_duplicate_profile(name){
@@ -463,6 +485,16 @@ adh_duplicate_profile(name){
 	return
 }
 
+adh_rename_profile:
+	if (adh_current_profile != "Default"){
+		adh_old_prof := adh_current_profile
+		InputBox, adh_new_prof, Profile Name, Please enter a new name
+		if (!ErrorLevel){
+			adh_duplicate_profile(adh_new_prof)
+			adh_delete_profile(adh_old_prof,adh_new_prof)
+		}
+	}
+	return
 ; End profile management
 
 ; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
