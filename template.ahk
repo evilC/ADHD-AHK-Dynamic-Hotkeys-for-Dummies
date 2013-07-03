@@ -214,14 +214,19 @@ return
 
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 ; DO NOT delete it entirely or remove it. It can be empty though
-adh_change_event:
+adh_init_author_vars:
 	; Set up vars used in your macro
 	fire_array := []
 	current_weapon := 1
 	fire_divider := 1
 	nextfire := 0		; A timer for when we are next allowed to press the fire button
 	weapon_toggle_mode := false
+	Gosub, DisableToggle
+	return
 	
+adh_change_event:
+	; This gets called in Program Mode, so now would be a good time to re-initialize
+	Gosub, adh_init_author_vars
 	StringSplit, adh_tmp, FireSequence, `,
 	Loop, %adh_tmp0%
 	{
@@ -339,6 +344,8 @@ DisableToggle:
 	Send {%WeaponToggle% up}
 	return
 
+; Keep this duplicate label here so ADH can stop any timers you start
+adh_disable_author_timers:
 ; Keep all timer disables in here so when we leave app we can stop timers
 DisableTimers:
 	SetTimer, DoFire, Off
@@ -786,12 +793,13 @@ adh_hotkey_ctrl_has_focus() {
 adh_program_mode_toggle:
 	Gui, Submit, NoHide
 	if (adh_program_mode == 1){
-		; Enable controls, stop hotkeys
+		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
+		Gosub, adh_disable_author_timers
 		GuiControl, enable, adh_limit_application
 		GuiControl, enable, adh_limit_application_on
 	} else {
-		; Disable controls, start hotkeys
+		; Disable controls, start hotkeys, start heartbeat timer
 		GoSub, adh_enable_hotkeys
 		GuiControl, disable, adh_limit_application
 		GuiControl, disable, adh_limit_application_on
