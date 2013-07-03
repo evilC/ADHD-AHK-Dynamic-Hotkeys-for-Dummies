@@ -166,8 +166,9 @@ Gosub, adh_profile_changed
 return
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; PLACE YOUR HOTKEY DEFINITIONS HERE
+; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
 
+; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
 
 ; Set up HotKey 1
@@ -175,16 +176,26 @@ return
 ; Fired on key down
 Fire:
 	tooltip, %WeaponGroup% down
-	;tmp := adh_hotkey_mappings["Fire"]["unmodified"] " up"
+	; adh_hotkey_mappings contains a handy lookup to hotkey mappings
+	; contains "modified" and "unmodified" keys
+	tmp := adh_hotkey_mappings["Fire"]["unmodified"] " up"
+	; For some games, they will not let you autofire if the triggering key is still held down...
+	; even if the triggering key is not the key sent and does nothing in the game!
+	; So look up the hotkey for this action and send a key up
 	;Send, %tmp%
+
+	; Fire LAZORS!!!
+	GoSub, DoFire
 	
-	;Send 1
+	; Set the re-fire timer to the value specified in the FireRate box
+	SetTimer, DoFire, %FireRate%
+	
 	return
 
 ; Fired on key up
 FireUp:
-	tooltip, %WeaponGroup% up
-	;Send q
+	; Kill the timer on key up
+	SetTimer, DoFire, Off
 	return
 
 ; Set up HotKey 2
@@ -200,7 +211,15 @@ ChangeFireRateUp:
 	tooltip, 2 up
 	;Send w
 	return
-	
+
+; End Hotkey block ====================
+
+; Timers need a label to go to, so handle firing in here...
+DoFire:
+	Send, %WeaponGroup%
+	return
+
+
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
