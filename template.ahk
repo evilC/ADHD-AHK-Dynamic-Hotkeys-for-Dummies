@@ -223,7 +223,7 @@ adh_change_event:
 	fire_array := []
 	current_weapon := 1
 	nextfire := 0		; A timer for when we are next allowed to press the fire button
-	weapon_toggle_mode := 0
+	weapon_toggle_mode := false
 	
 	StringSplit, adh_tmp, FireSequence, `,
 	Loop, %adh_tmp0%
@@ -291,7 +291,10 @@ ChangeFireRateUp:
 
 ; Set up Hotkey 3
 WeaponToggle:
-	
+	weapon_toggle_mode := !weapon_toggle_mode
+	if (weapon_toggle_mode){
+		soundplay, *16
+	}
 	return
 	
 WeaponToggleUp:
