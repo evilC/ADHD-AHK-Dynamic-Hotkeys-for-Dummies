@@ -784,10 +784,12 @@ adh_program_mode_toggle:
 		; Enable controls, stop hotkeys
 		GoSub, adh_disable_hotkeys
 		GuiControl, enable, adh_limit_application
+		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys
 		GoSub, adh_enable_hotkeys
 		GuiControl, disable, adh_limit_application
+		GuiControl, disable, adh_limit_application_on
 	}
 	return
 	
