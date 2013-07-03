@@ -55,13 +55,14 @@ fire_divider := 1
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; ToDo:
-; Add option to set default option for limit to application, eg CryENGINE
+; Add weapon toggle to Fire Control
 ; Add option to toggle Application Limit on or off
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
-; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
+
+; Add option to set default option for limit to application, eg CryENGINE
+; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-; Add weapon toggle to Fire Control
 
 adh_core_version := 0.1
 
