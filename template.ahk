@@ -61,7 +61,6 @@ fire_divider := 1
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-; Exit program mode on tab switch
 ; Add weapon toggle to Fire Control
 
 adh_core_version := 0.1
@@ -104,7 +103,7 @@ if (adh_gui_y == ""){
 
 ; Set up the GUI
 
-Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h%, Main|Bindings|Profiles|About
+Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
 
 adh_tabtop := 40
 adh_current_row := adh_tabtop + 20
@@ -164,6 +163,7 @@ Loop, % adh_hotkeys.MaxIndex()
 }
 
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
+adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
 Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application gadh_option_changed,
 Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
@@ -547,6 +547,14 @@ adh_rename_profile:
 	return
 ; End profile management
 
+adh_tab_changed:
+	; If in program mode on tab change, disable program mode
+	if (adh_program_mode == 1){
+		GuiControl,,adh_program_mode,0
+		Gosub, adh_program_mode_toggle
+	}
+	return
+	
 ; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
 adh_control_name_to_set_method(name){
 	if (name == "DropDownList"){
