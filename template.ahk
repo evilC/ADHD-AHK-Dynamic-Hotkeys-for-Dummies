@@ -72,10 +72,16 @@ IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
 IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
 if (adh_gui_x == "unset"){
 	msgbox, Welcome to this ADH based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
-	adh_gui_x := 0	; in case of crash empty values can get written
-	
+	adh_gui_x := 0	; initialize
 }
 if (adh_gui_y == "unset"){
+	adh_gui_y := 0
+}
+
+if (adh_gui_x == ""){
+	adh_gui_x := 0	; in case of crash empty values can get written
+}
+if (adh_gui_y == ""){
 	adh_gui_y := 0
 }
 
@@ -187,7 +193,6 @@ return
 
 ; Fired on key down
 Fire:
-	tooltip, %WeaponGroup% down
 	; adh_hotkey_mappings contains a handy lookup to hotkey mappings
 	; contains "modified" and "unmodified" keys
 	tmp := adh_hotkey_mappings["Fire"]["unmodified"] " up"
@@ -207,7 +212,6 @@ Fire:
 FireUp:
 	; Kill the timer when the key is released (Stop auto firing)
 	SetTimer, DoFire, Off
-	tooltip,
 	return
 
 ; Set up HotKey 2
@@ -289,7 +293,13 @@ adh_profile_changed:
 		}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"]
 	}
-	
+	adh_tmp := ""
+	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, 
+	if (adh_tmp == "ERROR"){
+		adh_tmp := ""
+	}
+	GuiControl,, adh_limit_application, %adh_tmp%
+		
 	; Get author vars from ini
 	Loop, % adh_ini_vars.MaxIndex()
 	{
@@ -636,9 +646,11 @@ adh_program_mode_toggle:
 	if (adh_program_mode == 1){
 		; Enable controls, stop hotkeys
 		GoSub, adh_disable_hotkeys
+		GuiControl, enable, adh_limit_application
 	} else {
 		; Disable controls, start hotkeys
 		GoSub, adh_enable_hotkeys
+		GuiControl, disable, adh_limit_application
 	}
 	return
 	
