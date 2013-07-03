@@ -45,7 +45,6 @@ fire_divider := 1
 ; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-; Why am I getting "ERROR" back when reading non-existant INI values - no default set? Need to sort out
 
 adh_core_version := 0.1
 
@@ -107,15 +106,12 @@ Gui, Tab, 1
 
 Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
 
-;Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1|2|3|4|5|6
-;adh_ini_vars.Insert(["WeaponGroup","DropDownList",1])
-
 Gui, Add, Edit, xp+80 yp W100 vFireSequence gadh_option_changed,
 adh_ini_vars.Insert(["FireSequence","Edit",""])
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
-Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed
+Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed,
 adh_ini_vars.Insert(["FireRate","Edit",100])
 
 Gui, Add, Text, x5 yp+20, Instructions:`nBind controls to Fire and Change Fire Rate in the Bindings tab.`nThen set Fire Rate above to the speed to fire at.`nThen set Weapon Group lets you use keys 1-6 to fire.`nUsing the Change Fire Rate button doubles the fire speed.
@@ -148,7 +144,7 @@ Loop, % adh_hotkeys.MaxIndex()
 
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
-Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application gadh_option_changed
+Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application gadh_option_changed,
 Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
 
@@ -282,11 +278,9 @@ adh_profile_changed:
 		adh_hotkey_mappings[adh_hotkeys[A_Index,2]] := {}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["index"] := A_Index
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, 
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
-		if (adh_tmp != "ERROR"){
-			adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"] := adh_tmp
-		}
+		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"] := adh_tmp
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
 		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
@@ -315,23 +309,20 @@ adh_profile_changed:
 		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"]
 	}
 	adh_tmp := ""
-	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, 
-	if (adh_tmp == "ERROR"){
-		adh_tmp := ""
-	}
+	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, %A_Space%
 	GuiControl,, adh_limit_application, %adh_tmp%
 		
 	; Get author vars from ini
 	Loop, % adh_ini_vars.MaxIndex()
 	{
 		adh_def := adh_ini_vars[A_Index,3]
+		if (adh_def == ""){
+			adh_def := A_Space
+		}
 		adh_key := adh_ini_vars[A_Index,1]
 		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
-		if (adh_tmp == "ERROR"){
-			adh_tmp := ""
-		}
 		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
 	}
 
@@ -435,7 +426,7 @@ adh_duplicate_profile(name){
 	
 	Loop, %adh_num_hotkeys%
 	{
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, 	
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
@@ -457,6 +448,9 @@ adh_duplicate_profile(name){
 	{
 		adh_key := adh_ini_vars[A_Index,1]		
 		adh_def := adh_ini_vars[A_Index,3]
+		if (adh_def == ""){
+			adh_def := A_Space
+		}
 		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 	
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
