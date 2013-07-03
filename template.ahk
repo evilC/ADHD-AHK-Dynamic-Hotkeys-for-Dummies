@@ -63,7 +63,6 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 
 ; ToDo:
 ; BUGS:
-; Current profile indicator in status bar does not change on copy
 
 ; Before next release:
 
@@ -483,6 +482,7 @@ if (adh_ignore_events != 1){
 		adh_default_app := A_Space
 	}
 	adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
+	SB_SetText("Current profile: " adh_current_profile)
 	
 	; Limit app toggle
 	adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
@@ -582,6 +582,7 @@ adh_duplicate_profile(name){
 	}
 	Sort, adh_profile_list, D|
 	
+	adh_current_profile := name
 	; Push the new list to the profile select box
 	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
 	; Set the new profile to the currently selected item
