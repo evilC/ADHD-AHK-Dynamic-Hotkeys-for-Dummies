@@ -23,7 +23,7 @@ adh_link_url := "http://evilc.com/proj/firectrl"		; The URL for the homepage of 
 
 ; GUI size
 adh_gui_w := 375
-adh_gui_h := 175
+adh_gui_h := 200
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
@@ -40,7 +40,6 @@ if (adh_hotkeys.MaxIndex() < 1){
 }
 Loop, % adh_hotkeys.MaxIndex()
 {
-	;msgbox, % adh_hotkeys[A_Index,2]
 	If (IsLabel(adh_hotkeys[A_Index,"subroutine"]) == false){
 		msgbox, % "The label`n`n" adh_hotkeys[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
 		ExitApp
@@ -55,11 +54,13 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; ToDo:
 ; BUGS:
 
-; Features
-; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
-; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
+; Before next release:
+; Screenshots for joomla page(s)
 
-; Possibles
+; Features:
+; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
+
+; Long-term:
 ; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
 ; Add option to set default option for limit to application, eg CryENGINE
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
@@ -104,7 +105,6 @@ if (adh_gui_y == ""){
 }
 
 ; Set up the GUI
-
 Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
 
 adh_tabtop := 40
@@ -192,11 +192,16 @@ Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a 
 Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
 Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
 
+Gui, Tab
+
+; Add a Status Bar for at-a-glance current profile readout
+Gui, Add, StatusBar,,
 
 
 ; Show the GUI =====================================
 Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
 
+;Hook for Tooltips
 OnMessage(0x200, "adh_mouse_move")
 
 Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
@@ -366,6 +371,8 @@ adh_profile_changed:
 	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
 	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
+	
+	SB_SetText("Current profile: " adh_current_profile) 
 	
 	adh_hotkey_mappings := {}
 	
