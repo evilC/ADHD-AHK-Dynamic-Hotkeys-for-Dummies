@@ -123,6 +123,7 @@ Gui, Tab, 1
 ; Change adh_hotkeys to associative
 ; Make adh_build_prefix use adh_hotkey_mappings? Make sure is used before adh_enable_hotkeys thought
 ; make adh_profile_changed use same prefix build code as above
+; Stop timers on exit Limited app
 
 Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
