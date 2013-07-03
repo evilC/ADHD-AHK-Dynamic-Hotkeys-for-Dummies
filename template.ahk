@@ -65,8 +65,8 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; BUGS:
 
 ; Before next release:
+; Tidy up UI ahk class overwriting box
 ; Screenshots for joomla page(s)
-; LimitFire in INI to limit_fire
 
 ; Features:
 
@@ -434,11 +434,11 @@ adh_profile_changed:
 	if (adh_default_app == "" || adh_default_app == null){
 		adh_default_app := A_Space
 	}
-	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, %adh_default_app%
+	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app, %adh_default_app%
 	GuiControl,, adh_limit_application, %adh_tmp%
 	
 	; limit application status
-	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app_on, 0
+	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app_on, 0
 	GuiControl,, adh_limit_application_on, %adh_tmp%
 	
 	; Get author vars from ini
@@ -480,10 +480,10 @@ if (adh_ignore_events != 1){
 	if (adh_default_app == "" || adh_default_app == null){
 		adh_default_app := A_Space
 	}
-	adh_update_ini("limit_app", adh_current_profile, adh_limit_application, adh_default_app)
+	adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
 	
 	; Limit app toggle
-	adh_update_ini("limit_app_on", adh_current_profile, adh_limit_application_on, 0)
+	adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
 	
 	; Add author vars to ini
 	Loop, % adh_ini_vars.MaxIndex()
