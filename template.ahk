@@ -56,7 +56,6 @@ adh_num_hotkeys := adh_hotkeys.MaxIndex()
 
 ; Features
 ; Disable timers and toggle on leave of app. + Reset state?
-; Add option to toggle Application Limit on or off
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 
@@ -172,7 +171,7 @@ adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn of
 Gui, Add, CheckBox, xp+90 yp vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
 Gui, Add, Edit, xp+160 yp-5 W100 vadh_limit_application gadh_option_changed,
 Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
-adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
+adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
 
 Gui, Tab, 3
 ; PROFILES TAB
@@ -647,8 +646,14 @@ adh_enable_hotkeys:
 		if (adh_tmp != ""){
 			adh_set := adh_pre adh_tmp
 			adh_hotkey_sub := adh_hotkeys[A_Index,"subroutine"]
-			if (adh_limit_application !=""){
-				Hotkey, IfWinActive, ahk_class %adh_limit_application%
+			if (adh_limit_application_on == 1){
+				if (adh_limit_application !=""){
+					; Enable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive, ahk_class %adh_limit_application%
+				}
+			} else {
+				; Disable Limit Application for all subsequently declared hotkeys
+				Hotkey, IfWinActive
 			}
 			Hotkey, ~%adh_set% , %adh_hotkey_sub%
 			Hotkey, ~%adh_set% up , %adh_hotkey_sub%Up
@@ -798,7 +803,7 @@ adh_mouse_move(){
 	static CurrControl, PrevControl, _TT
 	CurrControl := A_GuiControl
 	If (CurrControl <> PrevControl){
-			SetTimer, DisplayToolTip, -300 	; shorter wait, shows the tooltip faster
+			SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
 			PrevControl := CurrControl
 	}
 	return
