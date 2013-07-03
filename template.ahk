@@ -806,6 +806,7 @@ adh_program_mode_toggle:
 		GuiControl, disable, adh_limit_application_on
 	}
 	return
+
 	
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
 adh_mouse_move(){
