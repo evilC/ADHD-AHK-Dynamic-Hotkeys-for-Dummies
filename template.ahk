@@ -61,18 +61,20 @@ adh_hotkey_mappings := {}
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
  
-OnExit, adh_gui_close
+OnExit, GuiClose
 
 adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
 adh_ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
 
-IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, 0
-IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, 0
-if (adh_gui_x == ""){
+IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
+IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
+if (adh_gui_x == "unset"){
+	msgbox, Welcome to this ADH based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
 	adh_gui_x := 0	; in case of crash empty values can get written
+	
 }
-if (adh_gui_y == ""){
+if (adh_gui_y == "unset"){
 	adh_gui_y := 0
 }
 
@@ -561,7 +563,7 @@ adh_update_ini(key, section, value, default){
 }
 
 ; Kill the macro if the GUI is closed
-adh_gui_close:
+GuiClose:
 	Gui, +Hwndgui_id
 	WinGetPos, adh_gui_x, adh_gui_y,,, ahk_id %gui_id%
 	IniWrite, %adh_gui_x%, %A_ScriptName%.ini, Settings, gui_x
