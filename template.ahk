@@ -10,6 +10,10 @@
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; SETUP SECTION
 
+; Authors - configure this section according to your macro.
+; You should not add extra things here (except add more records to adh_hotkeys etc)
+; Also you should generally not delete things here - set them to a different value instead
+
 ; You may need to edit these depending on game
 SendMode, Event
 SetKeyDelay, 0, 50
@@ -20,6 +24,11 @@ adh_version := 1.0									; The version number of your script
 adh_author := "evilC"								; Your Name
 adh_link_text := "HomePage"							; The text of a link to your page about this macro
 adh_link_url := "http://evilc.com/proj/firectrl"		; The URL for the homepage of your script
+
+; The default application to limit hotkeys to.
+; Starts disabled by default, so no danger setting to whatever you want
+; Set it to blank ("") to disable altogether, DO NOT DELETE!
+adh_default_app := "CryENGINE"
 
 ; GUI size
 adh_gui_w := 375
@@ -47,6 +56,7 @@ Loop, % adh_hotkeys.MaxIndex()
 
 }
 
+; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 adh_num_hotkeys := adh_hotkeys.MaxIndex()
 adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
@@ -65,8 +75,10 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 
+; Start ADH init vars and settings
 adh_core_version := 0.1
 
+; Variables to be stored in the INI file - will be populated by code later
 ; [Variable Name, Control Type, Default Value]
 ; eg ["MyControl","Edit","None"]
 adh_ini_vars := []
@@ -79,9 +91,11 @@ adh_hotkey_mappings := {}
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
- 
+
+; Make sure closing the GUI using X exits the script
 OnExit, GuiClose
 
+; List of mouse buttons
 adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
 adh_ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
@@ -103,7 +117,7 @@ if (adh_gui_y == ""){
 	adh_gui_y := 0
 }
 
-; Set up the GUI
+; Set up the GUI ====================================================
 Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
 
 adh_tabtop := 40
@@ -112,7 +126,7 @@ adh_current_row := adh_tabtop + 20
 Gui, Tab, 1
 ; MAIN TAB
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; PLACE CUSTOM GUI ITEMS IN HERE
+; AUTHORS - PLACE CUSTOM GUI ITEMS IN HERE
 ; If you want their state saved in the ini file, add a line like this after you add the control:
 ; adh_ini_vars.Insert(["MyControl","DropDownList",1])
 ; The format is Name, Control Type, Default Value
@@ -215,7 +229,7 @@ GoSub, adh_enable_heartbeat		; Start the timer to check current appp, if enabled
 return
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
+; AUTHORS - PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
 ; When writing code, DO NOT create variables or functions starting adh_
 ; You can use the existing ones obviously
 
