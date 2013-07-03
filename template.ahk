@@ -118,14 +118,15 @@ adh_ini_vars.Insert(["FireRate","Edit",100])
 Gui, Add, CheckBox, x5 yp+25 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
 adh_ini_vars.Insert(["LimitFire","CheckBox",0])
 
-Gui, Add, Button, x5 yp+30 gShowInstructions, Instructions
+Gui, Add, Button, x5 yp+30 gadh_show_instructions, ADH Instructions	; Please leave this line in your macro
+Gui, Add, Button, xp+100 yp gShowInstructions, %adh_macro_name% Instructions
 ;Gui, Add, Text, x5 yp+20, 
 
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
 ; BINDINGS TAB
-Gui, Add, Text, x5 y40 W100 Center, Name
+Gui, Add, Text, x5 y40 W100 Center, Action
 Gui, Add, Text, xp+100 W70 Center, Keyboard
 Gui, Add, Text, xp+90 W70 Center, Mouse
 Gui, Add, Text, xp+82 W30 Center, Ctrl
@@ -279,10 +280,8 @@ setFireTimer(mode,delay = 0){
 }
 
 ShowInstructions:
-	tmp = Instructions:`n`n
-	tmp = %tmp%Bind controls to Fire and Change Fire Rate in the Bindings tab (Enable Program Mode to change).`n`n
-	tmp = %tmp%Also in the Bindings tab is a "Limit to Application" field which lets you make the macro only work while inside a certain application. Use the ? button next to it to find application names.`n`n
-	tmp = %tmp%Then set Fire Sequence to a comma separated list of keys to press.`n`n
+	tmp = %adh_macro_name% Instructions:`n`n
+	tmp = %tmp%Set Fire Sequence to a comma separated list of keys to press.`n`n
 	tmp = %tmp%Then set Fire Rate above to the speed to fire at.`n`n
 	tmp = %tmp%Using the Change Fire Rate button doubles the fire speed.`n`n
 	tmp = %tmp%The macro incorporates a "Limit Fire Rate" mode to stop you spam clicking (or releasing and clicking) faster than the specified fire rate.
@@ -311,6 +310,29 @@ adh_change_event:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
+adh_show_instructions:
+	tmp = ADH Macro System Instructions:`n`n
+	tmp = %tmp%What is the ADH macro system?`n
+	tmp = %tmp%The ADH macro system lets you quickly write macros that have the following features:`n`n
+	tmp = %tmp%* Allow end-users to bind hotkeys to an action via a GUI`n
+	tmp = %tmp%To do this, enter "Program Mode" from the "Bindings" tab`n
+	tmp = %tmp%So the basic idea is you go into Program Mode, bind one of the "Actions" to a key or mouse button, and when you hit that key or mouse button, something special happens.`n`n
+	tmp = %tmp%* IMPORTANT !! *`n
+	tmp = %tmp%* All keys that you bind to actions are "Pass Through" - that is, if you bind Left Mouse to an action, when you hit the Left Mouse button, windows will still "see" a Left click, as well as whatever the action does`n`n
+	tmp = %tmp%* Limit hotkeys to only work inside a specified application`n
+	tmp = %tmp%Again in the "Bindings" tab, use the ? button to find out window IDs (You need the "ahk_class" field)`n`n
+	tmp = %tmp%* Save and load of settings to an INI file`n
+	tmp = %tmp%This happens automatically any time you change an option`n`n
+	tmp = %tmp%* Save and load copies of your settings using profiles (with delete/copy/rename)`n
+	tmp = %tmp%Use the "Profiles" tab`n`n
+	tmp = %tmp%* The "Main" tab is specific to the actual macro at hand`n
+	tmp = %tmp%Click the other Instructions button for info about that`n`n`n
+	tmp = %tmp%The functionality of the Main tab (And thus the whole program) is designed to be changeable.`n
+	tmp = %tmp%The %adh_macro_name% functionality can easily be replaced with something completely different,
+	tmp = %tmp% all you need to know is a little AutoHotkey programming
+	msgbox, % tmp
+	return
+	
 ; Profile management - functions to manage preserving user settings
 
 ; aka load profile
