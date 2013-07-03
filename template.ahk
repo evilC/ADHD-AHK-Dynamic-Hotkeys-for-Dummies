@@ -63,6 +63,7 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 
 ; ToDo:
 ; BUGS:
+; Current profile indicator in status bar does not change on copy
 
 ; Before next release:
 
