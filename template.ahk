@@ -38,14 +38,14 @@ fire_divider := 1
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; ToDo:
-; Add option to limit controls to only a specific window
-;Hotkey, IfWinActive, ahk_class CryENGINE
+; Add option to set default option for limit to application, eg CryENGINE
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add explanation somewhere that all hotkeys are passthroughs
 ; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
+; Why am I getting "ERROR" back when reading non-existant INI values - no default set? Need to sort out
 
 adh_core_version := 0.1
 
@@ -105,9 +105,14 @@ Gui, Tab, 1
 ; Make adh_build_prefix use adh_hotkey_mappings? Make sure is used before adh_enable_hotkeys thought
 ; make adh_profile_changed use same prefix build code as above
 
-Gui, Add, Text, x5 y%adh_tabtop%, Weapon Group
-Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1|2|3|4|5|6
-adh_ini_vars.Insert(["WeaponGroup","DropDownList",1])
+Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
+
+;Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1|2|3|4|5|6
+;adh_ini_vars.Insert(["WeaponGroup","DropDownList",1])
+
+Gui, Add, Edit, xp+80 yp W100 vFireSequence gadh_option_changed,
+adh_ini_vars.Insert(["FireSequence","Edit",""])
+FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed
@@ -183,8 +188,6 @@ return
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
 
-;
-
 
 ; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
@@ -236,14 +239,27 @@ ChangeFireRateUp:
 DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
 	SetTimer, DoFire, Off
-	Send {%WeaponGroup%}
+	tooltip, % current_weapon
+	current_weapon := current_weapon + 1
+	if (current_weapon > fire_array.MaxIndex()){
+		current_weapon := 1
+	}
+	;Send {%FireSequence%}
 	SetTimer, DoFire, % FireRate / fire_divider
 	return
 
-; This is fired when settings change. Use it to pre-calculate values etc.
+; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 ; DO NOT delete it entirely or remove it. It can be empty though
 adh_change_event:
-	
+	fire_array := []
+	current_weapon := 1
+	StringSplit, adh_tmp, FireSequence, `,
+	Loop, %adh_tmp0%
+	{
+		fire_array[A_Index] := adh_tmp%A_Index%
+		;tmp := adh_tmp%A_Index%
+		;msgbox, % tmp
+	}
 	return
 
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -313,6 +329,9 @@ adh_profile_changed:
 		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 		
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
+		if (adh_tmp == "ERROR"){
+			adh_tmp := ""
+		}
 		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
 	}
 
@@ -344,6 +363,7 @@ if (adh_ignore_events != 1){
 		adh_tmp := adh_ini_vars[A_Index,1]
 		adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,3])
 	}
+	Gosub, adh_change_event
 }	
 return
 
