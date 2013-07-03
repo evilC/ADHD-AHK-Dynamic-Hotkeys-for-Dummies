@@ -144,7 +144,7 @@ Loop, % adh_hotkeys.MaxIndex()
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
 Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application gadh_option_changed
-Gui, Add, Button, xp+101 yp W10 gadh_show_window_spy, ?
+Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
 
 Gui, Tab, 3
@@ -240,6 +240,11 @@ DoFire:
 	SetTimer, DoFire, % FireRate / fire_divider
 	return
 
+; This is fired when settings change. Use it to pre-calculate values etc.
+; DO NOT delete it entirely or remove it. It can be empty though
+adh_change_event:
+	
+	return
 
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -313,6 +318,7 @@ adh_profile_changed:
 
 	Gosub, adh_enable_hotkeys
 	
+	Gosub, adh_change_event
 	return
 
 ; aka save profile
