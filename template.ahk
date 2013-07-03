@@ -170,8 +170,8 @@ Loop, % adh_hotkeys.MaxIndex()
 
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
-Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
-Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application gadh_option_changed,
+Gui, Add, CheckBox, xp+90 yp vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
+Gui, Add, Edit, xp+160 yp-5 W100 vadh_limit_application gadh_option_changed,
 Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
 
@@ -399,7 +399,10 @@ adh_profile_changed:
 	adh_tmp := ""
 	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, %A_Space%
 	GuiControl,, adh_limit_application, %adh_tmp%
-		
+	
+	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app_on, 0
+	GuiControl,, adh_limit_application_on, %adh_tmp%
+	
 	; Get author vars from ini
 	Loop, % adh_ini_vars.MaxIndex()
 	{
@@ -435,6 +438,7 @@ if (adh_ignore_events != 1){
 	adh_update_ini("profile_list", "Settings", adh_profile_list,"")
 	
 	adh_update_ini("limit_app", adh_current_profile, adh_limit_application, "")
+	adh_update_ini("limit_app_on", adh_current_profile, adh_limit_application_on, 0)
 	
 	; Add author vars to ini
 	Loop, % adh_ini_vars.MaxIndex()
