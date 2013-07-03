@@ -280,12 +280,13 @@ setFireTimer(mode,delay = 0){
 
 ShowInstructions:
 	tmp = Instructions:`n`n
-	tmp = %tmp%Bind controls to Fire and Change Fire Rate in the Bindings tab.`n`n
+	tmp = %tmp%Bind controls to Fire and Change Fire Rate in the Bindings tab (Enable Program Mode to change).`n`n
+	tmp = %tmp%Also in the Bindings tab is a "Limit to Application" field which lets you make the macro only work while inside a certain application. Use the ? button next to it to find application names.`n`n
 	tmp = %tmp%Then set Fire Sequence to a comma separated list of keys to press.`n`n
 	tmp = %tmp%Then set Fire Rate above to the speed to fire at.`n`n
 	tmp = %tmp%Using the Change Fire Rate button doubles the fire speed.`n`n
-	tmp = %tmp%The macro incorporates code to stop you spam clicking (or releasing and clicking) faster than the fire rate.
-	tmp = %tmp% If you hear a "Dong" noise, that is the macro stopping you from firing
+	tmp = %tmp%The macro incorporates a "Limit Fire Rate" mode to stop you spam clicking (or releasing and clicking) faster than the specified fire rate.
+	tmp = %tmp% If you hear a "Dong" noise, that is the macro stopping you from firing. If you keep holding the fire button, it will fire when the weapon is allowed to fire.
 	msgbox, % tmp
 	return
 
