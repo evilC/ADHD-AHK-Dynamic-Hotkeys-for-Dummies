@@ -67,6 +67,7 @@ adh_num_hotkeys := adh_hotkeys.MaxIndex()
 ; Add option to set default option for limit to application, eg CryENGINE
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
+; Remove adh_hotkey_mappings? Document somewhere? Remember REFERENCE ONLY
 
 adh_core_version := 0.1
 
@@ -121,11 +122,6 @@ Gui, Tab, 1
 ; adh_ini_vars.Insert(["MyControl","DropDownList",1])
 ; The format is Name, Control Type, Default Value
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
-; Remove adh_num_hotkeys - base on count of adh_hotkeys
-; Change adh_hotkeys to associative
-; Make adh_build_prefix use adh_hotkey_mappings? Make sure is used before adh_enable_hotkeys thought
-; make adh_profile_changed use same prefix build code as above
-; Stop timers on exit Limited app
 
 Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
@@ -244,17 +240,8 @@ adh_change_event:
 
 ; Fired on key down
 Fire:
-	; adh_hotkey_mappings contains a handy lookup to hotkey mappings
-	; contains "modified" and "unmodified" keys
-	;tmp := adh_hotkey_mappings["Fire"]["unmodified"] " up"
-	; For some games, they will not let you autofire if the triggering key is still held down...
-	; even if the triggering key is not the key sent and does nothing in the game!
-	; So look up the hotkey for this action and send a key up
-	;Send {%tmp%}
-
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
 	; If the user releases the button, the timer will terminate
-	;if ((LimitFire == 1) && (A_TickCount < nextfire)){
 	if (A_TickCount < nextfire){
 		soundplay, *16
 		SetFireTimer(1,true)
@@ -281,8 +268,6 @@ ChangeFireRate:
 	; More Lazors!! Toggles double speed fire!
 	; Toggle divider between 1 and 2
 	fire_divider := 3 - fire_divider
-
-	;Send 2
 	return
 
 ; Fired on key up
@@ -327,14 +312,6 @@ SetFireTimer(mode,delay){
 	global nextfire
 	global fire_divider
 	
-	if (delay == true){
-		soundplay, *16
-	}
-	;nextfire - A_TickCount
-	
-	if (delay == null){
-		delay := 0
-	}
 	if(mode == 0){
 		Gosub, DisableTimers
 	} else {
