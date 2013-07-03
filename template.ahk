@@ -291,12 +291,8 @@ WeaponToggle:
 	weapon_toggle_mode := !weapon_toggle_mode
 	if (weapon_toggle_mode){
 		Gosub, EnableToggle
-		SetScrollLockState, On
-		Send {%WeaponToggle% down}
 	} else {
 		Gosub, DisableToggle
-		SetScrollLockState, Off
-		Send {%WeaponToggle% up}
 	}
 	return
 	
