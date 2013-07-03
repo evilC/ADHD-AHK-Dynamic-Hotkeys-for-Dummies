@@ -202,8 +202,11 @@ OnMessage(0x200, "adh_mouse_move")
 Gui, Submit, NoHide	; Fire GuiSubmit while adh_ignore_events is on to set all the variables
 adh_ignore_events := 0
 
+; Finish setup =====================================
+
 GoSub, adh_program_mode_toggle
-Gosub, adh_profile_changed
+GoSub, adh_profile_changed
+GoSub, adh_enable_heartbeat		; Start the timer to check current appp, if enabled
 
 return
 
@@ -797,16 +800,32 @@ adh_program_mode_toggle:
 		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
 		Gosub, adh_disable_author_timers
+		Gosub, adh_disable_heartbeat
 		GuiControl, enable, adh_limit_application
 		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys, start heartbeat timer
 		GoSub, adh_enable_hotkeys
+		GoSub, adh_enable_heartbeat
 		GuiControl, disable, adh_limit_application
 		GuiControl, disable, adh_limit_application_on
 	}
 	return
 
+adh_enable_heartbeat:
+	if (adh_limit_application_on == 1){
+		SetTimer, adh_heartbeat, 500
+	}
+	return
+	
+adh_disable_heartbeat:
+	SetTimer, adh_heartbeat, Off
+	return
+	
+adh_heartbeat:
+	; Check current app here.
+	; Not used to enable or disable hotkeys, used to start or stop author macros etc
+	return
 	
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
 adh_mouse_move(){
