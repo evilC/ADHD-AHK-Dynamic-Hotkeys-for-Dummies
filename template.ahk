@@ -55,12 +55,15 @@ adh_num_hotkeys := adh_hotkeys.MaxIndex()
 
 ; ToDo:
 ; BUGS:
-; If you use the "Limit Fire Rate" feature and click, *dong* hold - it does not fire soon enough
+
+; Features
 ; Disable timers and toggle on leave of app. + Reset state?
 ; Add option to toggle Application Limit on or off
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 
+; Possibles
+; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
 ; Add option to set default option for limit to application, eg CryENGINE
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
@@ -243,17 +246,18 @@ adh_change_event:
 Fire:
 	; adh_hotkey_mappings contains a handy lookup to hotkey mappings
 	; contains "modified" and "unmodified" keys
-	tmp := adh_hotkey_mappings["Fire"]["unmodified"] " up"
+	;tmp := adh_hotkey_mappings["Fire"]["unmodified"] " up"
 	; For some games, they will not let you autofire if the triggering key is still held down...
 	; even if the triggering key is not the key sent and does nothing in the game!
 	; So look up the hotkey for this action and send a key up
-	Send {%tmp%}
+	;Send {%tmp%}
 
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
 	; If the user releases the button, the timer will terminate
-	if ((LimitFire == 1) && (A_TickCount < nextfire)){
+	;if ((LimitFire == 1) && (A_TickCount < nextfire)){
+	if (A_TickCount < nextfire){
 		soundplay, *16
-		SetFireTimer(1,nextfire - A_TickCount)
+		SetFireTimer(1,true)
 		return
 	}
 	
@@ -261,13 +265,13 @@ Fire:
 	GoSub, DoFire
 
 	; Start the fire timer
-	SetFireTimer(1)
+	SetFireTimer(1,false)
 	return
 
 ; Fired on key up
 FireUp:
 	; Kill the timer when the key is released (Stop auto firing)
-	SetFireTimer(0)
+	SetFireTimer(0,false)
 	return
 
 ; Set up HotKey 2
@@ -305,29 +309,41 @@ WeaponToggleUp:
 DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
 	Gosub, DisableTimers
+		
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
 		current_weapon := 1
 	}
 	out := fire_array[current_weapon]
 	Send {%out%}
-	SetTimer, DoFire, % FireRate / fire_divider
+	adh_tmp := FireRate / fire_divider
+	SetTimer, DoFire, % adh_tmp
+	nextfire := A_TickCount + (adh_tmp)
 	return
 
 ; used to start or stop the fire timer
-SetFireTimer(mode,delay = 0){
+SetFireTimer(mode,delay){
 	global FireRate
 	global nextfire
 	global fire_divider
 	
+	if (delay == true){
+		soundplay, *16
+	}
+	;nextfire - A_TickCount
+	
+	if (delay == null){
+		delay := 0
+	}
 	if(mode == 0){
 		Gosub, DisableTimers
 	} else {
-		tim := (FireRate / fire_divider) + delay
-		if (delay == 0){
-			nextfire := A_TickCount + tim
+		tim := (FireRate / fire_divider)
+		if (delay == false){
+			SetTimer, DoFire, %tim%
+		} else {
+			SetTimer, DoFire, % nextfire - A_TickCount
 		}
-		SetTimer, DoFire, %tim%
 	}
 }
 
