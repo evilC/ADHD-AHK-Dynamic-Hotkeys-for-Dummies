@@ -135,8 +135,8 @@ Loop, % adh_hotkeys.MaxIndex()
 }
 
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
-Gui, Add, Text, xp+100 yp Disabled, Limit to Application: ahk_class
-Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application Disabled
+Gui, Add, Text, xp+100 yp, Limit to Application: ahk_class
+Gui, Add, Edit, xp+150 yp-5 W100 vadh_limit_application
 Gui, Add, Button, xp+101 yp W10 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application"
 
@@ -288,7 +288,8 @@ adh_profile_changed:
 		}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,2]]["unmodified"]
 	}
-	; Get user vars from ini
+	
+	; Get author vars from ini
 	Loop, % adh_ini_vars.MaxIndex()
 	{
 		adh_def := adh_ini_vars[A_Index,3]
@@ -317,7 +318,7 @@ if (adh_ignore_events != 1){
 		adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
 	}
 	adh_update_ini("profile_list", "Settings", adh_profile_list,"")
-	; Add user vars to ini
+	; Add author vars to ini
 	Loop, % adh_ini_vars.MaxIndex()
 	{
 		adh_tmp := adh_ini_vars[A_Index,1]
@@ -411,6 +412,7 @@ adh_duplicate_profile(name){
 	}
 	adh_update_ini("current_profile", "Settings", name,"")
 	
+	; Duplicate author vars
 	Loop, % adh_ini_vars.MaxIndex()
 	{
 		adh_key := adh_ini_vars[A_Index,1]		
@@ -495,6 +497,9 @@ adh_enable_hotkeys:
 		if (adh_tmp != ""){
 			adh_set := adh_pre adh_tmp
 			adh_hotkey_sub := adh_hotkeys[A_Index,2]
+			if (adh_limit_application !=""){
+				Hotkey, IfWinActive, ahk_class %adh_limit_application%
+			}
 			Hotkey, ~%adh_set% , %adh_hotkey_sub%
 			Hotkey, ~%adh_set% up , %adh_hotkey_sub%Up
 			; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
