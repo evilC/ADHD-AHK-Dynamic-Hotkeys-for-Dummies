@@ -115,7 +115,8 @@ Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed,
 adh_ini_vars.Insert(["FireRate","Edit",100])
 
-Gui, Add, Text, x5 yp+20, Instructions:`nBind controls to Fire and Change Fire Rate in the Bindings tab.`nThen set Fire Rate above to the speed to fire at.`nThen set Weapon Group lets you use keys 1-6 to fire.`nUsing the Change Fire Rate button doubles the fire speed.
+Gui, Add, Button, x5 yp+30 gShowInstructions, Instructions
+;Gui, Add, Text, x5 yp+20, 
 
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -260,6 +261,17 @@ adh_change_event:
 	}
 	return
 
+ShowInstructions:
+	tmp = Instructions:`n`n
+	tmp = %tmp%Bind controls to Fire and Change Fire Rate in the Bindings tab.`n`n
+	tmp = %tmp%Then set Fire Sequence to a comma separated list of keys to press.`n`n
+	tmp = %tmp%Then set Fire Rate above to the speed to fire at.`n`n
+	tmp = %tmp%Using the Change Fire Rate button doubles the fire speed.`n`n
+	tmp = %tmp%The macro incorporates code to stop you spam clicking (or releasing and clicking) faster than the fire rate.
+	tmp = %tmp% If you hear a "Dong" noise, that is the macro stopping you from firing
+	msgbox, % tmp
+	return
+	
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
