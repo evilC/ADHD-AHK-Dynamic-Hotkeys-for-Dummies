@@ -522,9 +522,12 @@ adh_duplicate_profile:
 	return
 
 adh_duplicate_profile(name){
+	; ToDo: Duplicate - should just need to be able to change current name and save?
+	
 	global adh_profile_list
 	global adh_current_profile
 	
+	; Create the new item in the profile list
 	if (adh_profile_list == ""){
 		adh_profile_list := name
 	} else {
@@ -532,43 +535,14 @@ adh_duplicate_profile(name){
 	}
 	Sort, adh_profile_list, D|
 	
+	; Push the new list to the profile select box
 	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+	; Set the new profile to the currently selected item
 	GuiControl,ChooseString, adh_current_profile, %name%
+	; Update the profile list in the INI
 	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
 	
-	Loop, %adh_num_hotkeys%
-	{
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
-		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
-		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
-		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
-		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
-		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
-		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
-		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
-		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
-		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
-	}
-	adh_update_ini("current_profile", "Settings", name,"")
-	
-	; Duplicate author vars
-	Loop, % adh_ini_vars.MaxIndex()
-	{
-		adh_key := adh_ini_vars[A_Index,1]		
-		adh_def := adh_ini_vars[A_Index,3]
-		if (adh_def == ""){
-			adh_def := A_Space
-		}
-		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
-	
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
-		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
-	}
-	
+	; Firing adh_option_changed saves the current state to the new profile name in the INI
 	Gosub, adh_option_changed
 	;Gosub, adh_profile_changed
 
