@@ -137,10 +137,11 @@ Gui, Add, Text, x5 yp+25, Weapon Toggle group
 Gui, Add, DropDownList, xp+120 yp-2 W50 vWeaponToggle gadh_mouse_changed, None|1|2|3|4|5|6
 adh_ini_vars.Insert(["WeaponToggle","DropDownList","None"])
 
-Gui, Add, CheckBox, x5 yp+25 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
+Gui, Add, CheckBox, x5 yp+30 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
 adh_ini_vars.Insert(["LimitFire","CheckBox",0])
 
-Gui, Add, Link,x5 yp+30, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%adh_macro_name% Instructions</a>
+adh_tmp := adh_gui_h - 20
+Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%adh_macro_name% Instructions</a>
 
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
