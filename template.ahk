@@ -203,17 +203,29 @@ Fire:
 	; So look up the hotkey for this action and send a key up
 	Send {%tmp%}
 
+	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
+	; If the user releases the button, the timer will terminate
+	if (A_TickCount < nextfire){
+		soundplay, *16
+		tmp := nextfire - A_TickCount
+		setFireTimer(1,tmp)
+		return
+	}
+	
 	; Fire Lazors !!!
 	GoSub, DoFire
-	
+
+	; Start the fire timer
+	setFireTimer(1)
 	; Set the re-fire timer to the value specified in the FireRate box
-	SetTimer, DoFire, % FireRate / fire_divider
+	;SetTimer, DoFire, % FireRate / fire_divider
 	return
 
 ; Fired on key up
 FireUp:
 	; Kill the timer when the key is released (Stop auto firing)
-	SetTimer, DoFire, Off
+	setFireTimer(0)
+	;SetTimer, DoFire, Off
 	return
 
 ; Set up HotKey 2
@@ -247,19 +259,22 @@ DoFire:
 	SetTimer, DoFire, % FireRate / fire_divider
 	return
 
-; This is fired when settings change (including on load). Use it to pre-calculate values etc.
-; DO NOT delete it entirely or remove it. It can be empty though
-adh_change_event:
-	fire_array := []
-	current_weapon := 1
-	StringSplit, adh_tmp, FireSequence, `,
-	Loop, %adh_tmp0%
-	{
-		if (adh_tmp%A_Index% != ""){
-			fire_array[A_Index] := adh_tmp%A_Index%
+; used to start or stop the fire timer
+setFireTimer(mode,delay = 0){
+	global FireRate
+	global nextfire
+	global fire_divider
+	
+	if(mode == 0){
+		SetTimer, DoFire, off
+	} else {
+		tim := (FireRate / fire_divider) + delay
+		if (delay == 0){
+			nextfire := A_TickCount + tim
 		}
+		SetTimer, DoFire, %tim%
 	}
-	return
+}
 
 ShowInstructions:
 	tmp = Instructions:`n`n
@@ -271,7 +286,23 @@ ShowInstructions:
 	tmp = %tmp% If you hear a "Dong" noise, that is the macro stopping you from firing
 	msgbox, % tmp
 	return
+
+; This is fired when settings change (including on load). Use it to pre-calculate values etc.
+; DO NOT delete it entirely or remove it. It can be empty though
+adh_change_event:
+	fire_array := []
+	current_weapon := 1
+	nextfire := 0		; A timer for when we are next allowed to press the fire button
 	
+	StringSplit, adh_tmp, FireSequence, `,
+	Loop, %adh_tmp0%
+	{
+		if (adh_tmp%A_Index% != ""){
+			fire_array[A_Index] := adh_tmp%A_Index%
+		}
+	}
+	return
+
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
