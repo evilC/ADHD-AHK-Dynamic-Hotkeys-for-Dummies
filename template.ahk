@@ -32,7 +32,7 @@ adh_default_app := "CryENGINE"
 
 ; GUI size
 adh_gui_w := 375
-adh_gui_h := 200
+adh_gui_h := 220
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
@@ -153,9 +153,9 @@ adh_ini_vars.Insert(["WeaponToggle","DropDownList","None"])
 Gui, Add, CheckBox, x5 yp+30 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
 adh_ini_vars.Insert(["LimitFire","CheckBox",0])
 
-Gui, Add, Link, x5 yp+20, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
+Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
-adh_tmp := adh_gui_h - 20
+adh_tmp := adh_gui_h - 40
 Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%adh_macro_name% Instructions</a>
 
 
@@ -182,17 +182,20 @@ Loop, % adh_hotkeys.MaxIndex()
 	adh_current_row := adh_current_row + 30
 }
 
+; Limit application toggle
+Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
+
+; Limit application Text box
+Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+
+; Launch window spy
+Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
+adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
+
 ; Program mode toggle
 Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
 adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 
-; Limit application toggle
-Gui, Add, CheckBox, xp+90 yp vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
-Gui, Add, Edit, xp+160 yp-5 W100 vadh_limit_application gadh_option_changed,
-
-; Launch window spy
-Gui, Add, Button, xp+101 yp-1 W15 gadh_show_window_spy, ?
-adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
 
 Gui, Tab, 3
 ; PROFILES TAB
@@ -207,8 +210,8 @@ GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
 
 Gui, Tab, 4
 ; ABOUT TAB
-adh_current_row := adh_tabtop + 10
-Gui, Add, Link,x5 y%adh_tabtop%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
+adh_current_row := adh_tabtop + 20
+Gui, Add, Link,x5 y%adh_current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
 Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
 Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
