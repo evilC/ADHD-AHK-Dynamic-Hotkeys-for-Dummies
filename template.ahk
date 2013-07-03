@@ -213,7 +213,26 @@ return
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
+; When writing code, DO NOT create variables or functions starting adh_
+; You can use the existing ones obviously
 
+; This is fired when settings change (including on load). Use it to pre-calculate values etc.
+; DO NOT delete it entirely or remove it. It can be empty though
+adh_change_event:
+	; Set up vars used in your macro
+	fire_array := []
+	current_weapon := 1
+	nextfire := 0		; A timer for when we are next allowed to press the fire button
+	weapon_toggle_mode := 0
+	
+	StringSplit, adh_tmp, FireSequence, `,
+	Loop, %adh_tmp0%
+	{
+		if (adh_tmp%A_Index% != ""){
+			fire_array[A_Index] := adh_tmp%A_Index%
+		}
+	}
+	return
 
 ; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
@@ -272,7 +291,7 @@ ChangeFireRateUp:
 
 ; Set up Hotkey 3
 WeaponToggle:
-
+	
 	return
 	
 WeaponToggleUp:
@@ -310,22 +329,6 @@ setFireTimer(mode,delay = 0){
 		SetTimer, DoFire, %tim%
 	}
 }
-
-; This is fired when settings change (including on load). Use it to pre-calculate values etc.
-; DO NOT delete it entirely or remove it. It can be empty though
-adh_change_event:
-	fire_array := []
-	current_weapon := 1
-	nextfire := 0		; A timer for when we are next allowed to press the fire button
-	
-	StringSplit, adh_tmp, FireSequence, `,
-	Loop, %adh_tmp0%
-	{
-		if (adh_tmp%A_Index% != ""){
-			fire_array[A_Index] := adh_tmp%A_Index%
-		}
-	}
-	return
 
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
