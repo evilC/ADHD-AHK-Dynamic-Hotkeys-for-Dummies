@@ -58,11 +58,10 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; Screenshots for joomla page(s)
 
 ; Features:
-; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
+; Add option to set default option for limit to application, eg CryENGINE
 
 ; Long-term:
 ; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
-; Add option to set default option for limit to application, eg CryENGINE
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 
@@ -287,11 +286,6 @@ ChangeFireRate:
 	fire_divider := 3 - fire_divider
 	return
 
-; Fired on key up
-ChangeFireRateUp:
-	; Do nothing, we do not need to hook into key up for this action
-	return
-
 ; Set up Hotkey 3
 WeaponToggle:
 	weapon_toggle_mode := !weapon_toggle_mode
@@ -302,8 +296,6 @@ WeaponToggle:
 	}
 	return
 	
-WeaponToggleUp:
-	return
 	
 ; End Hotkey block ====================
 
@@ -673,8 +665,14 @@ adh_enable_hotkeys:
 				; Disable Limit Application for all subsequently declared hotkeys
 				Hotkey, IfWinActive
 			}
+			
+			; Bind down action of hotkey
 			Hotkey, ~%adh_set% , %adh_hotkey_sub%
-			Hotkey, ~%adh_set% up , %adh_hotkey_sub%Up
+			
+			if (IsLabel(adh_hotkey_sub "Up")){
+				; Bind up action of hotkey
+				Hotkey, ~%adh_set% up , %adh_hotkey_sub%Up
+			}
 			; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 		}
 		GuiControl, Disable, adh_hk_k_%A_Index%
@@ -700,7 +698,10 @@ adh_disable_hotkeys:
 			adh_set := adh_pre adh_tmp
 			; ToDo: Is there a better way to remove a hotkey?
 			HotKey, ~%adh_set%, adh_do_nothing
-			HotKey, ~%adh_set% up, adh_do_nothing
+			if (IsLabel(adh_hotkey_sub "Up")){
+				; Bind up action of hotkey
+				HotKey, ~%adh_set% up, adh_do_nothing
+			}
 		}
 		GuiControl, Enable, adh_hk_k_%A_Index%
 		GuiControl, Enable, adh_hk_m_%A_Index%
