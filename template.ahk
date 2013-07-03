@@ -571,6 +571,7 @@ adh_rename_profile:
 ; Often a workaround is to send a keyup of the triggering key
 ; Calling adh_send_keyup_on_press() in an action will cause this to happen
 adh_send_keyup_on_press(sub,mod){
+	global adh_hotkey_mappings
 	; adh_hotkey_mappings contains a handy lookup to hotkey mappings !
 	; contains "modified" and "unmodified" keys
 	; Note, it is REFERENCE ONLY. Changing it has no effect.
