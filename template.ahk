@@ -25,12 +25,25 @@ adh_link_url := "http://evilc.com/proj/firectrl"		; The URL for the homepage of 
 adh_gui_w := 375
 adh_gui_h := 150
 
-; Number of Hotkeys
-adh_num_hotkeys := 2
 ; Defines your hotkeys 
 ; The first item in each pair is what to display to the user in the UI
 ; The second item in each pair is the name of the subroutine called when it is triggered
 adh_hotkeys := [["Fire","Fire"],["Change Fire Rate","ChangeFireRate"]]
+if (adh_hotkeys.MaxIndex() < 1){
+	msgbox, No Actions defined, Exiting...
+	ExitApp
+}
+Loop, % adh_hotkeys.MaxIndex()
+{
+	;msgbox, % adh_hotkeys[A_Index,2]
+	If (IsLabel(adh_hotkeys[A_Index,2]) == false){
+		msgbox, % "The label`n`n" adh_hotkeys[A_Index,2] ":`n`n does not appear in the script.`nExiting..."
+		ExitApp
+	}
+
+}
+
+adh_num_hotkeys := adh_hotkeys.MaxIndex()
 
 ; Set up variables for your macro here
 fire_divider := 1
@@ -41,11 +54,10 @@ fire_divider := 1
 ; Add option to set default option for limit to application, eg CryENGINE
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
-; Add explanation somewhere that all hotkeys are passthroughs
-; Check if labels exist on start (like AHK already does) but provide easier to understand explanation if not found ("Add a label for your hotkeys!")
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 ; Exit program mode on tab switch
+; Add weapon toggle to Fire Control
 
 adh_core_version := 0.1
 
@@ -667,6 +679,7 @@ adh_update_ini(key, section, value, default){
 }
 
 ; Kill the macro if the GUI is closed
+adh_exit_app:
 GuiClose:
 	Gui, +Hwndgui_id
 	WinGetPos, adh_gui_x, adh_gui_y,,, ahk_id %gui_id%
