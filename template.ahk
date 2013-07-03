@@ -81,11 +81,13 @@ Gui, Tab, 1
 ; MAIN TAB
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE CUSTOM GUI ITEMS IN HERE
+; If you want their state saved in the ini file, add a line like this after you add the control:
+; adh_ini_vars.Insert(["MyControl","DropDownList",1])
+; The format is Name, Control Type, Default Value
+; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
 
 Gui, Add, Text, x5 y%adh_tabtop%, Weapon Group
-Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1||2|3|4|5|6
-; Add the previous control to adh_ini_vars so it gets stored in the INI file
-; The format is Name, Control Type, Default Value
+Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1|2|3|4|5|6
 adh_ini_vars.Insert(["WeaponGroup","DropDownList",1])
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
