@@ -57,7 +57,7 @@ fire_divider := 1
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; ToDo:
-; Add weapon toggle to Fire Control
+; Disable timers and toggle on leave of app. + Reset state?
 ; Add option to toggle Application Limit on or off
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
@@ -253,7 +253,7 @@ Fire:
 	; If the user releases the button, the timer will terminate
 	if ((LimitFire == 1) && (A_TickCount < nextfire)){
 		soundplay, *16
-		setFireTimer(1,nextfire - A_TickCount)
+		SetFireTimer(1,nextfire - A_TickCount)
 		return
 	}
 	
@@ -261,16 +261,13 @@ Fire:
 	GoSub, DoFire
 
 	; Start the fire timer
-	setFireTimer(1)
-	; Set the re-fire timer to the value specified in the FireRate box
-	;SetTimer, DoFire, % FireRate / fire_divider
+	SetFireTimer(1)
 	return
 
 ; Fired on key up
 FireUp:
 	; Kill the timer when the key is released (Stop auto firing)
-	setFireTimer(0)
-	;SetTimer, DoFire, Off
+	SetFireTimer(0)
 	return
 
 ; Set up HotKey 2
@@ -293,12 +290,17 @@ ChangeFireRateUp:
 WeaponToggle:
 	weapon_toggle_mode := !weapon_toggle_mode
 	if (weapon_toggle_mode){
-		soundplay, *16
+		Gosub, EnableToggle
+		SetScrollLockState, On
+		Send {%WeaponToggle% down}
+	} else {
+		Gosub, DisableToggle
+		SetScrollLockState, Off
+		Send {%WeaponToggle% up}
 	}
 	return
 	
 WeaponToggleUp:
-	
 	return
 	
 ; End Hotkey block ====================
@@ -306,7 +308,7 @@ WeaponToggleUp:
 ; Timers need a label to go to, so handle firing in here...
 DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
-	SetTimer, DoFire, Off
+	Gosub, DisableTimers
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
 		current_weapon := 1
@@ -317,13 +319,13 @@ DoFire:
 	return
 
 ; used to start or stop the fire timer
-setFireTimer(mode,delay = 0){
+SetFireTimer(mode,delay = 0){
 	global FireRate
 	global nextfire
 	global fire_divider
 	
 	if(mode == 0){
-		SetTimer, DoFire, off
+		Gosub, DisableTimers
 	} else {
 		tim := (FireRate / fire_divider) + delay
 		if (delay == 0){
@@ -333,6 +335,22 @@ setFireTimer(mode,delay = 0){
 	}
 }
 
+EnableToggle:
+	SetScrollLockState, On
+	Send {%WeaponToggle% down}
+	return
+
+; Put disable toggle code in here so when we leave app we can call it
+DisableToggle:
+	SetScrollLockState, Off
+	Send {%WeaponToggle% up}
+	return
+
+; Keep all timer disables in here so when we leave app we can stop timers
+DisableTimers:
+	SetTimer, DoFire, Off
+	return
+	
 ;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
