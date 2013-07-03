@@ -23,14 +23,16 @@ adh_link_url := "http://evilc.com/proj/firectrl"		; The URL for the homepage of 
 
 ; GUI size
 adh_gui_w := 375
-adh_gui_h := 150
+adh_gui_h := 175
 
 ; Defines your hotkeys 
 ; The first item in each pair is what to display to the user in the UI
 ; The second item in each pair is the name of the subroutine called when it is triggered
-adh_hotkeys := [{uiname: "Fire", subroutine: "Fire"},{uiname: "Change Fire Rate", subroutine: "ChangeFireRate"}]
-;msgbox, % adh_hotkeys[1,"uiname"]
-;ExitApp
+;adh_hotkeys := [{uiname: "Fire", subroutine: "Fire"},{uiname: "Change Fire Rate", subroutine: "ChangeFireRate"}]
+adh_hotkeys := []
+adh_hotkeys.Insert({uiname: "Fire", subroutine: "Fire"})
+adh_hotkeys.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
+adh_hotkeys.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
 
 if (adh_hotkeys.MaxIndex() < 1){
@@ -263,6 +265,15 @@ ChangeFireRateUp:
 	; Do nothing, we do not need to hook into key up for this action
 	return
 
+; Set up Hotkey 3
+WeaponToggle:
+
+	return
+	
+WeaponToggleUp:
+	
+	return
+	
 ; End Hotkey block ====================
 
 ; Timers need a label to go to, so handle firing in here...
