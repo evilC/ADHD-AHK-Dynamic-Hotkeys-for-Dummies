@@ -115,6 +115,9 @@ Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 Gui, Add, Edit, xp+80 yp W40 vFireRate gadh_option_changed,
 adh_ini_vars.Insert(["FireRate","Edit",100])
 
+Gui, Add, CheckBox, x5 yp+25 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
+adh_ini_vars.Insert(["LimitFire","CheckBox",0])
+
 Gui, Add, Button, x5 yp+30 gShowInstructions, Instructions
 ;Gui, Add, Text, x5 yp+20, 
 
@@ -205,10 +208,9 @@ Fire:
 
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
 	; If the user releases the button, the timer will terminate
-	if (A_TickCount < nextfire){
+	if ((LimitFire == 1) && (A_TickCount < nextfire)){
 		soundplay, *16
-		tmp := nextfire - A_TickCount
-		setFireTimer(1,tmp)
+		setFireTimer(1,nextfire - A_TickCount)
 		return
 	}
 	
