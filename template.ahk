@@ -26,9 +26,8 @@ adh_gui_w := 375
 adh_gui_h := 175
 
 ; Defines your hotkeys 
-; The first item in each pair is what to display to the user in the UI
-; The second item in each pair is the name of the subroutine called when it is triggered
-;adh_hotkeys := [{uiname: "Fire", subroutine: "Fire"},{uiname: "Change Fire Rate", subroutine: "ChangeFireRate"}]
+; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
+; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
 adh_hotkeys := []
 adh_hotkeys.Insert({uiname: "Fire", subroutine: "Fire"})
 adh_hotkeys.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
