@@ -237,12 +237,12 @@ ChangeFireRateUp:
 DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
 	SetTimer, DoFire, Off
-	tooltip, % current_weapon
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
 		current_weapon := 1
 	}
-	;Send {%FireSequence%}
+	out := fire_array[current_weapon]
+	Send {%out%}
 	SetTimer, DoFire, % FireRate / fire_divider
 	return
 
@@ -254,9 +254,9 @@ adh_change_event:
 	StringSplit, adh_tmp, FireSequence, `,
 	Loop, %adh_tmp0%
 	{
-		fire_array[A_Index] := adh_tmp%A_Index%
-		;tmp := adh_tmp%A_Index%
-		;msgbox, % tmp
+		if (adh_tmp%A_Index% != ""){
+			fire_array[A_Index] := adh_tmp%A_Index%
+		}
 	}
 	return
 
