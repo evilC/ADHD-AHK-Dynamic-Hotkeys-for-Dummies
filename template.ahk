@@ -51,12 +51,11 @@ Loop, % adh_hotkeys.MaxIndex()
 
 adh_num_hotkeys := adh_hotkeys.MaxIndex()
 
-; Set up variables for your macro here
-fire_divider := 1
-
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; ToDo:
+; BUGS:
+; If you use the "Limit Fire Rate" feature and click, *dong* hold - it does not fire soon enough
 ; Disable timers and toggle on leave of app. + Reset state?
 ; Add option to toggle Application Limit on or off
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
@@ -222,6 +221,7 @@ adh_change_event:
 	; Set up vars used in your macro
 	fire_array := []
 	current_weapon := 1
+	fire_divider := 1
 	nextfire := 0		; A timer for when we are next allowed to press the fire button
 	weapon_toggle_mode := false
 	
