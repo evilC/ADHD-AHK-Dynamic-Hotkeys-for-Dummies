@@ -66,6 +66,7 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 
 ; Before next release:
 ; Screenshots for joomla page(s)
+; LimitFire in INI to limit_fire
 
 ; Features:
 ; Add option to set default option for limit to application, eg CryENGINE
@@ -393,6 +394,7 @@ adh_profile_changed:
 	
 	adh_hotkey_mappings := {}
 	
+	; Load hotkey bindings
 	Loop, %adh_num_hotkeys%
 	{
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
@@ -428,10 +430,15 @@ adh_profile_changed:
 		}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
 	}
-	adh_tmp := ""
-	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, %A_Space%
+	
+	; limit application name
+	if (adh_default_app == "" || adh_default_app == null){
+		adh_default_app := A_Space
+	}
+	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app, %adh_default_app%
 	GuiControl,, adh_limit_application, %adh_tmp%
 	
+	; limit application status
 	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, limit_app_on, 0
 	GuiControl,, adh_limit_application_on, %adh_tmp%
 	
@@ -459,6 +466,7 @@ adh_option_changed:
 if (adh_ignore_events != 1){
 	Gui, Submit, NoHide
 	
+	; Hotkey bindings
 	Loop, %adh_num_hotkeys%
 	{
 		adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
@@ -469,7 +477,13 @@ if (adh_ignore_events != 1){
 	}
 	adh_update_ini("profile_list", "Settings", adh_profile_list,"")
 	
-	adh_update_ini("limit_app", adh_current_profile, adh_limit_application, "")
+	; Limit app
+	if (adh_default_app == "" || adh_default_app == null){
+		adh_default_app := A_Space
+	}
+	adh_update_ini("limit_app", adh_current_profile, adh_limit_application, adh_default_app)
+	
+	; Limit app toggle
 	adh_update_ini("limit_app_on", adh_current_profile, adh_limit_application_on, 0)
 	
 	; Add author vars to ini
