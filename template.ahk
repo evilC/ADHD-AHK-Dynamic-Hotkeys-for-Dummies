@@ -67,7 +67,6 @@ adh_num_hotkeys := adh_hotkeys.MaxIndex()
 ; Add option to set default option for limit to application, eg CryENGINE
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-; Remove adh_hotkey_mappings? Document somewhere? Remember REFERENCE ONLY
 
 adh_core_version := 0.1
 
@@ -242,6 +241,12 @@ adh_change_event:
 
 ; Fired on key down
 Fire:
+	; Many games do not work properly with autofire unless this is enabled.
+	; You can try leaving it out.
+	; MechWarrior Online for example will not do fast (<~500ms) chain fire with weapons all in one group without this enabled
+	adh_send_keyup_on_press("Fire","unmodified")
+
+
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
 	; If the user releases the button, the timer will terminate
 	if (A_TickCount < nextfire){
@@ -578,6 +583,19 @@ adh_rename_profile:
 	}
 	return
 ; End profile management
+
+; For some games, they will not let you autofire if the triggering key is still held down...
+; even if the triggering key is not the key sent and does nothing in the game!
+; Often a workaround is to send a keyup of the triggering key
+; Calling adh_send_keyup_on_press() in an action will cause this to happen
+adh_send_keyup_on_press(sub,mod){
+	; adh_hotkey_mappings contains a handy lookup to hotkey mappings !
+	; contains "modified" and "unmodified" keys
+	; Note, it is REFERENCE ONLY. Changing it has no effect.
+	tmp := adh_hotkey_mappings[sub][mod] " up"
+	Send {%tmp%}
+
+}
 
 adh_tab_changed:
 	; If in program mode on tab change, disable program mode
