@@ -37,14 +37,14 @@ adh_hotkeys := [["Fire","Fire"],["Fire Rate","FireRate"]]
 ; ToDo:
 ; Add option to limit controls to only a specific window
 ;Hotkey, IfWinActive, ahk_class CryENGINE
-; Add way for macro authors to hook into profile syatem
 ; Give macro authors a way to find out what hotkey is bound to a function (eg to send hotkey up when doing autofire)
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add explanation somewhere that all hotkeys are passthroughs
 
 adh_core_version := 0.1
-; Variable Name, Default Value
+; [Variable Name, Control Type, Default Value]
+; eg ["MyControl","Edit","None"]
 adh_ini_vars := []
 
 #InstallKeybdHook
@@ -84,7 +84,7 @@ Gui, Tab, 1
 Gui, Add, Text, x5 y%adh_tabtop%, Weapon Group
 Gui, Add, DropDownList, xp+80 yp-5 W30 vWeaponGroup gadh_option_changed, 1||2|3|4|5|6
 ; Add the previous control to adh_ini_vars so it gets stored in the INI file
-adh_ini_vars.Insert(["WeaponGroup",1])
+adh_ini_vars.Insert(["WeaponGroup","DropDownList",1])
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Gui, Tab, 2
@@ -189,6 +189,8 @@ FireRateUp:
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
 ; Profile management - functions to manage preserving user settings
+
+; aka load profile
 adh_profile_changed:
 	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
@@ -211,10 +213,44 @@ adh_profile_changed:
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
 		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 	}
+	; Get user vars from ini
+	Loop, % adh_ini_vars.MaxIndex()
+	{
+		adh_def := adh_ini_vars[A_Index,3]
+		adh_key := adh_ini_vars[A_Index,1]
+		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
+		
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
+		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
+	}
 
 	Gosub, adh_enable_hotkeys
 	
 	return
+
+; aka save profile
+adh_option_changed:
+if (adh_ignore_events != 1){
+	Gui, Submit, NoHide
+	
+	Loop, %adh_num_hotkeys%
+	{
+		adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
+		adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
+		adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
+		adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
+		adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+	}
+	adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+	; Add user vars to ini
+	Loop, % adh_ini_vars.MaxIndex()
+	{
+		adh_tmp := adh_ini_vars[A_Index,1]
+		adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,3])
+	}
+}	
+return
+
 
 adh_add_profile:
 	InputBox, adh_tmp, Profile Name, Please enter a profile name
@@ -299,35 +335,33 @@ adh_duplicate_profile(name){
 		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 	}
 	adh_update_ini("current_profile", "Settings", name,"")
+	
+	Loop, % adh_ini_vars.MaxIndex()
+	{
+		adh_key := adh_ini_vars[A_Index,1]		
+		adh_def := adh_ini_vars[A_Index,3]
+		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
+	
+		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
+		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
+	}
+	
 	Gosub, adh_option_changed
 	;Gosub, adh_profile_changed
 
 	return
 }
 
-adh_option_changed:
-	if (adh_ignore_events != 1){
-		Gui, Submit, NoHide
-		
-		Loop, %adh_num_hotkeys%
-		{
-			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
-			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
-			adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
-			adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
-			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
-		}
-		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
-		; Add user vars to ini
-		Loop, % adh_ini_vars.MaxIndex()
-		{
-			adh_tmp := adh_ini_vars[A_Index,1]
-			adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,2])
-		}
-	}	
-	return
-
 ; End profile management
+
+; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
+adh_control_name_to_set_method(name){
+	if (name == "DropDownList"){
+		return "ChooseString"
+	} else {
+		return ""
+	}
+}
 
 adh_key_changed:
 	adh_tmp := %A_GuiControl%
