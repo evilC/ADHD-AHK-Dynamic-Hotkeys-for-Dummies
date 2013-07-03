@@ -32,12 +32,14 @@ adh_num_hotkeys := 2
 ; The second item in each pair is the name of the subroutine called when it is triggered
 adh_hotkeys := [["Fire","Fire"],["Change Fire Rate","ChangeFireRate"]]
 
+; Set up variables for your macro here
+fire_divider := 1
+
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ; ToDo:
 ; Add option to limit controls to only a specific window
 ;Hotkey, IfWinActive, ahk_class CryENGINE
-; Give macro authors a way to find out what hotkey is bound to a function (eg to send hotkey up when doing autofire)
 ; Allow macro authors to not have to specify an up label (Use IsLabel() to detect if label exists)
 ; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 ; Add explanation somewhere that all hotkeys are passthroughs
@@ -45,11 +47,12 @@ adh_hotkeys := [["Fire","Fire"],["Change Fire Rate","ChangeFireRate"]]
 ; Add indicator for current profile outside of tabs (Right of tabs? Title bar?)
 
 adh_core_version := 0.1
+
 ; [Variable Name, Control Type, Default Value]
 ; eg ["MyControl","Edit","None"]
 adh_ini_vars := []
 ; Holds a REFERENCE copy of the hotkeys so authors can access the info (to eg send a keyup after the trigger key is pressed)
-;adh_hotkey_mappings := []
+adh_hotkey_mappings := {}
 
 #InstallKeybdHook
 #InstallMouseHook
@@ -168,6 +171,9 @@ return
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
 
+;
+
+
 ; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
 
@@ -182,41 +188,46 @@ Fire:
 	; For some games, they will not let you autofire if the triggering key is still held down...
 	; even if the triggering key is not the key sent and does nothing in the game!
 	; So look up the hotkey for this action and send a key up
-	;Send, %tmp%
+	Send {%tmp%}
 
-	; Fire LAZORS!!!
+	; Fire Lazors !!!
 	GoSub, DoFire
 	
 	; Set the re-fire timer to the value specified in the FireRate box
-	SetTimer, DoFire, %FireRate%
-	
+	SetTimer, DoFire, % FireRate / fire_divider
 	return
 
 ; Fired on key up
 FireUp:
-	; Kill the timer on key up
+	; Kill the timer when the key is released (Stop auto firing)
 	SetTimer, DoFire, Off
+	tooltip,
 	return
 
 ; Set up HotKey 2
 
 ; Fired on key down
 ChangeFireRate:
-	tooltip, 2 down
+	; More Lazors!! Toggles double speed fire!
+	; Toggle divider between 1 and 2
+	fire_divider := 3 - fire_divider
+
 	;Send 2
 	return
 
 ; Fired on key up
 ChangeFireRateUp:
-	tooltip, 2 up
-	;Send w
+	; Do nothing, we do not need to hook into key up for this action
 	return
 
 ; End Hotkey block ====================
 
 ; Timers need a label to go to, so handle firing in here...
 DoFire:
-	Send, %WeaponGroup%
+	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
+	SetTimer, DoFire, Off
+	Send {%WeaponGroup%}
+	SetTimer, DoFire, % FireRate / fire_divider
 	return
 
 
