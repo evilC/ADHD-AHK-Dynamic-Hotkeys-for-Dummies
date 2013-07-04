@@ -229,8 +229,15 @@ OnMessage(0x200, "adh_mouse_move")
 ; Fire GuiSubmit while adh_ignore_events is on to set all the variables
 Gui, Submit, NoHide
 
+adh_tmp := adh_gui_w - 30
+Gui, 2:Add,Edit,w%adh_tmp% h380 vadh_log_contents,
+adh_tmp := adh_gui_y - 440
+Gui, 2:Show, x%adh_gui_x% y%adh_tmp% w%adh_gui_w% h400
 ; Finished startup, allow change of controls to fire events
 adh_ignore_events := 0
+;guicontrol, 2:, adh_log_contents, hello
+adh_debug("Test1")
+adh_debug("Test2")
 
 ; Finish setup =====================================
 
@@ -803,6 +810,13 @@ adh_show_window_spy(){
 		Run, %tmp%
 }
 
+adh_debug(msg){
+	global adh_log_contents
+	guicontrol,2:,adh_log_contents, % adh_log_contents msg "`n`n"
+	gui, 2:submit, nohide
+}
+
+; ==========================================================================================================================
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
