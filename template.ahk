@@ -837,7 +837,6 @@ adh_debug_change:
 adh_debug(msg){
 	global adh_log_contents
 	global adh_debug_mode
-	soundplay, *16
 
 	;if (adh_debug_mode == 1){
 		guicontrol,2:,adh_log_contents, % adh_log_contents msg "`n`n"
