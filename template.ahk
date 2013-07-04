@@ -76,6 +76,9 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 ; Start ADH init vars and settings
 adh_core_version := 0.2
 
+adh_debug_mode := 0
+adh_debug_window := 0
+
 ; Variables to be stored in the INI file - will be populated by code later
 ; [Variable Name, Control Type, Default Value]
 ; eg ["MyControl","Edit","None"]
@@ -226,18 +229,25 @@ Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name%
 ;Hook for Tooltips
 OnMessage(0x200, "adh_mouse_move")
 
+Gui, Tab
+adh_tmp := adh_gui_w - 90
+Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
+	
+adh_tmp := adh_gui_w - 180
+Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
+	
+;adh_tmp := adh_gui_w - 120
+;Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug mode
+	
 ; Fire GuiSubmit while adh_ignore_events is on to set all the variables
 Gui, Submit, NoHide
 
+; Create the debug GUI, but do not show yet
 adh_tmp := adh_gui_w - 30
 Gui, 2:Add,Edit,w%adh_tmp% h380 vadh_log_contents,
-adh_tmp := adh_gui_y - 440
-Gui, 2:Show, x%adh_gui_x% y%adh_tmp% w%adh_gui_w% h400
+
 ; Finished startup, allow change of controls to fire events
 adh_ignore_events := 0
-;guicontrol, 2:, adh_log_contents, hello
-adh_debug("Test1")
-adh_debug("Test2")
 
 ; Finish setup =====================================
 
@@ -810,56 +820,37 @@ adh_show_window_spy(){
 		Run, %tmp%
 }
 
+adh_debug_window_change:
+	gui, submit, nohide
+	if (adh_debug_window == 1){
+		adh_tmp := adh_gui_y - 440
+		Gui, 2:Show, x%adh_gui_x% y%adh_tmp% w%adh_gui_w% h400
+	} else {
+		gui, 2:hide
+	}
+	return
+
+adh_debug_change:
+	gui, 2:submit, nohide
+	return
+	
 adh_debug(msg){
 	global adh_log_contents
-	guicontrol,2:,adh_log_contents, % adh_log_contents msg "`n`n"
-	gui, 2:submit, nohide
+	global adh_debug_mode
+	soundplay, *16
+
+	;if (adh_debug_mode == 1){
+		guicontrol,2:,adh_log_contents, % adh_log_contents msg "`n`n"
+		gui, 2:submit, nohide
+	;}
 }
 
-; ==========================================================================================================================
-; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
-; This code enables extra keys in a Hotkey GUI control
-#MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If ctrl := adh_hotkey_ctrl_has_focus()
-	*AppsKey::                       ;Add support for these special keys,
-	*BackSpace::                     ;  which the hotkey control does not normally allow.
-	*Delete::
-	*Enter::
-	*Escape::
-	*Pause::
-	*PrintScreen::
-	*Space::
-	*Tab::
-	; Can use mouse hotkeys like this - it detects them but does not display them
-	;~*WheelUp::
-	adh_modifier := ""
-	If GetKeyState("Shift","P")
-		adh_modifier .= "+"
-	If GetKeyState("Ctrl","P")
-		adh_modifier .= "^"
-	If GetKeyState("Alt","P")
-		adh_modifier .= "!"
-	Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
-	If (A_ThisHotkey == "*BackSpace" && %ctrl% && !adh_modifier)	;If the control has text but no modifiers held,
-		GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
-	Else                                                     	;Otherwise,
-		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
-	;validateHK(ctrl)
-	Gosub, adh_option_changed
-	return
-#If
-
-adh_hotkey_ctrl_has_focus() {
-	GuiControlGet, ctrl, Focus       ;ClassNN
-	If InStr(ctrl,"hotkey") {
-		GuiControlGet, ctrl, FocusV     ;Associated variable
-		Return, ctrl
-	}
-}
 
 adh_program_mode_toggle:
 	Gui, Submit, NoHide
+	
 	if (adh_program_mode == 1){
+		adh_debug("Entering Program Mode")
 		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
 		Gosub, adh_disable_author_timers
@@ -868,6 +859,7 @@ adh_program_mode_toggle:
 		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys, start heartbeat timer
+		adh_debug("Exiting Program Mode")
 		GoSub, adh_enable_hotkeys
 		GoSub, adh_enable_heartbeat
 		GuiControl, disable, adh_limit_application
@@ -915,6 +907,48 @@ adh_app_active(act){
 			Gosub, adh_init_author_vars
 			adh_app_act_curr := 0
 		}
+	}
+}
+
+
+; ==========================================================================================================================
+; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
+; This code enables extra keys in a Hotkey GUI control
+#MenuMaskKey vk07                 ;Requires AHK_L 38+
+#If ctrl := adh_hotkey_ctrl_has_focus()
+	*AppsKey::                       ;Add support for these special keys,
+	*BackSpace::                     ;  which the hotkey control does not normally allow.
+	*Delete::
+	*Enter::
+	*Escape::
+	*Pause::
+	*PrintScreen::
+	*Space::
+	*Tab::
+	; Can use mouse hotkeys like this - it detects them but does not display them
+	;~*WheelUp::
+	adh_modifier := ""
+	If GetKeyState("Shift","P")
+		adh_modifier .= "+"
+	If GetKeyState("Ctrl","P")
+		adh_modifier .= "^"
+	If GetKeyState("Alt","P")
+		adh_modifier .= "!"
+	Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
+	If (A_ThisHotkey == "*BackSpace" && %ctrl% && !adh_modifier)	;If the control has text but no modifiers held,
+		GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
+	Else                                                     	;Otherwise,
+		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
+	;validateHK(ctrl)
+	Gosub, adh_option_changed
+	return
+#If
+
+adh_hotkey_ctrl_has_focus() {
+	GuiControlGet, ctrl, Focus       ;ClassNN
+	If InStr(ctrl,"hotkey") {
+		GuiControlGet, ctrl, FocusV     ;Associated variable
+		Return, ctrl
 	}
 }
 	
