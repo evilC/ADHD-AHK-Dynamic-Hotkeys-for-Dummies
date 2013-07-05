@@ -773,23 +773,27 @@ adh_enable_hotkeys(){
 }
 
 adh_disable_hotkeys:
-	Loop, %adh_num_hotkeys%
+	adh_disable_hotkeys()
+	return
+
+adh_disable_hotkeys(){
+	global adh_num_hotkeys
+	global adh_limit_application
+	global adh_limit_application_on
+	global adh_hotkeys
+	
+	
+	Loop, % adh_num_hotkeys
 	{
-		adh_pre := adh_build_prefix(A_Index)
-		adh_tmp := adh_hk_k_%A_Index%
-		if (adh_tmp == ""){
-			adh_tmp := adh_hk_m_%A_Index%
-			if (adh_tmp == "None"){
-				adh_tmp := ""
-			}
-		}
-		if (adh_tmp != ""){
-			adh_set := adh_pre adh_tmp
+		hotkey_prefix := adh_build_prefix(A_Index)
+		hotkey_keys :=  := adh_get_hotkey_string(A_Index)
+		if (hotkey_keys != ""){
+			hotkey_string := hotkey_prefix hotkey_keys
 			; ToDo: Is there a better way to remove a hotkey?
-			HotKey, ~%adh_set%, adh_do_nothing
-			if (IsLabel(adh_hotkey_sub "Up")){
+			HotKey, ~%hotkey_string%, adh_do_nothing
+			if (IsLabel(hotkey_subroutine "Up")){
 				; Bind up action of hotkey
-				HotKey, ~%adh_set% up, adh_do_nothing
+				HotKey, ~%hotkey_string% up, adh_do_nothing
 			}
 		}
 		GuiControl, Enable, adh_hk_k_%A_Index%
@@ -799,6 +803,7 @@ adh_disable_hotkeys:
 		GuiControl, Enable, adh_hk_a_%A_Index%
 	}
 	return
+}
 
 ; An empty stub to redirect unbound hotkeys to
 adh_do_nothing:
