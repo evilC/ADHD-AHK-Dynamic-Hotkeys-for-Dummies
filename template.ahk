@@ -507,13 +507,29 @@ adh_profile_changed:
 
 ; aka save profile
 adh_option_changed:
+	adh_option_changed()
+	return
+
+adh_option_changed(){
+	global adh_starting_up
+	global adh_num_hotkeys
+	global adh_current_profile
+	global adh_profile_list
+	global adh_default_app
+	global adh_limit_application
+	global adh_limit_application_on
+	global adh_ini_vars
+	global adh_debug_mode
+	global adh_debug_window
+	
+	
 	if (adh_starting_up != 1){
 		adh_debug("option_changed - control: " A_guicontrol)
 		
 		Gui, Submit, NoHide
 
 		; Hotkey bindings
-		Loop, %adh_num_hotkeys%
+		Loop, % adh_num_hotkeys
 		{
 			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
 			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
@@ -549,6 +565,7 @@ adh_option_changed:
 		adh_debug("ignoring option_changed - " A_Guicontrol)
 	}
 	return
+}
 
 ; Add and remove glabel is useful because:
 ; When you use GuiControl to set the contents of an edit...
