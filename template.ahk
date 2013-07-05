@@ -66,7 +66,7 @@ adh_log_contents := ""
 ; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
 adh_starting_up := 1
 
-adh_debug("Starting up...")
+ADH.debug("Starting up...")
 adh_num_hotkeys := adh_hotkeys.MaxIndex()
 adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
@@ -252,9 +252,9 @@ adh_debug_ready := 1
 
 ; Finish setup =====================================
 GoSub, adh_profile_changed
-adh_debug_window_change()
+ADH.debug_window_change()
 
-adh_debug("Finished startup")
+ADH.debug("Finished startup")
 
 ; Finished startup, allow change of controls to fire events
 adh_starting_up := 0
@@ -427,7 +427,7 @@ Class ADH
 		global adh_debug_mode
 		global adh_debug_window
 		
-		adh_debug("profile_changed")
+		this.debug("profile_changed")
 		Gui, Submit, NoHide
 
 		this.update_ini("current_profile", "Settings", adh_current_profile,"")
@@ -535,7 +535,7 @@ Class ADH
 		global adh_debug_window
 		
 		if (adh_starting_up != 1){
-			adh_debug("option_changed - control: " A_guicontrol)
+			this.debug("option_changed - control: " A_guicontrol)
 			
 			Gui, Submit, NoHide
 
@@ -573,7 +573,7 @@ Class ADH
 			this.update_ini("adh_debug_window", "settings", adh_debug_window, 0)
 			
 		} else {
-			adh_debug("ignoring option_changed - " A_Guicontrol)
+			this.debug("ignoring option_changed - " A_Guicontrol)
 		}
 		return
 	}
@@ -678,7 +678,7 @@ Class ADH
 		this.update_ini("profile_list", "Settings", adh_profile_list, "")
 		
 		; Firing adh_option_changed saves the current state to the new profile name in the INI
-		adh_debug("duplicate_profile calling option_changed")
+		this.debug("duplicate_profile calling option_changed")
 		Gosub, adh_option_changed
 
 		return
@@ -753,7 +753,7 @@ Class ADH
 		; key pressed
 		if (ctr < max){
 			GuiControl,, %A_GuiControl%, None
-			adh_debug("key_changed calling option_changed")
+			this.debug("key_changed calling option_changed")
 			Gosub, adh_option_changed
 		}
 		else
@@ -761,7 +761,7 @@ Class ADH
 			tmp := SubStr(A_GuiControl,10)
 			; Set the mouse field to blank
 			GuiControl,ChooseString, adh_hk_m_%tmp%, None
-			adh_debug("key_changed calling option_changed")
+			this.debug("key_changed calling option_changed")
 			Gosub, adh_option_changed
 		}
 		return
@@ -771,7 +771,7 @@ Class ADH
 		tmp := SubStr(A_GuiControl,10)
 		; Set the keyboard field to blank
 		GuiControl,, adh_hk_k_%tmp%, None
-		adh_debug("mouse_changed calling option_changed")
+		this.debug("mouse_changed calling option_changed")
 		Gosub, adh_option_changed
 		return
 	}
@@ -811,6 +811,58 @@ Class ADH
 		}
 		ExitApp
 		return
+	}
+
+	show_window_spy(){
+		SplitPath, A_AhkPath,,tmp
+		tmp := tmp "\AU3_Spy.exe"
+		IfExist, %tmp%
+			Run, %tmp%
+	}
+
+	; Debug functions
+	debug_window_change(){
+		global adh_debug_window
+		global adh_gui_x
+		global adh_gui_y
+		global adh_gui_w
+		global adh_gui_h
+		global adh_starting_up
+		
+		gui, submit, nohide
+		if (adh_debug_window == 1){
+			tmp := adh_gui_y - 440
+			Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400, ADH Debug Window
+		} else {
+			gui, 2:hide
+		}
+		; On startup do not call adh_option_changed, we are just setting the window open or closed
+		if (!adh_starting_up){
+			gosub, adh_option_changed
+		}
+		return
+	}
+
+	debug_change(){
+		gui, 2:submit, nohide
+		gosub, adh_option_changed
+		return
+	}
+
+	debug(msg){
+		global adh_log_contents
+		global adh_debug_mode
+		global adh_starting_up
+		global adh_debug_ready
+
+		; If in debug mode, or starting up...
+		if (adh_debug_mode || adh_starting_up){
+			adh_log_contents := adh_log_contents "* " msg "`n"
+			if (adh_debug_ready){
+				guicontrol,2:,adh_log_contents, % adh_log_contents
+				gui, 2:submit, nohide
+			}
+		}
 	}
 
 
@@ -882,7 +934,7 @@ adh_enable_hotkeys(){
 	global adh_hotkeys
 	
 	; ToDo: Should not submit gui here, triggering save...
-	adh_debug("enable_hotkeys")
+	;adh_debug("enable_hotkeys")
 
 	Gui, Submit, NoHide
 	Loop, % adh_num_hotkeys
@@ -933,7 +985,7 @@ adh_disable_hotkeys(){
 	global adh_limit_application_on
 	global adh_hotkeys
 	
-	adh_debug("disable_hotkeys")
+	;adh_debug("disable_hotkeys")
 
 	Loop, % adh_num_hotkeys
 	{
@@ -985,68 +1037,17 @@ GuiClose:
 	return
 
 adh_show_window_spy:
-	adh_show_window_spy()
+	ADH.show_window_spy()
 	return
-
-adh_show_window_spy(){
-	SplitPath, A_AhkPath,,tmp
-	tmp := tmp "\AU3_Spy.exe"
-	IfExist, %tmp%
-		Run, %tmp%
-}
 
 adh_debug_window_change:
-	adh_debug_window_change()
+	ADH.debug_window_change()
 	return
-
-adh_debug_window_change(){
-	global adh_debug_window
-	global adh_gui_x
-	global adh_gui_y
-	global adh_gui_w
-	global adh_gui_h
-	global adh_starting_up
-	
-	gui, submit, nohide
-	if (adh_debug_window == 1){
-		tmp := adh_gui_y - 440
-		Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400, ADH Debug Window
-	} else {
-		gui, 2:hide
-	}
-	; On startup do not call adh_option_changed, we are just setting the window open or closed
-	if (!adh_starting_up){
-		gosub, adh_option_changed
-	}
-	return
-}
 
 adh_debug_change:
-	adh_debug_change()
+	ADH.debug_change()
 	return
 	
-adh_debug_change(){
-	gui, 2:submit, nohide
-	gosub, adh_option_changed
-	return
-}
-	
-adh_debug(msg){
-	global adh_log_contents
-	global adh_debug_mode
-	global adh_starting_up
-	global adh_debug_ready
-
-	; If in debug mode, or starting up...
-	if (adh_debug_mode || adh_starting_up){
-		adh_log_contents := adh_log_contents "* " msg "`n"
-		if (adh_debug_ready){
-			guicontrol,2:,adh_log_contents, % adh_log_contents
-			gui, 2:submit, nohide
-		}
-	}
-}
-
 adh_clear_log:
 	adh_log_contents := ""
 	GuiControl,,adh_log_contents,%adh_log_contents%
@@ -1062,11 +1063,11 @@ adh_program_mode_changed(){
 	global adh_limit_application_on
 	global adh_program_mode
 	
-	adh_debug("program_mode_changed")
+	;adh_debug("program_mode_changed")
 	Gui, Submit, NoHide
 	
 	if (adh_program_mode == 1){
-		adh_debug("Entering Program Mode")
+		;adh_debug("Entering Program Mode")
 		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
 		Gosub, adh_disable_author_timers
@@ -1075,7 +1076,7 @@ adh_program_mode_changed(){
 		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys, start heartbeat timer
-		adh_debug("Exiting Program Mode")
+		;adh_debug("Exiting Program Mode")
 		GoSub, adh_enable_hotkeys
 		adh_enable_heartbeat()
 		GuiControl, disable, adh_limit_application
@@ -1085,7 +1086,7 @@ adh_program_mode_changed(){
 }
 
 adh_enable_heartbeat(){
-	adh_debug("Enabling Heartbeat")
+	;adh_debug("Enabling Heartbeat")
 	global adh_limit_application
 	global adh_limit_application_on
 	
@@ -1096,7 +1097,7 @@ adh_enable_heartbeat(){
 }
 
 adh_disable_heartbeat(){
-	adh_debug("Disabling Heartbeat")
+	;adh_debug("Disabling Heartbeat")
 	SetTimer, adh_heartbeat, Off
 	return
 }
@@ -1168,7 +1169,7 @@ adh_app_active(act){
 	Else                                                     	;Otherwise,
 		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
 	;validateHK(ctrl)
-	adh_debug("special key detect calling option_changed")
+	ADH.debug("special key detect calling option_changed")
 	Gosub, adh_option_changed
 	return
 #If
