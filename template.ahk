@@ -348,15 +348,16 @@ DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
 	Gosub, DisableTimers
 		
-	current_weapon := current_weapon + 1
-	if (current_weapon > fire_array.MaxIndex()){
-		current_weapon := 1
-	}
 	out := fire_array[current_weapon]
 	Send {%out%}
 	adh_tmp := FireRate / fire_divider
 	SetTimer, DoFire, % adh_tmp
 	nextfire := A_TickCount + (adh_tmp)
+
+	current_weapon := current_weapon + 1
+	if (current_weapon > fire_array.MaxIndex()){
+		current_weapon := 1
+	}
 	return
 
 ; used to start or stop the fire timer
@@ -404,6 +405,7 @@ DisableTimers:
 
 ; aka load profile
 adh_profile_changed:
+	adh_debug("profile_changed")
 	Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
 	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
@@ -482,6 +484,7 @@ adh_profile_changed:
 ; aka save profile
 adh_option_changed:
 if (adh_ignore_events != 1){
+	adh_debug("option_changed")
 	Gui, Submit, NoHide
 
 	; Hotkey bindings
@@ -616,6 +619,7 @@ adh_duplicate_profile(name){
 	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
 	
 	; Firing adh_option_changed saves the current state to the new profile name in the INI
+	adh_debug("duplicate_profile calling option_changed")
 	Gosub, adh_option_changed
 	;Gosub, adh_profile_changed
 
@@ -708,6 +712,7 @@ adh_key_changed(){
 	; key pressed
 	if (ctr < max){
 		GuiControl,, %A_GuiControl%, None
+		adh_debug("key_changed calling option_changed")
 		Gosub, adh_option_changed
 	}
 	else
@@ -715,6 +720,7 @@ adh_key_changed(){
 		tmp := SubStr(A_GuiControl,10)
 		; Set the mouse field to blank
 		GuiControl,ChooseString, adh_hk_m_%tmp%, None
+		adh_debug("key_changed calling option_changed")
 		Gosub, adh_option_changed
 	}
 	return
@@ -728,6 +734,7 @@ adh_mouse_changed(){
 	tmp := SubStr(A_GuiControl,10)
 	; Set the keyboard field to blank
 	GuiControl,, adh_hk_k_%tmp%, None
+	adh_debug("mouse_changed calling option_changed")
 	Gosub, adh_option_changed
 	return
 }
@@ -1037,6 +1044,7 @@ adh_app_active(act){
 	Else                                                     	;Otherwise,
 		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
 	;validateHK(ctrl)
+	adh_debug("special key detect calling option_changed")
 	Gosub, adh_option_changed
 	return
 #If
