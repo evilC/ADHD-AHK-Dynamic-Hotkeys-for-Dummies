@@ -509,6 +509,14 @@ adh_option_changed:
 	adh_option_changed()
 	return
 
+;adh_update_ini(key, section, value, default)
+; IniRead, Section, Key, Default
+adh_read_ini(key,section,default){
+	IniRead, out, %A_ScriptName%.ini, section, key, default
+	return out
+}
+
+
 ; aka save profile
 adh_option_changed(){
 	global adh_starting_up
