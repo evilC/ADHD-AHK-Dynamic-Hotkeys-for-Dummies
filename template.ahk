@@ -580,17 +580,21 @@ adh_delete_profile(name, gotoprofile = "Default"){
 }
 
 adh_duplicate_profile:
-	InputBox, adh_tmp, Profile Name, Please enter a profile name
-	if (!ErrorLevel){
-		adh_duplicate_profile(adh_tmp)
-	}
+	adh_duplicate_profile("")
 	return
-
-adh_duplicate_profile(name){
-	; ToDo: Duplicate - should just need to be able to change current name and save?
 	
+adh_duplicate_profile(name){
 	global adh_profile_list
 	global adh_current_profile
+	
+	; Blank name specified - prompt for name
+	if (name == ""){
+		InputBox, name, Profile Name, Please enter a profile name
+		if (ErrorLevel){
+			return
+		}
+	}
+	; ToDo: Duplicate - should just need to be able to change current name and save?
 	
 	; Create the new item in the profile list
 	if (adh_profile_list == ""){
