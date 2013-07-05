@@ -664,41 +664,51 @@ adh_get_string_for_hotkey(hk){
 }
 
 adh_key_changed:
-	adh_tmp := %A_GuiControl%
-	adh_ctr := 0
-	adh_max := StrLen(adh_tmp)
-	Loop, %adh_max%
+	adh_key_changed()
+	return
+
+adh_key_changed(){
+	tmp := %A_GuiControl%
+	ctr := 0
+	max := StrLen(tmp)
+	Loop, %max%
 	{
-		chr := substr(adh_tmp,adh_ctr,1)
+		chr := substr(tmp,ctr,1)
 		if (chr != "^" && chr != "!" && chr != "+"){
-			adh_ctr := adh_ctr + 1
+			ctr := ctr + 1
 		}
 	}
 	; Only modifier keys pressed?
-	if (adh_ctr == 0){
+	if (ctr == 0){
 		return
 	}
 	
 	; key pressed
-	if (adh_ctr < adh_max){
+	if (ctr < max){
 		GuiControl,, %A_GuiControl%, None
 		Gosub, adh_option_changed
 	}
 	else
 	{
-		adh_tmp := SubStr(A_GuiControl,10)
+		tmp := SubStr(A_GuiControl,10)
 		; Set the mouse field to blank
-		GuiControl,ChooseString, adh_hk_m_%adh_tmp%, None
+		GuiControl,ChooseString, adh_hk_m_%tmp%, None
 		Gosub, adh_option_changed
 	}
 	return
+}
 
 adh_mouse_changed:
-	adh_tmp := SubStr(A_GuiControl,10)
+	adh_mouse_changed()
+	return
+
+adh_mouse_changed(){
+	tmp := SubStr(A_GuiControl,10)
 	; Set the keyboard field to blank
-	GuiControl,, adh_hk_k_%adh_tmp%, None
+	GuiControl,, adh_hk_k_%tmp%, None
 	Gosub, adh_option_changed
 	return
+}
 
 adh_enable_hotkeys:
 	Gui, Submit, NoHide
