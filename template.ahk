@@ -447,7 +447,7 @@ adh_profile_changed:
 
 		; Control Modifier
 		adh_modstring := ""
-		adh_tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,A_Space)
+		adh_tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
 		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
 		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
@@ -455,7 +455,7 @@ adh_profile_changed:
 		}
 		
 		; Shift Modifier
-		adh_tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,A_Space)
+		adh_tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
 		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
 		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
@@ -463,7 +463,7 @@ adh_profile_changed:
 		}
 		
 		; Alt Modifier
-		adh_tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,A_Space)
+		adh_tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
 		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
 		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
@@ -477,12 +477,14 @@ adh_profile_changed:
 	if (adh_default_app == "" || adh_default_app == null){
 		adh_default_app := A_Space
 	}
-	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app, %adh_default_app%
+	adh_tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
+	;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app, %adh_default_app%
 	GuiControl,, adh_limit_application, %adh_tmp%
 	adh_add_glabel("adh_limit_application")
 	
 	; limit application status
-	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app_on, 0
+	adh_tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
+	;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app_on, 0
 	GuiControl,, adh_limit_application_on, %adh_tmp%
 	
 	; Get author vars from ini
