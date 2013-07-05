@@ -241,20 +241,25 @@ Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
 ;Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug mode
 	
 ; Fire GuiSubmit while adh_ignore_events is on to set all the variables
+
 Gui, Submit, NoHide
 
 ; Create the debug GUI, but do not show yet
 adh_tmp := adh_gui_w - 30
 Gui, 2:Add,Edit,w%adh_tmp% h380 vadh_log_contents,
 
-; Finished startup, allow change of controls to fire events
-adh_ignore_events := 0
-
 ; Finish setup =====================================
 
-GoSub, adh_program_mode_changed
 GoSub, adh_profile_changed
-adh_enable_heartbeat()		; Start the timer to check current appp, if enabled
+;GoSub, adh_program_mode_changed
+adh_enable_heartbeat()
+
+; Finished startup, allow change of controls to fire events
+adh_ignore_events := 0
+adh_debug("Finished startup")
+
+
+;adh_enable_heartbeat()		; Start the timer to check current appp, if enabled
 
 return
 
@@ -479,44 +484,48 @@ adh_profile_changed:
 	Gosub, adh_enable_hotkeys
 	
 	Gosub, adh_change_event
+
 	return
 
 ; aka save profile
 adh_option_changed:
-if (adh_ignore_events != 1){
-	adh_debug("option_changed")
-	Gui, Submit, NoHide
+	if (adh_ignore_events != 1){
+		adh_debug("option_changed - control: " A_guicontrol)
+		Gui, Submit, NoHide
 
-	; Hotkey bindings
-	Loop, %adh_num_hotkeys%
-	{
-		adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
-		adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
-		adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
-		adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
-		adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+		; Hotkey bindings
+		Loop, %adh_num_hotkeys%
+		{
+			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
+			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
+			adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
+			adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
+			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+		}
+		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+		
+		; Limit app
+		if (adh_default_app == "" || adh_default_app == null){
+			adh_default_app := A_Space
+		}
+		adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
+		SB_SetText("Current profile: " adh_current_profile)
+		
+		; Limit app toggle
+		adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
+		
+		; Add author vars to ini
+		Loop, % adh_ini_vars.MaxIndex()
+		{
+			adh_tmp := adh_ini_vars[A_Index,1]
+			adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,3])
+		}
+		Gosub, adh_change_event
+
+	} else {
+		adh_debug("ignoring option_changed - " A_Guicontrol)
 	}
-	adh_update_ini("profile_list", "Settings", adh_profile_list,"")
-	
-	; Limit app
-	if (adh_default_app == "" || adh_default_app == null){
-		adh_default_app := A_Space
-	}
-	adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
-	SB_SetText("Current profile: " adh_current_profile)
-	
-	; Limit app toggle
-	adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
-	
-	; Add author vars to ini
-	Loop, % adh_ini_vars.MaxIndex()
-	{
-		adh_tmp := adh_ini_vars[A_Index,1]
-		adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,3])
-	}
-	Gosub, adh_change_event
-}	
-return
+	return
 
 
 adh_add_profile:
@@ -762,6 +771,8 @@ adh_enable_hotkeys(){
 	global adh_hotkeys
 	
 	; ToDo: Should not submit gui here, triggering save...
+	adh_debug("enable_hotkeys")
+
 	Gui, Submit, NoHide
 	Loop, % adh_num_hotkeys
 	{
@@ -811,7 +822,8 @@ adh_disable_hotkeys(){
 	global adh_limit_application_on
 	global adh_hotkeys
 	
-	
+	adh_debug("disabling hotkeys")
+
 	Loop, % adh_num_hotkeys
 	{
 		hotkey_prefix := adh_build_prefix(A_Index)
@@ -901,6 +913,7 @@ adh_debug_window_change(){
 	global adh_gui_w
 	global adh_gui_h
 	
+	adh_debug("debug_window_change")
 	gui, submit, nohide
 	if (adh_debug_window == 1){
 		tmp := adh_gui_y - 440
@@ -940,10 +953,11 @@ adh_program_mode_changed(){
 	global adh_limit_application_on
 	global adh_program_mode
 	
+	adh_debug("program_mode_changed")
 	Gui, Submit, NoHide
 	
 	if (adh_program_mode == 1){
-		adh_debug("Entering Program Mode")
+		adh_debug("Entering Program Mode - Disabling Hotkeys")
 		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
 		Gosub, adh_disable_author_timers
@@ -952,7 +966,7 @@ adh_program_mode_changed(){
 		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys, start heartbeat timer
-		adh_debug("Exiting Program Mode")
+		adh_debug("Exiting Program Mode - Enabling Hotkeys")
 		GoSub, adh_enable_hotkeys
 		adh_enable_heartbeat()
 		GuiControl, disable, adh_limit_application
@@ -962,6 +976,7 @@ adh_program_mode_changed(){
 }
 
 adh_enable_heartbeat(){
+	adh_debug("Enabling Heartbeat")
 	global adh_limit_application
 	global adh_limit_application_on
 	
@@ -972,6 +987,7 @@ adh_enable_heartbeat(){
 }
 
 adh_disable_heartbeat(){
+	adh_debug("Disabling Heartbeat")
 	SetTimer, adh_heartbeat, Off
 	return
 }
