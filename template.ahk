@@ -253,7 +253,7 @@ adh_ignore_events := 0
 
 GoSub, adh_program_mode_toggle
 GoSub, adh_profile_changed
-GoSub, adh_enable_heartbeat		; Start the timer to check current appp, if enabled
+adh_enable_heartbeat()		; Start the timer to check current appp, if enabled
 
 return
 
@@ -791,23 +791,28 @@ adh_build_prefix(hk){
 	
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 adh_update_ini(key, section, value, default){
-	adh_tmp := A_ScriptName ".ini"
+	tmp := A_ScriptName ".ini"
 	if (value != default){
-		IniWrite,  %value%, %adh_tmp%, %section%, %key%
+		IniWrite,  %value%, %tmp%, %section%, %key%
 	} else {
-		IniDelete, %adh_tmp%, %section%, %key%
+		IniDelete, %tmp%, %section%, %key%
 	}
 }
 
 ; Kill the macro if the GUI is closed
 adh_exit_app:
 GuiClose:
+	adh_exit_app()
+	return
+
+adh_exit_app(){	
 	Gui, +Hwndgui_id
 	WinGetPos, adh_gui_x, adh_gui_y,,, ahk_id %gui_id%
 	IniWrite, %adh_gui_x%, %A_ScriptName%.ini, Settings, gui_x
 	IniWrite, %adh_gui_y%, %A_ScriptName%.ini, Settings, gui_y
 	ExitApp
 	return
+}
 
 adh_show_window_spy:
 	adh_show_window_spy()
@@ -821,14 +826,25 @@ adh_show_window_spy(){
 }
 
 adh_debug_window_change:
+	adh_debug_window_change()
+	return
+
+adh_debug_window_change(){
+	global adh_debug_window
+	global adh_gui_x
+	global adh_gui_y
+	global adh_gui_w
+	global adh_gui_h
+	
 	gui, submit, nohide
 	if (adh_debug_window == 1){
-		adh_tmp := adh_gui_y - 440
-		Gui, 2:Show, x%adh_gui_x% y%adh_tmp% w%adh_gui_w% h400
+		tmp := adh_gui_y - 440
+		Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400
 	} else {
 		gui, 2:hide
 	}
 	return
+}
 
 adh_debug_change:
 	gui, 2:submit, nohide
@@ -846,6 +862,13 @@ adh_debug(msg){
 
 
 adh_program_mode_toggle:
+	adh_program_mode_toggle()
+	return
+
+adh_program_mode_toggle(){
+	global adh_limit_application
+	global adh_limit_application_on
+	
 	Gui, Submit, NoHide
 	
 	if (adh_program_mode == 1){
@@ -853,30 +876,40 @@ adh_program_mode_toggle:
 		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
 		Gosub, adh_disable_author_timers
-		Gosub, adh_disable_heartbeat
+		adh_disable_heartbeat()
 		GuiControl, enable, adh_limit_application
 		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys, start heartbeat timer
 		adh_debug("Exiting Program Mode")
 		GoSub, adh_enable_hotkeys
-		GoSub, adh_enable_heartbeat
+		adh_enable_heartbeat()
 		GuiControl, disable, adh_limit_application
 		GuiControl, disable, adh_limit_application_on
 	}
 	return
+}
 
-adh_enable_heartbeat:
+adh_enable_heartbeat(){
+	global adh_limit_application
+	global adh_limit_application_on
+	
 	if (adh_limit_application_on == 1 && adh_limit_application != ""){
 		SetTimer, adh_heartbeat, 500
 	}
 	return
-	
-adh_disable_heartbeat:
+}
+
+adh_disable_heartbeat(){
 	SetTimer, adh_heartbeat, Off
 	return
-	
+}
+
 adh_heartbeat:
+	adh_heartbeat()
+	return
+	
+adh_heartbeat(){
 	; Check current app here.
 	; Not used to enable or disable hotkeys, used to start or stop author macros etc
 	adh_tmp := "ahk_class " adh_limit_application
@@ -889,6 +922,7 @@ adh_heartbeat:
 		adh_app_active(0)
 	}
 	return
+}
 
 adh_app_active(act){
 	Global adh_app_act_curr
