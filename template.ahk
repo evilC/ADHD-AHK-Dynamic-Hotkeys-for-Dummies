@@ -78,6 +78,7 @@ adh_core_version := 0.2
 
 adh_debug_mode := 0
 adh_debug_window := 0
+adh_debug_window := 0
 
 ; Variables to be stored in the INI file - will be populated by code later
 ; [Variable Name, Control Type, Default Value]
@@ -868,6 +869,7 @@ adh_program_mode_toggle:
 adh_program_mode_toggle(){
 	global adh_limit_application
 	global adh_limit_application_on
+	global adh_program_mode
 	
 	Gui, Submit, NoHide
 	
