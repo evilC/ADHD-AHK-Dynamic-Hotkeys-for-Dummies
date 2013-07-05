@@ -517,12 +517,17 @@ return
 
 
 adh_add_profile:
-	InputBox, adh_tmp, Profile Name, Please enter a profile name
+	adh_add_profile()
+	return
+
+adh_add_profile(){
+	InputBox, tmp, Profile Name, Please enter a profile name
 	if (!ErrorLevel){
-		adh_add_profile(adh_tmp)
-		Gosub, adh_profile_changed
+		adh_add_profile(tmp)
+		adh_profile_changed()
 	}
 	return
+}
 
 adh_add_profile(name){
 	global adh_profile_list
@@ -902,8 +907,13 @@ adh_debug_window_change(){
 }
 
 adh_debug_change:
+	adh_debug_change()
+	return
+	
+adh_debug_change(){
 	gui, 2:submit, nohide
 	return
+}
 	
 adh_debug(msg){
 	global adh_log_contents
