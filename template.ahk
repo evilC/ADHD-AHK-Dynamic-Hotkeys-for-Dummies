@@ -479,7 +479,7 @@ Class ADH
 		}
 		
 		; limit application name
-		adh_remove_glabel("adh_limit_application")
+		this.remove_glabel("adh_limit_application")
 		if (adh_default_app == "" || adh_default_app == null){
 			adh_default_app := A_Space
 		}
@@ -501,7 +501,7 @@ Class ADH
 			adh_key := adh_ini_vars[A_Index,1]
 			adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 			
-			adh_remove_glabel(adh_key)
+			this.remove_glabel(adh_key)
 			tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
 			GuiControl,%adh_sm%, %adh_key%, %tmp%
 			this.add_glabel(adh_key)
@@ -586,9 +586,122 @@ Class ADH
 		GuiControl, +gadh_option_changed, %ctrl%
 	}
 
+	remove_glabel(ctrl){
+		GuiControl, -g, %ctrl%
+	}
+
+	; Profile management - functions to manage preserving user settings
+	add_profile(name){
+		global adh_profile_list
+		
+		if (name == ""){
+			InputBox, name, Profile Name, Please enter a profile name
+			if (ErrorLevel){
+				return
+			}
+		}
+		if (adh_profile_list == ""){
+			adh_profile_list := name
+		} else {
+			adh_profile_list := adh_profile_list "|" name
+		}
+		Sort, adh_profile_list, D|
+		
+		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+		GuiControl,ChooseString, adh_current_profile, %name%
+		
+		adh_update_ini("profile_list", "Settings", adh_profile_list, "")
+	}
+
+	delete_profile(name, gotoprofile = "Default"){
+		Global adh_profile_list
+		Global adh_current_profile
+		
+		if (name != "Default"){
+			StringSplit, tmp, adh_profile_list, |
+			out := ""
+			Loop, %tmp0%{
+				if (tmp%a_index% != name){
+					if (out != ""){
+						out := out "|"
+					}
+					out := out tmp%a_index%
+				}
+			}
+			adh_profile_list := out
+			
+			IniDelete, %A_ScriptName%.ini, %name%
+			adh_update_ini("profile_list", "Settings", adh_profile_list, "")		
+			
+			; Set new contents of list
+			GuiControl,, adh_current_profile, |Default|%adh_profile_list%
+			
+			; Select the desired new current profile
+			GuiControl, ChooseString, adh_current_profile, %gotoprofile%
+			
+			; Trigger save
+			Gui, Submit, NoHide
+			
+			; Trigger Author Event
+			Gosub, adh_profile_changed
+		}
+		return
+	}
+
+	duplicate_profile(name){
+		global adh_profile_list
+		global adh_current_profile
+		
+		; Blank name specified - prompt for name
+		if (name == ""){
+			InputBox, name, Profile Name, Please enter a profile name
+			if (ErrorLevel){
+				return
+			}
+		}
+		; ToDo: Duplicate - should just need to be able to change current name and save?
+		
+		; Create the new item in the profile list
+		if (adh_profile_list == ""){
+			adh_profile_list := name
+		} else {
+			adh_profile_list := adh_profile_list "|" name
+		}
+		Sort, adh_profile_list, D|
+		
+		adh_current_profile := name
+		; Push the new list to the profile select box
+		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+		; Set the new profile to the currently selected item
+		GuiControl,ChooseString, adh_current_profile, %name%
+		; Update the profile list in the INI
+		adh_update_ini("profile_list", "Settings", adh_profile_list, "")
+		
+		; Firing adh_option_changed saves the current state to the new profile name in the INI
+		adh_debug("duplicate_profile calling option_changed")
+		Gosub, adh_option_changed
+
+		return
+	}
+
+	rename_profile(){
+		global adh_current_profile
+		
+		if (adh_current_profile != "Default"){
+			old_prof := adh_current_profile
+			InputBox, new_prof, Profile Name, Please enter a new name
+			if (!ErrorLevel){
+				this.duplicate_profile(new_prof)
+				this.delete_profile(old_prof,new_prof)
+			}
+		}
+		return
+	}
+
+	; End profile management
+
 }
 
-; Profile management - functions to manage preserving user settings
 
 adh_profile_changed:
 	ADH.profile_changed()
@@ -600,136 +713,24 @@ adh_option_changed:
 	return
 
 
-
-adh_remove_glabel(ctrl){
-	GuiControl, -g, %ctrl%
-}
-
 adh_add_profile:
-	adh_add_profile("")
+	ADH.add_profile("")	; just clicking the button calls with empty param
 	return
-
-adh_add_profile(name){
-	global adh_profile_list
-	
-	if (name == ""){
-		InputBox, name, Profile Name, Please enter a profile name
-		if (ErrorLevel){
-			return
-		}
-	}
-	if (adh_profile_list == ""){
-		adh_profile_list := name
-	} else {
-		adh_profile_list := adh_profile_list "|" name
-	}
-	Sort, adh_profile_list, D|
-	
-	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
-	GuiControl,ChooseString, adh_current_profile, %name%
-	
-	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
-}
 
 ; Delete Profile pressed
 adh_delete_profile:
-	adh_delete_profile(adh_current_profile)
+	ADH.delete_profile(adh_current_profile)	; Just clicking the button deletes the current profile
 	return
 
-adh_delete_profile(name, gotoprofile = "Default"){
-	Global adh_profile_list
-	Global adh_current_profile
-	
-	if (name != "Default"){
-		StringSplit, tmp, adh_profile_list, |
-		out := ""
-		Loop, %tmp0%{
-			if (tmp%a_index% != name){
-				if (out != ""){
-					out := out "|"
-				}
-				out := out tmp%a_index%
-			}
-		}
-		adh_profile_list := out
-		
-		IniDelete, %A_ScriptName%.ini, %name%
-		adh_update_ini("profile_list", "Settings", adh_profile_list, "")		
-		
-		; Set new contents of list
-		GuiControl,, adh_current_profile, |Default|%adh_profile_list%
-		
-		; Select the desired new current profile
-		GuiControl, ChooseString, adh_current_profile, %gotoprofile%
-		
-		; Trigger save
-		Gui, Submit, NoHide
-		
-		; Trigger Author Event
-		Gosub, adh_profile_changed
-	}
-	return
-}
 
 adh_duplicate_profile:
-	adh_duplicate_profile("")
+	ADH.duplicate_profile("")
 	return
 	
-adh_duplicate_profile(name){
-	global adh_profile_list
-	global adh_current_profile
-	
-	; Blank name specified - prompt for name
-	if (name == ""){
-		InputBox, name, Profile Name, Please enter a profile name
-		if (ErrorLevel){
-			return
-		}
-	}
-	; ToDo: Duplicate - should just need to be able to change current name and save?
-	
-	; Create the new item in the profile list
-	if (adh_profile_list == ""){
-		adh_profile_list := name
-	} else {
-		adh_profile_list := adh_profile_list "|" name
-	}
-	Sort, adh_profile_list, D|
-	
-	adh_current_profile := name
-	; Push the new list to the profile select box
-	GuiControl,, adh_current_profile, |Default||%adh_profile_list%
-	; Set the new profile to the currently selected item
-	GuiControl,ChooseString, adh_current_profile, %name%
-	; Update the profile list in the INI
-	adh_update_ini("profile_list", "Settings", adh_profile_list, "")
-	
-	; Firing adh_option_changed saves the current state to the new profile name in the INI
-	adh_debug("duplicate_profile calling option_changed")
-	Gosub, adh_option_changed
-
-	return
-}
-
 adh_rename_profile:
-	adh_rename_profile()
+	ADH.rename_profile()
 	return
 
-adh_rename_profile(){
-	global adh_current_profile
-	
-	if (adh_current_profile != "Default"){
-		old_prof := adh_current_profile
-		InputBox, new_prof, Profile Name, Please enter a new name
-		if (!ErrorLevel){
-			adh_duplicate_profile(new_prof)
-			adh_delete_profile(old_prof,new_prof)
-		}
-	}
-	return
-}
-
-; End profile management
 
 ; For some games, they will not let you autofire if the triggering key is still held down...
 ; even if the triggering key is not the key sent and does nothing in the game!
