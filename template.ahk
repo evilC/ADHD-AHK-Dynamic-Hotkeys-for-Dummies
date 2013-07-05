@@ -514,7 +514,7 @@ Class ADH
 		adh_debug_window := this.read_ini("adh_debug_window","Settings",0)
 		GuiControl,, adh_debug_window, %adh_debug_window%
 
-		adh_program_mode_changed()
+		this.program_mode_changed()
 		
 		Gosub, adh_change_event
 
@@ -720,7 +720,7 @@ Class ADH
 		; If in program mode on tab change, disable program mode
 		if (adh_program_mode == 1){
 			GuiControl,,adh_program_mode,0
-			adh_program_mode_changed()
+			this.program_mode_changed()
 		}
 		return
 	}
@@ -863,6 +863,33 @@ Class ADH
 				gui, 2:submit, nohide
 			}
 		}
+	}
+
+	program_mode_changed(){
+		global adh_limit_application
+		global adh_limit_application_on
+		global adh_program_mode
+		
+		;adh_debug("program_mode_changed")
+		Gui, Submit, NoHide
+		
+		if (adh_program_mode == 1){
+			;adh_debug("Entering Program Mode")
+			; Enable controls, stop hotkeys, kill timers
+			GoSub, adh_disable_hotkeys
+			Gosub, adh_disable_author_timers
+			adh_disable_heartbeat()
+			GuiControl, enable, adh_limit_application
+			GuiControl, enable, adh_limit_application_on
+		} else {
+			; Disable controls, start hotkeys, start heartbeat timer
+			;adh_debug("Exiting Program Mode")
+			GoSub, adh_enable_hotkeys
+			adh_enable_heartbeat()
+			GuiControl, disable, adh_limit_application
+			GuiControl, disable, adh_limit_application_on
+		}
+		return
 	}
 
 
@@ -1052,38 +1079,10 @@ adh_clear_log:
 	adh_log_contents := ""
 	GuiControl,,adh_log_contents,%adh_log_contents%
 	return
-	
 
 adh_program_mode_changed:
-	adh_program_mode_changed()
+	ADH.program_mode_changed()
 	return
-
-adh_program_mode_changed(){
-	global adh_limit_application
-	global adh_limit_application_on
-	global adh_program_mode
-	
-	;adh_debug("program_mode_changed")
-	Gui, Submit, NoHide
-	
-	if (adh_program_mode == 1){
-		;adh_debug("Entering Program Mode")
-		; Enable controls, stop hotkeys, kill timers
-		GoSub, adh_disable_hotkeys
-		Gosub, adh_disable_author_timers
-		adh_disable_heartbeat()
-		GuiControl, enable, adh_limit_application
-		GuiControl, enable, adh_limit_application_on
-	} else {
-		; Disable controls, start hotkeys, start heartbeat timer
-		;adh_debug("Exiting Program Mode")
-		GoSub, adh_enable_hotkeys
-		adh_enable_heartbeat()
-		GuiControl, disable, adh_limit_application
-		GuiControl, disable, adh_limit_application_on
-	}
-	return
-}
 
 adh_enable_heartbeat(){
 	;adh_debug("Enabling Heartbeat")
