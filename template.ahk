@@ -443,12 +443,12 @@ Class ADH
 			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
 
 			; Keyboard bindings
-			tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
+			tmp := this.read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
 			GuiControl,,adh_hk_k_%A_Index%, %tmp%
 			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
 			
 			; Mouse bindings
-			tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
+			tmp := this.read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
 			GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
 			if (tmp != "None"){
 				adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
@@ -456,21 +456,21 @@ Class ADH
 
 			; Control Modifier
 			adh_modstring := ""
-			tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
+			tmp := this.read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
 			GuiControl,, adh_hk_c_%A_Index%, %tmp%
 			if (tmp == 1){
 				adh_modstring := adh_modstring "^"
 			}
 			
 			; Shift Modifier
-			tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
+			tmp := this.read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
 			GuiControl,, adh_hk_s_%A_Index%, %tmp%
 			if (tmp == 1){
 				adh_modstring := adh_modstring "+"
 			}
 			
 			; Alt Modifier
-			tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
+			tmp := this.read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
 			GuiControl,, adh_hk_a_%A_Index%, %tmp%
 			if (tmp == 1){
 				adh_modstring := adh_modstring "!"
@@ -483,12 +483,12 @@ Class ADH
 		if (adh_default_app == "" || adh_default_app == null){
 			adh_default_app := A_Space
 		}
-		tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
+		tmp := this.read_ini("adh_limit_app",adh_current_profile,adh_default_app)
 		GuiControl,, adh_limit_application, %tmp%
 		this.add_glabel("adh_limit_application")
 		
 		; limit application status
-		tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
+		tmp := this.read_ini("adh_limit_app_on",adh_current_profile,0)
 		GuiControl,, adh_limit_application_on, %tmp%
 		
 		; Get author vars from ini
@@ -502,16 +502,16 @@ Class ADH
 			adh_sm := this.control_name_to_set_method(adh_ini_vars[A_Index,2])
 			
 			this.remove_glabel(adh_key)
-			tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
+			tmp := this.read_ini(adh_key,adh_current_profile,adh_def)
 			GuiControl,%adh_sm%, %adh_key%, %tmp%
 			this.add_glabel(adh_key)
 		}
 
 		; Debug settings
-		adh_debug_mode := adh_read_ini("adh_debug_mode","Settings",0)
+		adh_debug_mode := this.read_ini("adh_debug_mode","Settings",0)
 		GuiControl,, adh_debug_mode, %adh_debug_mode%
 		
-		adh_debug_window := adh_read_ini("adh_debug_window","Settings",0)
+		adh_debug_window := this.read_ini("adh_debug_window","Settings",0)
 		GuiControl,, adh_debug_window, %adh_debug_window%
 
 		adh_program_mode_changed()
@@ -783,15 +783,34 @@ Class ADH
 		tmp := A_ScriptName ".ini"
 		if (value != default){
 			; Only write the value if it differs from what is already written
-			if (adh_read_ini(key,section,-1) != value){
+			if (this.read_ini(key,section,-1) != value){
 				IniWrite,  %value%, %tmp%, %section%, %key%
 			}
 		} else {
 			; Only delete the value if there is already a value to delete
-			if (adh_read_ini(key,section,-1) != -1){
+			if (this.read_ini(key,section,-1) != -1){
 				IniDelete, %tmp%, %section%, %key%
 			}
 		}
+	}
+
+	read_ini(key,section,default){
+		IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
+		return out
+	}
+
+	; Called on app exit
+	exit_app(){	
+		Gui, +Hwndgui_id
+		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
+		if (this.read_ini("gui_x","Settings", -1) != gui_x){
+			IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
+		}
+		if (this.read_ini("gui_y","Settings", -1) != gui_y){
+			IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
+		}
+		ExitApp
+		return
 	}
 
 
@@ -958,30 +977,12 @@ adh_build_prefix(hk){
 	return out
 }
 	
-adh_read_ini(key,section,default){
-	IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
-	return out
-}
-
 
 ; Kill the macro if the GUI is closed
 adh_exit_app:
 GuiClose:
-	adh_exit_app()
+	ADH.exit_app()
 	return
-
-adh_exit_app(){	
-	Gui, +Hwndgui_id
-	WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
-	if (adh_read_ini("gui_x","Settings", -1) != gui_x){
-		IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
-	}
-	if (adh_read_ini("gui_y","Settings", -1) != gui_y){
-		IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
-	}
-	ExitApp
-	return
-}
 
 adh_show_window_spy:
 	adh_show_window_spy()
