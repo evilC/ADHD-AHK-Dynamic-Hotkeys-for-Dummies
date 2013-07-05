@@ -415,7 +415,6 @@ DisableTimers:
 ; aka load profile
 adh_profile_changed:
 	adh_debug("profile_changed")
-	;Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
 
 	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
@@ -429,17 +428,14 @@ adh_profile_changed:
 	{
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
-		;adh_tmp := adh_read_ini(key,section,default)
 
 		; Keyboard bindings
 		adh_tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
-		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
 		
 		; Mouse bindings
 		adh_tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
-		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
 		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
 		if (adh_tmp != "None"){
 			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
@@ -448,7 +444,6 @@ adh_profile_changed:
 		; Control Modifier
 		adh_modstring := ""
 		adh_tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
-		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
 		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "^"
@@ -456,7 +451,6 @@ adh_profile_changed:
 		
 		; Shift Modifier
 		adh_tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
-		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
 		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "+"
@@ -464,7 +458,6 @@ adh_profile_changed:
 		
 		; Alt Modifier
 		adh_tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
-		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
 		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "!"
@@ -478,13 +471,11 @@ adh_profile_changed:
 		adh_default_app := A_Space
 	}
 	adh_tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
-	;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app, %adh_default_app%
 	GuiControl,, adh_limit_application, %adh_tmp%
 	adh_add_glabel("adh_limit_application")
 	
 	; limit application status
 	adh_tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
-	;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app_on, 0
 	GuiControl,, adh_limit_application_on, %adh_tmp%
 	
 	; Get author vars from ini
@@ -499,19 +490,15 @@ adh_profile_changed:
 		
 		adh_remove_glabel(adh_key)
 		adh_tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
-		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
 		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
 		adh_add_glabel(adh_key)
 	}
 
 	; Debug settings
-	IniRead, adh_debug_mode, %A_ScriptName%.ini, settings, adh_debug_mode, 0
+	adh_debug_mode := adh_read_ini("adh_debug_mode","Settings",0)
 	GuiControl,, adh_debug_mode, %adh_debug_mode%
-	;msgbox, % adh_debug_mode adh_tmp
-
-	;adh_update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
 	
-	IniRead, adh_debug_window, %A_ScriptName%.ini, settings, adh_debug_window, 0
+	adh_debug_window := adh_read_ini("adh_debug_window","Settings",0)
 	GuiControl,, adh_debug_window, %adh_debug_window%
 
 	adh_program_mode_changed()
