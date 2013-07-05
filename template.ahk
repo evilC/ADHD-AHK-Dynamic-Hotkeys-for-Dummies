@@ -483,7 +483,7 @@ adh_profile_changed:
 adh_option_changed:
 if (adh_ignore_events != 1){
 	Gui, Submit, NoHide
-	
+
 	; Hotkey bindings
 	Loop, %adh_num_hotkeys%
 	{
@@ -517,20 +517,18 @@ return
 
 
 adh_add_profile:
-	adh_add_profile()
+	adh_add_profile("")
 	return
-
-adh_add_profile(){
-	InputBox, tmp, Profile Name, Please enter a profile name
-	if (!ErrorLevel){
-		adh_add_profile(tmp)
-		adh_profile_changed()
-	}
-	return
-}
 
 adh_add_profile(name){
 	global adh_profile_list
+	
+	if (name == ""){
+		InputBox, name, Profile Name, Please enter a profile name
+		if (ErrorLevel){
+			return
+		}
+	}
 	if (adh_profile_list == ""){
 		adh_profile_list := name
 	} else {
