@@ -353,9 +353,9 @@ DoFire:
 		
 	out := fire_array[current_weapon]
 	Send {%out%}
-	adh_tmp := FireRate / fire_divider
-	SetTimer, DoFire, % adh_tmp
-	nextfire := A_TickCount + (adh_tmp)
+	tmp := FireRate / fire_divider
+	SetTimer, DoFire, % tmp
+	nextfire := A_TickCount + (tmp)
 
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
@@ -445,36 +445,36 @@ adh_profile_changed(){
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
 
 		; Keyboard bindings
-		adh_tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
-		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
-		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
+		tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
+		GuiControl,,adh_hk_k_%A_Index%, %tmp%
+		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
 		
 		; Mouse bindings
-		adh_tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
-		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
-		if (adh_tmp != "None"){
-			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
+		tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
+		GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
+		if (tmp != "None"){
+			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
 		}
 
 		; Control Modifier
 		adh_modstring := ""
-		adh_tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
-		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
-		if (adh_tmp == 1){
+		tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
+		GuiControl,, adh_hk_c_%A_Index%, %tmp%
+		if (tmp == 1){
 			adh_modstring := adh_modstring "^"
 		}
 		
 		; Shift Modifier
-		adh_tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
-		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
-		if (adh_tmp == 1){
+		tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
+		GuiControl,, adh_hk_s_%A_Index%, %tmp%
+		if (tmp == 1){
 			adh_modstring := adh_modstring "+"
 		}
 		
 		; Alt Modifier
-		adh_tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
-		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
-		if (adh_tmp == 1){
+		tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
+		GuiControl,, adh_hk_a_%A_Index%, %tmp%
+		if (tmp == 1){
 			adh_modstring := adh_modstring "!"
 		}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
@@ -485,13 +485,13 @@ adh_profile_changed(){
 	if (adh_default_app == "" || adh_default_app == null){
 		adh_default_app := A_Space
 	}
-	adh_tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
-	GuiControl,, adh_limit_application, %adh_tmp%
+	tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
+	GuiControl,, adh_limit_application, %tmp%
 	adh_add_glabel("adh_limit_application")
 	
 	; limit application status
-	adh_tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
-	GuiControl,, adh_limit_application_on, %adh_tmp%
+	tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
+	GuiControl,, adh_limit_application_on, %tmp%
 	
 	; Get author vars from ini
 	Loop, % adh_ini_vars.MaxIndex()
@@ -504,8 +504,8 @@ adh_profile_changed(){
 		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 		
 		adh_remove_glabel(adh_key)
-		adh_tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
-		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
+		tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
+		GuiControl,%adh_sm%, %adh_key%, %tmp%
 		adh_add_glabel(adh_key)
 	}
 
@@ -827,14 +827,14 @@ adh_mouse_changed(){
 
 adh_get_hotkey_string(hk){
 	;Get hotkey string - could be keyboard or mouse
-	adh_tmp := adh_hk_k_%hk%
-	if (adh_tmp == ""){
-		adh_tmp := adh_hk_m_%hk%
-		if (adh_tmp == "None"){
-			adh_tmp := ""
+	tmp := adh_hk_k_%hk%
+	if (tmp == ""){
+		tmp := adh_hk_m_%hk%
+		if (tmp == "None"){
+			tmp := ""
 		}
 	}
-	return adh_tmp
+	return tmp
 }
 
 adh_enable_hotkeys:
@@ -928,19 +928,19 @@ adh_do_nothing:
 	return
 
 adh_build_prefix(hk){
-	adh_out := ""
-	adh_tmp = adh_hk_c_%hk%
-	GuiControlGet,%adh_tmp%
+	out := ""
+	tmp = adh_hk_c_%hk%
+	GuiControlGet,%tmp%
 	if (adh_hk_c_%hk% == 1){
-		adh_out := adh_out "^"
+		out := out "^"
 	}
 	if (adh_hk_a_%hk% == 1){
-		adh_out := adh_out "!"
+		out := out "!"
 	}
 	if (adh_hk_s_%hk% == 1){
-		adh_out := adh_out "+"
+		out := out "+"
 	}
-	return adh_out
+	return out
 }
 	
 ; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
@@ -1102,7 +1102,6 @@ adh_heartbeat:
 adh_heartbeat(){
 	; Check current app here.
 	; Not used to enable or disable hotkeys, used to start or stop author macros etc
-	adh_tmp := "ahk_class " adh_limit_application
 	IfWinActive, % "ahk_class " adh_limit_application
 	{
 		adh_app_active(1)
