@@ -58,6 +58,15 @@ Loop, % adh_hotkeys.MaxIndex()
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+; Debug vars
+adh_debug_mode := 0
+adh_debug_window := 0
+adh_debug_ready := 0
+adh_log_contents := ""
+; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
+adh_starting_up := 1
+
+adh_debug("Starting up...")
 adh_num_hotkeys := adh_hotkeys.MaxIndex()
 adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
@@ -75,9 +84,6 @@ adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or no
 
 ; Start ADH init vars and settings
 adh_core_version := 0.2
-
-adh_debug_mode := 0
-adh_debug_window := 0
 
 ; Variables to be stored in the INI file - will be populated by code later
 ; [Variable Name, Control Type, Default Value]
@@ -98,8 +104,6 @@ OnExit, GuiClose
 
 ; List of mouse buttons
 adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
-
-adh_ignore_events := 1	; Setting this to 1 while we load the GUI allows us to ignore change messages generated while we build the GUI
 
 IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
 IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
@@ -229,6 +233,7 @@ Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name%
 ;Hook for Tooltips
 OnMessage(0x200, "adh_mouse_move")
 
+; Add Debug window controls
 Gui, Tab
 adh_tmp := adh_gui_w - 90
 Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
@@ -239,24 +244,24 @@ Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
 ;adh_tmp := adh_gui_w - 120
 ;Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug mode
 	
-; Fire GuiSubmit while adh_ignore_events is on to set all the variables
+; Fire GuiSubmit while adh_starting_up is on to set all the variables
 
 Gui, Submit, NoHide
 
 ; Create the debug GUI, but do not show yet
 adh_tmp := adh_gui_w - 30
-Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents,
+Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
 Gui, 2:Add, Button, gadh_clear_log, clear
+adh_debug_ready := 1
 
 ; Finish setup =====================================
 GoSub, adh_profile_changed
+adh_debug_window_change()
 
-; Finished startup, allow change of controls to fire events
-adh_ignore_events := 0
 adh_debug("Finished startup")
 
-
-;adh_enable_heartbeat()		; Start the timer to check current appp, if enabled
+; Finished startup, allow change of controls to fire events
+adh_starting_up := 0
 
 return
 
@@ -488,7 +493,16 @@ adh_profile_changed:
 		adh_add_glabel(adh_key)
 	}
 
-	;Gosub, adh_enable_hotkeys
+	; Debug settings
+	IniRead, adh_debug_mode, %A_ScriptName%.ini, settings, adh_debug_mode, 0
+	GuiControl,, adh_debug_mode, %adh_debug_mode%
+	;msgbox, % adh_debug_mode adh_tmp
+
+	;adh_update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
+	
+	IniRead, adh_debug_window, %A_ScriptName%.ini, settings, adh_debug_window, 0
+	GuiControl,, adh_debug_window, %adh_debug_window%
+
 	adh_program_mode_changed()
 	
 	Gosub, adh_change_event
@@ -497,7 +511,7 @@ adh_profile_changed:
 
 ; aka save profile
 adh_option_changed:
-	if (adh_ignore_events != 1){
+	if (adh_starting_up != 1){
 		adh_debug("option_changed - control: " A_guicontrol)
 		
 		Gui, Submit, NoHide
@@ -530,7 +544,11 @@ adh_option_changed:
 			adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,3])
 		}
 		Gosub, adh_change_event
-
+		
+		; Debug settings
+		adh_update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
+		adh_update_ini("adh_debug_window", "settings", adh_debug_window, 0)
+		
 	} else {
 		adh_debug("ignoring option_changed - " A_Guicontrol)
 	}
@@ -932,6 +950,7 @@ adh_debug_window_change(){
 	global adh_gui_y
 	global adh_gui_w
 	global adh_gui_h
+	global adh_starting_up
 	
 	gui, submit, nohide
 	if (adh_debug_window == 1){
@@ -939,6 +958,10 @@ adh_debug_window_change(){
 		Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400
 	} else {
 		gui, 2:hide
+	}
+	; On startup do not call adh_option_changed, we are just setting the window open or closed
+	if (!adh_starting_up){
+		gosub, adh_option_changed
 	}
 	return
 }
@@ -949,17 +972,24 @@ adh_debug_change:
 	
 adh_debug_change(){
 	gui, 2:submit, nohide
+	gosub, adh_option_changed
 	return
 }
 	
 adh_debug(msg){
 	global adh_log_contents
 	global adh_debug_mode
+	global adh_starting_up
+	global adh_debug_ready
 
-	;if (adh_debug_mode == 1){
-		guicontrol,2:,adh_log_contents, % adh_log_contents msg "`n`n"
-		gui, 2:submit, nohide
-	;}
+	; If in debug mode, or starting up...
+	if (adh_debug_mode || adh_starting_up){
+		adh_log_contents := adh_log_contents "* " msg "`n"
+		if (adh_debug_ready){
+			guicontrol,2:,adh_log_contents, % adh_log_contents
+			gui, 2:submit, nohide
+		}
+	}
 }
 
 adh_clear_log:
