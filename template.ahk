@@ -195,7 +195,7 @@ Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
 adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
 
 ; Program mode toggle
-Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_toggle, Program Mode
+Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_changed, Program Mode
 adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 
 
@@ -252,7 +252,7 @@ adh_ignore_events := 0
 
 ; Finish setup =====================================
 
-GoSub, adh_program_mode_toggle
+GoSub, adh_program_mode_changed
 GoSub, adh_profile_changed
 adh_enable_heartbeat()		; Start the timer to check current appp, if enabled
 
@@ -651,7 +651,7 @@ adh_tab_changed(){
 	; If in program mode on tab change, disable program mode
 	if (adh_program_mode == 1){
 		GuiControl,,adh_program_mode,0
-		adh_program_mode_toggle()
+		adh_program_mode_changed()
 	}
 	return
 }
@@ -904,11 +904,11 @@ adh_debug(msg){
 }
 
 
-adh_program_mode_toggle:
-	adh_program_mode_toggle()
+adh_program_mode_changed:
+	adh_program_mode_changed()
 	return
 
-adh_program_mode_toggle(){
+adh_program_mode_changed(){
 	global adh_limit_application
 	global adh_limit_application_on
 	global adh_program_mode
