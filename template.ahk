@@ -241,11 +241,7 @@ Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, S
 adh_tmp := adh_gui_w - 180
 Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
 	
-;adh_tmp := adh_gui_w - 120
-;Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug mode
-	
 ; Fire GuiSubmit while adh_starting_up is on to set all the variables
-
 Gui, Submit, NoHide
 
 ; Create the debug GUI, but do not show yet
@@ -955,7 +951,7 @@ adh_debug_window_change(){
 	gui, submit, nohide
 	if (adh_debug_window == 1){
 		tmp := adh_gui_y - 440
-		Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400
+		Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400, ADH Debug Window
 	} else {
 		gui, 2:hide
 	}
