@@ -417,6 +417,7 @@ adh_profile_changed:
 	adh_debug("profile_changed")
 	;Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
+
 	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
 	
 	SB_SetText("Current profile: " adh_current_profile) 
@@ -428,7 +429,9 @@ adh_profile_changed:
 	{
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
+		;adh_tmp := adh_read_ini(key,section,default)
 		
+		;adh_tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
@@ -512,7 +515,7 @@ adh_option_changed:
 ;adh_update_ini(key, section, value, default)
 ; IniRead, Section, Key, Default
 adh_read_ini(key,section,default){
-	IniRead, out, %A_ScriptName%.ini, section, key, default
+	IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
 	return out
 }
 
@@ -929,9 +932,15 @@ adh_build_prefix(hk){
 adh_update_ini(key, section, value, default){
 	tmp := A_ScriptName ".ini"
 	if (value != default){
-		IniWrite,  %value%, %tmp%, %section%, %key%
+		; Only write the value if it differs from what is already written
+		if (adh_read_ini(key,section,-1) != value){
+			IniWrite,  %value%, %tmp%, %section%, %key%
+		}
 	} else {
-		IniDelete, %tmp%, %section%, %key%
+		; Only delete the value if there is already a value to delete
+		if (adh_read_ini(key,section,-1) != -1){
+			IniDelete, %tmp%, %section%, %key%
+		}
 	}
 }
 
@@ -943,9 +952,13 @@ GuiClose:
 
 adh_exit_app(){	
 	Gui, +Hwndgui_id
-	WinGetPos, adh_gui_x, adh_gui_y,,, ahk_id %gui_id%
-	IniWrite, %adh_gui_x%, %A_ScriptName%.ini, Settings, gui_x
-	IniWrite, %adh_gui_y%, %A_ScriptName%.ini, Settings, gui_y
+	WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
+	if (adh_read_ini("gui_x","Settings", -1) != gui_x){
+		IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
+	}
+	if (adh_read_ini("gui_y","Settings", -1) != gui_y){
+		IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
+	}
 	ExitApp
 	return
 }
