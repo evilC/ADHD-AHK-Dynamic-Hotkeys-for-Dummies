@@ -414,6 +414,21 @@ DisableTimers:
 
 ; aka load profile
 adh_profile_changed:
+	adh_profile_changed()
+	return
+
+adh_profile_changed(){
+	global adh_current_profile
+	global adh_hotkey_mappings
+	global adh_num_hotkeys
+	global adh_hotkeys
+	global adh_default_app
+	global adh_limit_application
+	global adh_limit_application_on
+	global adh_ini_vars
+	global adh_debug_mode
+	global adh_debug_window
+	
 	adh_debug("profile_changed")
 	Gui, Submit, NoHide
 
@@ -424,7 +439,7 @@ adh_profile_changed:
 	adh_hotkey_mappings := {}
 	
 	; Load hotkey bindings
-	Loop, %adh_num_hotkeys%
+	Loop, % adh_num_hotkeys
 	{
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
@@ -506,6 +521,7 @@ adh_profile_changed:
 	Gosub, adh_change_event
 
 	return
+}
 
 adh_option_changed:
 	adh_option_changed()
