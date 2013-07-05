@@ -505,11 +505,11 @@ adh_profile_changed:
 
 	return
 
-; aka save profile
 adh_option_changed:
 	adh_option_changed()
 	return
 
+; aka save profile
 adh_option_changed(){
 	global adh_starting_up
 	global adh_num_hotkeys
@@ -552,8 +552,8 @@ adh_option_changed(){
 		; Add author vars to ini
 		Loop, % adh_ini_vars.MaxIndex()
 		{
-			adh_tmp := adh_ini_vars[A_Index,1]
-			adh_update_ini(adh_tmp, adh_current_profile, %adh_tmp%, adh_ini_vars[A_Index,3])
+			tmp := adh_ini_vars[A_Index,1]
+			adh_update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
 		}
 		Gosub, adh_change_event
 		
