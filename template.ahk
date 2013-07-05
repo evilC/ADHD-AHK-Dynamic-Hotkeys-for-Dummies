@@ -723,26 +723,25 @@ adh_get_hotkey_string(hk){
 }
 
 adh_enable_hotkeys:
+	adh_enable_hotkeys()
+	return
+
+adh_enable_hotkeys(){
+	global adh_num_hotkeys
+	global adh_limit_application
+	global adh_limit_application_on
+	global adh_hotkeys
+	
 	; ToDo: Should not submit gui here, triggering save...
 	Gui, Submit, NoHide
-	Loop, %adh_num_hotkeys%
+	Loop, % adh_num_hotkeys
 	{
-		adh_pre := adh_build_prefix(A_Index)
-		/*
-		adh_tmp := adh_hk_k_%A_Index%
-		if (adh_tmp == ""){
-			adh_tmp := adh_hk_m_%A_Index%
-			if (adh_tmp == "None"){
-				adh_tmp := ""
-			}
-		}
-		*/
-		adh_tmp := adh_get_hotkey_string(A_Index)
-		;msgbox, % adh_tmp " | " adh_tmp2
+		hotkey_prefix := adh_build_prefix(A_Index)
+		hotkey_keys := adh_get_hotkey_string(A_Index)
 		
-		if (adh_tmp != ""){
-			adh_set := adh_pre adh_tmp
-			adh_hotkey_sub := adh_hotkeys[A_Index,"subroutine"]
+		if (hotkey_keys != ""){
+			hotkey_string := hotkey_prefix hotkey_keys
+			hotkey_subroutine := adh_hotkeys[A_Index,"subroutine"]
 			if (adh_limit_application_on == 1){
 				if (adh_limit_application !=""){
 					; Enable Limit Application for all subsequently declared hotkeys
@@ -754,14 +753,16 @@ adh_enable_hotkeys:
 			}
 			
 			; Bind down action of hotkey
-			Hotkey, ~%adh_set% , %adh_hotkey_sub%
+			Hotkey, ~%hotkey_string% , %hotkey_subroutine%
 			
-			if (IsLabel(adh_hotkey_sub "Up")){
+			if (IsLabel(hotkey_subroutine "Up")){
 				; Bind up action of hotkey
-				Hotkey, ~%adh_set% up , %adh_hotkey_sub%Up
+				Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
 			}
 			; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 		}
+		
+		; ToDo: Disabling of GUI controls should not be in here - put them in program mode
 		GuiControl, Disable, adh_hk_k_%A_Index%
 		GuiControl, Disable, adh_hk_m_%A_Index%
 		GuiControl, Disable, adh_hk_c_%A_Index%
@@ -769,6 +770,7 @@ adh_enable_hotkeys:
 		GuiControl, Disable, adh_hk_a_%A_Index%
 	}
 	return
+}
 
 adh_disable_hotkeys:
 	Loop, %adh_num_hotkeys%
