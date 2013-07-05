@@ -710,11 +710,25 @@ adh_mouse_changed(){
 	return
 }
 
+adh_get_hotkey_string(hk){
+	;Get hotkey string - could be keyboard or mouse
+	adh_tmp := adh_hk_k_%hk%
+	if (adh_tmp == ""){
+		adh_tmp := adh_hk_m_%hk%
+		if (adh_tmp == "None"){
+			adh_tmp := ""
+		}
+	}
+	return adh_tmp
+}
+
 adh_enable_hotkeys:
+	; ToDo: Should not submit gui here, triggering save...
 	Gui, Submit, NoHide
 	Loop, %adh_num_hotkeys%
 	{
 		adh_pre := adh_build_prefix(A_Index)
+		/*
 		adh_tmp := adh_hk_k_%A_Index%
 		if (adh_tmp == ""){
 			adh_tmp := adh_hk_m_%A_Index%
@@ -722,6 +736,10 @@ adh_enable_hotkeys:
 				adh_tmp := ""
 			}
 		}
+		*/
+		adh_tmp := adh_get_hotkey_string(A_Index)
+		;msgbox, % adh_tmp " | " adh_tmp2
+		
 		if (adh_tmp != ""){
 			adh_set := adh_pre adh_tmp
 			adh_hotkey_sub := adh_hotkeys[A_Index,"subroutine"]
