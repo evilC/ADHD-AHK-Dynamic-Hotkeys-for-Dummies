@@ -274,7 +274,7 @@ adh_init_author_vars:
 	fire_divider := 1
 	nextfire := 0		; A timer for when we are next allowed to press the fire button
 	weapon_toggle_mode := false
-	Gosub, DisableToggle
+	Gosub, ResetToggle
 	return
 	
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
@@ -393,6 +393,10 @@ DisableToggle:
 	Send {%WeaponToggle% up}
 	return
 
+ResetToggle:
+	SetScrollLockState, Off
+	return
+
 ; Keep this duplicate label here so ADH can stop any timers you start
 adh_disable_author_timers:
 ; Keep all timer disables in here so when we leave app we can stop timers
@@ -456,11 +460,13 @@ adh_profile_changed:
 	}
 	
 	; limit application name
+	adh_remove_glabel("adh_limit_application")
 	if (adh_default_app == "" || adh_default_app == null){
 		adh_default_app := A_Space
 	}
 	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app, %adh_default_app%
 	GuiControl,, adh_limit_application, %adh_tmp%
+	adh_add_glabel("adh_limit_application")
 	
 	; limit application status
 	IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_limit_app_on, 0
@@ -476,8 +482,10 @@ adh_profile_changed:
 		adh_key := adh_ini_vars[A_Index,1]
 		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 		
+		adh_remove_glabel(adh_key)
 		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
 		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
+		adh_add_glabel(adh_key)
 	}
 
 	Gosub, adh_enable_hotkeys
@@ -490,6 +498,7 @@ adh_profile_changed:
 adh_option_changed:
 	if (adh_ignore_events != 1){
 		adh_debug("option_changed - control: " A_guicontrol)
+		
 		Gui, Submit, NoHide
 
 		; Hotkey bindings
@@ -526,6 +535,13 @@ adh_option_changed:
 	}
 	return
 
+adh_add_glabel(ctrl){
+	GuiControl, +gadh_option_changed, %ctrl%
+}
+
+adh_remove_glabel(ctrl){
+	GuiControl, -g, %ctrl%
+}
 
 adh_add_profile:
 	adh_add_profile("")
