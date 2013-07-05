@@ -78,7 +78,6 @@ adh_core_version := 0.2
 
 adh_debug_mode := 0
 adh_debug_window := 0
-adh_debug_window := 0
 
 ; Variables to be stored in the INI file - will be populated by code later
 ; [Variable Name, Control Type, Default Value]
@@ -246,10 +245,10 @@ Gui, Submit, NoHide
 
 ; Create the debug GUI, but do not show yet
 adh_tmp := adh_gui_w - 30
-Gui, 2:Add,Edit,w%adh_tmp% h380 vadh_log_contents,
+Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents,
+Gui, 2:Add, Button, gadh_clear_log, clear
 
 ; Finish setup =====================================
-
 GoSub, adh_profile_changed
 ;GoSub, adh_program_mode_changed
 adh_enable_heartbeat()
@@ -822,7 +821,7 @@ adh_disable_hotkeys(){
 	global adh_limit_application_on
 	global adh_hotkeys
 	
-	adh_debug("disabling hotkeys")
+	adh_debug("disable_hotkeys")
 
 	Loop, % adh_num_hotkeys
 	{
@@ -913,7 +912,6 @@ adh_debug_window_change(){
 	global adh_gui_w
 	global adh_gui_h
 	
-	adh_debug("debug_window_change")
 	gui, submit, nohide
 	if (adh_debug_window == 1){
 		tmp := adh_gui_y - 440
@@ -943,6 +941,11 @@ adh_debug(msg){
 	;}
 }
 
+adh_clear_log:
+	adh_log_contents := ""
+	GuiControl,,adh_log_contents,%adh_log_contents%
+	return
+	
 
 adh_program_mode_changed:
 	adh_program_mode_changed()
@@ -957,7 +960,7 @@ adh_program_mode_changed(){
 	Gui, Submit, NoHide
 	
 	if (adh_program_mode == 1){
-		adh_debug("Entering Program Mode - Disabling Hotkeys")
+		adh_debug("Entering Program Mode")
 		; Enable controls, stop hotkeys, kill timers
 		GoSub, adh_disable_hotkeys
 		Gosub, adh_disable_author_timers
@@ -966,7 +969,7 @@ adh_program_mode_changed(){
 		GuiControl, enable, adh_limit_application_on
 	} else {
 		; Disable controls, start hotkeys, start heartbeat timer
-		adh_debug("Exiting Program Mode - Enabling Hotkeys")
+		adh_debug("Exiting Program Mode")
 		GoSub, adh_enable_hotkeys
 		adh_enable_heartbeat()
 		GuiControl, disable, adh_limit_application
