@@ -250,8 +250,6 @@ Gui, 2:Add, Button, gadh_clear_log, clear
 
 ; Finish setup =====================================
 GoSub, adh_profile_changed
-;GoSub, adh_program_mode_changed
-adh_enable_heartbeat()
 
 ; Finished startup, allow change of controls to fire events
 adh_ignore_events := 0
@@ -416,7 +414,7 @@ DisableTimers:
 ; aka load profile
 adh_profile_changed:
 	adh_debug("profile_changed")
-	Gosub, adh_disable_hotkeys
+	;Gosub, adh_disable_hotkeys
 	Gui, Submit, NoHide
 	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
 	
@@ -490,7 +488,8 @@ adh_profile_changed:
 		adh_add_glabel(adh_key)
 	}
 
-	Gosub, adh_enable_hotkeys
+	;Gosub, adh_enable_hotkeys
+	adh_program_mode_changed()
 	
 	Gosub, adh_change_event
 
