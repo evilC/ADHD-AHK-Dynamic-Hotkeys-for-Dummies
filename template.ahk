@@ -865,6 +865,7 @@ Class ADH
 		}
 	}
 
+	; Program mode stuff
 	program_mode_changed(){
 		global adh_limit_application
 		global adh_limit_application_on
@@ -878,18 +879,72 @@ Class ADH
 			; Enable controls, stop hotkeys, kill timers
 			GoSub, adh_disable_hotkeys
 			Gosub, adh_disable_author_timers
-			adh_disable_heartbeat()
+			this.disable_heartbeat()
 			GuiControl, enable, adh_limit_application
 			GuiControl, enable, adh_limit_application_on
 		} else {
 			; Disable controls, start hotkeys, start heartbeat timer
 			;adh_debug("Exiting Program Mode")
 			GoSub, adh_enable_hotkeys
-			adh_enable_heartbeat()
+			this.enable_heartbeat()
 			GuiControl, disable, adh_limit_application
 			GuiControl, disable, adh_limit_application_on
 		}
 		return
+	}
+
+	; App detection stuff
+	enable_heartbeat(){
+		;adh_debug("Enabling Heartbeat")
+		global adh_limit_application
+		global adh_limit_application_on
+		
+		if (adh_limit_application_on == 1 && adh_limit_application != ""){
+			SetTimer, adh_heartbeat, 500
+		}
+		return
+	}
+
+	disable_heartbeat(){
+		;adh_debug("Disabling Heartbeat")
+		SetTimer, adh_heartbeat, Off
+		return
+	}
+
+	heartbeat(){
+		global adh_limit_application
+		
+		; Check current app here.
+		; Not used to enable or disable hotkeys, used to start or stop author macros etc
+		IfWinActive, % "ahk_class " adh_limit_application
+		{
+			this.app_active(1)
+		}
+		else
+		{
+			this.app_active(0)
+		}
+		return
+	}
+
+	app_active(act){
+		Global adh_app_act_curr
+		
+		if (act){
+			if (adh_app_act_curr != 1){
+				; Changing from inactive to active
+				adh_app_act_curr := 1
+			}
+		} else {
+			if (adh_app_act_curr != 0){
+				; Changing from active to inactive
+				; Stop Author Timers
+				Gosub, adh_disable_author_timers
+				; Reset author macro
+				Gosub, adh_init_author_vars
+				adh_app_act_curr := 0
+			}
+		}
 	}
 
 
@@ -1084,60 +1139,10 @@ adh_program_mode_changed:
 	ADH.program_mode_changed()
 	return
 
-adh_enable_heartbeat(){
-	;adh_debug("Enabling Heartbeat")
-	global adh_limit_application
-	global adh_limit_application_on
-	
-	if (adh_limit_application_on == 1 && adh_limit_application != ""){
-		SetTimer, adh_heartbeat, 500
-	}
-	return
-}
-
-adh_disable_heartbeat(){
-	;adh_debug("Disabling Heartbeat")
-	SetTimer, adh_heartbeat, Off
-	return
-}
-
 adh_heartbeat:
-	adh_heartbeat()
+	ADH.heartbeat()
 	return
 	
-adh_heartbeat(){
-	; Check current app here.
-	; Not used to enable or disable hotkeys, used to start or stop author macros etc
-	IfWinActive, % "ahk_class " adh_limit_application
-	{
-		adh_app_active(1)
-	}
-	else
-	{
-		adh_app_active(0)
-	}
-	return
-}
-
-adh_app_active(act){
-	Global adh_app_act_curr
-	if (act){
-		if (adh_app_act_curr != 1){
-			; Changing from inactive to active
-			adh_app_act_curr := 1
-		}
-	} else {
-		if (adh_app_act_curr != 0){
-			; Changing from active to inactive
-			; Stop Author Timers
-			Gosub, adh_disable_author_timers
-			; Reset author macro
-			Gosub, adh_init_author_vars
-			adh_app_act_curr := 0
-		}
-	}
-}
-
 
 ; ==========================================================================================================================
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
