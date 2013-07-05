@@ -620,15 +620,23 @@ adh_duplicate_profile(name){
 }
 
 adh_rename_profile:
+	adh_rename_profile()
+	return
+
+adh_rename_profile(){
+	global adh_current_profile
+	
 	if (adh_current_profile != "Default"){
-		adh_old_prof := adh_current_profile
-		InputBox, adh_new_prof, Profile Name, Please enter a new name
+		old_prof := adh_current_profile
+		InputBox, new_prof, Profile Name, Please enter a new name
 		if (!ErrorLevel){
-			adh_duplicate_profile(adh_new_prof)
-			adh_delete_profile(adh_old_prof,adh_new_prof)
+			adh_duplicate_profile(new_prof)
+			adh_delete_profile(old_prof,new_prof)
 		}
 	}
 	return
+}
+
 ; End profile management
 
 ; For some games, they will not let you autofire if the triggering key is still held down...
