@@ -549,17 +549,17 @@ adh_delete_profile(name, gotoprofile = "Default"){
 	Global adh_current_profile
 	
 	if (name != "Default"){
-		StringSplit, adh_tmp, adh_profile_list, |
-		adh_out := ""
-		Loop, %adh_tmp0%{
-			if (adh_tmp%a_index% != name){
-				if (adh_out != ""){
-					adh_out := adh_out "|"
+		StringSplit, tmp, adh_profile_list, |
+		out := ""
+		Loop, %tmp0%{
+			if (tmp%a_index% != name){
+				if (out != ""){
+					out := out "|"
 				}
-				adh_out := adh_out adh_tmp%a_index%
+				out := out tmp%a_index%
 			}
 		}
-		adh_profile_list := adh_out
+		adh_profile_list := out
 		
 		IniDelete, %A_ScriptName%.ini, %name%
 		adh_update_ini("profile_list", "Settings", adh_profile_list, "")		
