@@ -498,7 +498,8 @@ adh_profile_changed:
 		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
 		
 		adh_remove_glabel(adh_key)
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
+		adh_tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
+		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, %adh_key%, %adh_def%
 		GuiControl,%adh_sm%, %adh_key%, %adh_tmp%
 		adh_add_glabel(adh_key)
 	}
