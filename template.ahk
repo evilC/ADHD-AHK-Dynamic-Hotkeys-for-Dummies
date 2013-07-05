@@ -430,7 +430,7 @@ Class ADH
 		adh_debug("profile_changed")
 		Gui, Submit, NoHide
 
-		adh_update_ini("current_profile", "Settings", adh_current_profile,"")
+		this.update_ini("current_profile", "Settings", adh_current_profile,"")
 		
 		SB_SetText("Current profile: " adh_current_profile) 
 		
@@ -542,35 +542,35 @@ Class ADH
 			; Hotkey bindings
 			Loop, % adh_num_hotkeys
 			{
-				adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
-				adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
-				adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
-				adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
-				adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+				this.update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
+				this.update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
+				this.update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
+				this.update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
+				this.update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
 			}
-			adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+			this.update_ini("profile_list", "Settings", adh_profile_list,"")
 			
 			; Limit app
 			if (adh_default_app == "" || adh_default_app == null){
 				adh_default_app := A_Space
 			}
-			adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
+			this.update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
 			SB_SetText("Current profile: " adh_current_profile)
 			
 			; Limit app toggle
-			adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
+			this.update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
 			
 			; Add author vars to ini
 			Loop, % adh_ini_vars.MaxIndex()
 			{
 				tmp := adh_ini_vars[A_Index,1]
-				adh_update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
+				this.update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
 			}
 			Gosub, adh_change_event
 			
 			; Debug settings
-			adh_update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
-			adh_update_ini("adh_debug_window", "settings", adh_debug_window, 0)
+			this.update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
+			this.update_ini("adh_debug_window", "settings", adh_debug_window, 0)
 			
 		} else {
 			adh_debug("ignoring option_changed - " A_Guicontrol)
@@ -610,7 +610,7 @@ Class ADH
 		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
 		GuiControl,ChooseString, adh_current_profile, %name%
 		
-		adh_update_ini("profile_list", "Settings", adh_profile_list, "")
+		this.update_ini("profile_list", "Settings", adh_profile_list, "")
 	}
 
 	delete_profile(name, gotoprofile = "Default"){
@@ -631,7 +631,7 @@ Class ADH
 			adh_profile_list := out
 			
 			IniDelete, %A_ScriptName%.ini, %name%
-			adh_update_ini("profile_list", "Settings", adh_profile_list, "")		
+			this.update_ini("profile_list", "Settings", adh_profile_list, "")		
 			
 			; Set new contents of list
 			GuiControl,, adh_current_profile, |Default|%adh_profile_list%
@@ -675,7 +675,7 @@ Class ADH
 		; Set the new profile to the currently selected item
 		GuiControl,ChooseString, adh_current_profile, %name%
 		; Update the profile list in the INI
-		adh_update_ini("profile_list", "Settings", adh_profile_list, "")
+		this.update_ini("profile_list", "Settings", adh_profile_list, "")
 		
 		; Firing adh_option_changed saves the current state to the new profile name in the INI
 		adh_debug("duplicate_profile calling option_changed")
@@ -775,6 +775,25 @@ Class ADH
 		Gosub, adh_option_changed
 		return
 	}
+
+	; INI manipulation
+	
+	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
+	update_ini(key, section, value, default){
+		tmp := A_ScriptName ".ini"
+		if (value != default){
+			; Only write the value if it differs from what is already written
+			if (adh_read_ini(key,section,-1) != value){
+				IniWrite,  %value%, %tmp%, %section%, %key%
+			}
+		} else {
+			; Only delete the value if there is already a value to delete
+			if (adh_read_ini(key,section,-1) != -1){
+				IniDelete, %tmp%, %section%, %key%
+			}
+		}
+	}
+
 
 }
 
@@ -939,22 +958,6 @@ adh_build_prefix(hk){
 	return out
 }
 	
-; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
-adh_update_ini(key, section, value, default){
-	tmp := A_ScriptName ".ini"
-	if (value != default){
-		; Only write the value if it differs from what is already written
-		if (adh_read_ini(key,section,-1) != value){
-			IniWrite,  %value%, %tmp%, %section%, %key%
-		}
-	} else {
-		; Only delete the value if there is already a value to delete
-		if (adh_read_ini(key,section,-1) != -1){
-			IniDelete, %tmp%, %section%, %key%
-		}
-	}
-}
-
 adh_read_ini(key,section,default){
 	IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
 	return out
