@@ -410,196 +410,196 @@ DisableTimers:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
-; Profile management - functions to manage preserving user settings
-
-; aka load profile
-adh_profile_changed:
-	adh_profile_changed()
-	return
-
-adh_profile_changed(){
-	global adh_current_profile
-	global adh_hotkey_mappings
-	global adh_num_hotkeys
-	global adh_hotkeys
-	global adh_default_app
-	global adh_limit_application
-	global adh_limit_application_on
-	global adh_ini_vars
-	global adh_debug_mode
-	global adh_debug_window
+Class ADH
+{
+	; ADH Library
 	
-	adh_debug("profile_changed")
-	Gui, Submit, NoHide
-
-	adh_update_ini("current_profile", "Settings", adh_current_profile,"")
-	
-	SB_SetText("Current profile: " adh_current_profile) 
-	
-	adh_hotkey_mappings := {}
-	
-	; Load hotkey bindings
-	Loop, % adh_num_hotkeys
-	{
-		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
-		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
-
-		; Keyboard bindings
-		tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
-		GuiControl,,adh_hk_k_%A_Index%, %tmp%
-		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+	; aka load profile
+	profile_changed(){
+		global adh_current_profile
+		global adh_hotkey_mappings
+		global adh_num_hotkeys
+		global adh_hotkeys
+		global adh_default_app
+		global adh_limit_application
+		global adh_limit_application_on
+		global adh_ini_vars
+		global adh_debug_mode
+		global adh_debug_window
 		
-		; Mouse bindings
-		tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
-		GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
-		if (tmp != "None"){
-			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
-		}
-
-		; Control Modifier
-		adh_modstring := ""
-		tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
-		GuiControl,, adh_hk_c_%A_Index%, %tmp%
-		if (tmp == 1){
-			adh_modstring := adh_modstring "^"
-		}
-		
-		; Shift Modifier
-		tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
-		GuiControl,, adh_hk_s_%A_Index%, %tmp%
-		if (tmp == 1){
-			adh_modstring := adh_modstring "+"
-		}
-		
-		; Alt Modifier
-		tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
-		GuiControl,, adh_hk_a_%A_Index%, %tmp%
-		if (tmp == 1){
-			adh_modstring := adh_modstring "!"
-		}
-		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
-	}
-	
-	; limit application name
-	adh_remove_glabel("adh_limit_application")
-	if (adh_default_app == "" || adh_default_app == null){
-		adh_default_app := A_Space
-	}
-	tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
-	GuiControl,, adh_limit_application, %tmp%
-	adh_add_glabel("adh_limit_application")
-	
-	; limit application status
-	tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
-	GuiControl,, adh_limit_application_on, %tmp%
-	
-	; Get author vars from ini
-	Loop, % adh_ini_vars.MaxIndex()
-	{
-		adh_def := adh_ini_vars[A_Index,3]
-		if (adh_def == ""){
-			adh_def := A_Space
-		}
-		adh_key := adh_ini_vars[A_Index,1]
-		adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
-		
-		adh_remove_glabel(adh_key)
-		tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
-		GuiControl,%adh_sm%, %adh_key%, %tmp%
-		adh_add_glabel(adh_key)
-	}
-
-	; Debug settings
-	adh_debug_mode := adh_read_ini("adh_debug_mode","Settings",0)
-	GuiControl,, adh_debug_mode, %adh_debug_mode%
-	
-	adh_debug_window := adh_read_ini("adh_debug_window","Settings",0)
-	GuiControl,, adh_debug_window, %adh_debug_window%
-
-	adh_program_mode_changed()
-	
-	Gosub, adh_change_event
-
-	return
-}
-
-adh_option_changed:
-	adh_option_changed()
-	return
-
-;adh_update_ini(key, section, value, default)
-; IniRead, Section, Key, Default
-adh_read_ini(key,section,default){
-	IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
-	return out
-}
-
-
-; aka save profile
-adh_option_changed(){
-	global adh_starting_up
-	global adh_num_hotkeys
-	global adh_current_profile
-	global adh_profile_list
-	global adh_default_app
-	global adh_limit_application
-	global adh_limit_application_on
-	global adh_ini_vars
-	global adh_debug_mode
-	global adh_debug_window
-	
-	
-	if (adh_starting_up != 1){
-		adh_debug("option_changed - control: " A_guicontrol)
-		
+		adh_debug("profile_changed")
 		Gui, Submit, NoHide
 
-		; Hotkey bindings
+		adh_update_ini("current_profile", "Settings", adh_current_profile,"")
+		
+		SB_SetText("Current profile: " adh_current_profile) 
+		
+		adh_hotkey_mappings := {}
+		
+		; Load hotkey bindings
 		Loop, % adh_num_hotkeys
 		{
-			adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
-			adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
-			adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
-			adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
-			adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
+			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
+
+			; Keyboard bindings
+			tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
+			GuiControl,,adh_hk_k_%A_Index%, %tmp%
+			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+			
+			; Mouse bindings
+			tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
+			GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
+			if (tmp != "None"){
+				adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+			}
+
+			; Control Modifier
+			adh_modstring := ""
+			tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
+			GuiControl,, adh_hk_c_%A_Index%, %tmp%
+			if (tmp == 1){
+				adh_modstring := adh_modstring "^"
+			}
+			
+			; Shift Modifier
+			tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
+			GuiControl,, adh_hk_s_%A_Index%, %tmp%
+			if (tmp == 1){
+				adh_modstring := adh_modstring "+"
+			}
+			
+			; Alt Modifier
+			tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
+			GuiControl,, adh_hk_a_%A_Index%, %tmp%
+			if (tmp == 1){
+				adh_modstring := adh_modstring "!"
+			}
+			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
 		}
-		adh_update_ini("profile_list", "Settings", adh_profile_list,"")
 		
-		; Limit app
+		; limit application name
+		adh_remove_glabel("adh_limit_application")
 		if (adh_default_app == "" || adh_default_app == null){
 			adh_default_app := A_Space
 		}
-		adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
-		SB_SetText("Current profile: " adh_current_profile)
+		tmp := adh_read_ini("adh_limit_app",adh_current_profile,adh_default_app)
+		GuiControl,, adh_limit_application, %tmp%
+		this.add_glabel("adh_limit_application")
 		
-		; Limit app toggle
-		adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
+		; limit application status
+		tmp := adh_read_ini("adh_limit_app_on",adh_current_profile,0)
+		GuiControl,, adh_limit_application_on, %tmp%
 		
-		; Add author vars to ini
+		; Get author vars from ini
 		Loop, % adh_ini_vars.MaxIndex()
 		{
-			tmp := adh_ini_vars[A_Index,1]
-			adh_update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
+			adh_def := adh_ini_vars[A_Index,3]
+			if (adh_def == ""){
+				adh_def := A_Space
+			}
+			adh_key := adh_ini_vars[A_Index,1]
+			adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
+			
+			adh_remove_glabel(adh_key)
+			tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
+			GuiControl,%adh_sm%, %adh_key%, %tmp%
+			this.add_glabel(adh_key)
 		}
-		Gosub, adh_change_event
-		
+
 		; Debug settings
-		adh_update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
-		adh_update_ini("adh_debug_window", "settings", adh_debug_window, 0)
+		adh_debug_mode := adh_read_ini("adh_debug_mode","Settings",0)
+		GuiControl,, adh_debug_mode, %adh_debug_mode%
 		
-	} else {
-		adh_debug("ignoring option_changed - " A_Guicontrol)
+		adh_debug_window := adh_read_ini("adh_debug_window","Settings",0)
+		GuiControl,, adh_debug_window, %adh_debug_window%
+
+		adh_program_mode_changed()
+		
+		Gosub, adh_change_event
+
+		return
 	}
-	return
+
+	; aka save profile
+	option_changed(){
+		global adh_starting_up
+		global adh_num_hotkeys
+		global adh_current_profile
+		global adh_profile_list
+		global adh_default_app
+		global adh_limit_application
+		global adh_limit_application_on
+		global adh_ini_vars
+		global adh_debug_mode
+		global adh_debug_window
+		
+		if (adh_starting_up != 1){
+			adh_debug("option_changed - control: " A_guicontrol)
+			
+			Gui, Submit, NoHide
+
+			; Hotkey bindings
+			Loop, % adh_num_hotkeys
+			{
+				adh_update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
+				adh_update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
+				adh_update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
+				adh_update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
+				adh_update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+			}
+			adh_update_ini("profile_list", "Settings", adh_profile_list,"")
+			
+			; Limit app
+			if (adh_default_app == "" || adh_default_app == null){
+				adh_default_app := A_Space
+			}
+			adh_update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
+			SB_SetText("Current profile: " adh_current_profile)
+			
+			; Limit app toggle
+			adh_update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
+			
+			; Add author vars to ini
+			Loop, % adh_ini_vars.MaxIndex()
+			{
+				tmp := adh_ini_vars[A_Index,1]
+				adh_update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
+			}
+			Gosub, adh_change_event
+			
+			; Debug settings
+			adh_update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
+			adh_update_ini("adh_debug_window", "settings", adh_debug_window, 0)
+			
+		} else {
+			adh_debug("ignoring option_changed - " A_Guicontrol)
+		}
+		return
+	}
+
+	; Add and remove glabel is useful because:
+	; When you use GuiControl to set the contents of an edit...
+	; .. it's glabel is fired.
+	; So remove glabel, set editbox value, re-add glabel to solve
+	add_glabel(ctrl){
+		GuiControl, +gadh_option_changed, %ctrl%
+	}
+
 }
 
-; Add and remove glabel is useful because:
-; When you use GuiControl to set the contents of an edit...
-; .. it's glabel is fired.
-; So remove glabel, set editbox value, re-add glabel to solve
-adh_add_glabel(ctrl){
-	GuiControl, +gadh_option_changed, %ctrl%
-}
+; Profile management - functions to manage preserving user settings
+
+adh_profile_changed:
+	ADH.profile_changed()
+	return
+
+
+adh_option_changed:
+	ADH.option_changed()
+	return
+
+
 
 adh_remove_glabel(ctrl){
 	GuiControl, -g, %ctrl%
@@ -707,7 +707,6 @@ adh_duplicate_profile(name){
 	; Firing adh_option_changed saves the current state to the new profile name in the INI
 	adh_debug("duplicate_profile calling option_changed")
 	Gosub, adh_option_changed
-	;Gosub, adh_profile_changed
 
 	return
 }
@@ -958,6 +957,12 @@ adh_update_ini(key, section, value, default){
 		}
 	}
 }
+
+adh_read_ini(key,section,default){
+	IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
+	return out
+}
+
 
 ; Kill the macro if the GUI is closed
 adh_exit_app:
