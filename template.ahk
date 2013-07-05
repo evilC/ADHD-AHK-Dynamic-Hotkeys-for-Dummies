@@ -430,32 +430,41 @@ adh_profile_changed:
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
 		;adh_tmp := adh_read_ini(key,section,default)
-		
-		;adh_tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
+
+		; Keyboard bindings
+		adh_tmp := adh_read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
+		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_k_%A_Index%, %A_Space%
 		GuiControl,,adh_hk_k_%A_Index%, %adh_tmp%
 		adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
+		; Mouse bindings
+		adh_tmp := adh_read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
+		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_m_%A_Index%, None
 		GuiControl, ChooseString, adh_hk_m_%A_Index%, %adh_tmp%
 		if (adh_tmp != "None"){
 			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := adh_tmp
 		}
-		
+
+		; Control Modifier
 		adh_modstring := ""
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
+		adh_tmp := adh_read_ini("adh_hk_c_" A_Index,adh_current_profile,A_Space)
+		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_c_%A_Index%, 0
 		GuiControl,, adh_hk_c_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "^"
 		}
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
+		; Shift Modifier
+		adh_tmp := adh_read_ini("adh_hk_s_" A_Index,adh_current_profile,A_Space)
+		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_s_%A_Index%, 0
 		GuiControl,, adh_hk_s_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "+"
 		}
 		
-		IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
+		; Alt Modifier
+		adh_tmp := adh_read_ini("adh_hk_a_" A_Index,adh_current_profile,A_Space)
+		;IniRead, adh_tmp, %A_ScriptName%.ini, %adh_current_profile%, adh_hk_a_%A_Index%, 0
 		GuiControl,, adh_hk_a_%A_Index%, %adh_tmp%
 		if (adh_tmp == 1){
 			adh_modstring := adh_modstring "!"
