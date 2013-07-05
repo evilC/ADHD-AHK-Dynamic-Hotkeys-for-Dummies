@@ -393,6 +393,8 @@ DisableToggle:
 	Send {%WeaponToggle% up}
 	return
 
+; ResetToggle is used to just unset the light
+; Using the normal disable while editing an editbox moves the cursor to the start
 ResetToggle:
 	SetScrollLockState, Off
 	return
