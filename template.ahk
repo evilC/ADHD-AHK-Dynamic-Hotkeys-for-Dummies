@@ -300,7 +300,7 @@ Fire:
 	; Many games do not work properly with autofire unless this is enabled.
 	; You can try leaving it out.
 	; MechWarrior Online for example will not do fast (<~500ms) chain fire with weapons all in one group without this enabled
-	adh_send_keyup_on_press("Fire","unmodified")
+	ADH.send_keyup_on_press("Fire","unmodified")
 
 
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
@@ -499,7 +499,7 @@ Class ADH
 				adh_def := A_Space
 			}
 			adh_key := adh_ini_vars[A_Index,1]
-			adh_sm := adh_control_name_to_set_method(adh_ini_vars[A_Index,2])
+			adh_sm := this.control_name_to_set_method(adh_ini_vars[A_Index,2])
 			
 			this.remove_glabel(adh_key)
 			tmp := adh_read_ini(adh_key,adh_current_profile,adh_def)
@@ -700,6 +700,82 @@ Class ADH
 
 	; End profile management
 
+	; For some games, they will not let you autofire if the triggering key is still held down...
+	; even if the triggering key is not the key sent and does nothing in the game!
+	; Often a workaround is to send a keyup of the triggering key
+	; Calling send_keyup_on_press() in an action will cause this to happen
+	send_keyup_on_press(sub,mod){
+		global adh_hotkey_mappings
+		; adh_hotkey_mappings contains a handy lookup to hotkey mappings !
+		; contains "modified" and "unmodified" keys
+		; Note, it is REFERENCE ONLY. Changing it has no effect.
+		tmp := adh_hotkey_mappings[sub][mod] " up"
+		Send {%tmp%}
+
+	}
+
+	tab_changed(){
+		global adh_program_mode
+		
+		; If in program mode on tab change, disable program mode
+		if (adh_program_mode == 1){
+			GuiControl,,adh_program_mode,0
+			adh_program_mode_changed()
+		}
+		return
+	}
+
+	; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
+	control_name_to_set_method(name){
+		if (name == "DropDownList"){
+			return "ChooseString"
+		} else {
+			return ""
+		}
+	}
+
+	key_changed(){
+		tmp := %A_GuiControl%
+		ctr := 0
+		max := StrLen(tmp)
+		Loop, %max%
+		{
+			chr := substr(tmp,ctr,1)
+			if (chr != "^" && chr != "!" && chr != "+"){
+				ctr := ctr + 1
+			}
+		}
+		; Only modifier keys pressed?
+		if (ctr == 0){
+			return
+		}
+		
+		; key pressed
+		if (ctr < max){
+			GuiControl,, %A_GuiControl%, None
+			adh_debug("key_changed calling option_changed")
+			Gosub, adh_option_changed
+		}
+		else
+		{
+			tmp := SubStr(A_GuiControl,10)
+			; Set the mouse field to blank
+			GuiControl,ChooseString, adh_hk_m_%tmp%, None
+			adh_debug("key_changed calling option_changed")
+			Gosub, adh_option_changed
+		}
+		return
+	}
+
+	mouse_changed(){
+		tmp := SubStr(A_GuiControl,10)
+		; Set the keyboard field to blank
+		GuiControl,, adh_hk_k_%tmp%, None
+		adh_debug("mouse_changed calling option_changed")
+		Gosub, adh_option_changed
+		return
+	}
+
 }
 
 
@@ -732,98 +808,18 @@ adh_rename_profile:
 	return
 
 
-; For some games, they will not let you autofire if the triggering key is still held down...
-; even if the triggering key is not the key sent and does nothing in the game!
-; Often a workaround is to send a keyup of the triggering key
-; Calling adh_send_keyup_on_press() in an action will cause this to happen
-adh_send_keyup_on_press(sub,mod){
-	global adh_hotkey_mappings
-	; adh_hotkey_mappings contains a handy lookup to hotkey mappings !
-	; contains "modified" and "unmodified" keys
-	; Note, it is REFERENCE ONLY. Changing it has no effect.
-	tmp := adh_hotkey_mappings[sub][mod] " up"
-	Send {%tmp%}
-
-}
-
 adh_tab_changed:
-	adh_tab_changed()
+	ADH.tab_changed()
 	return
-
-adh_tab_changed(){
-	global adh_program_mode
-	
-	; If in program mode on tab change, disable program mode
-	if (adh_program_mode == 1){
-		GuiControl,,adh_program_mode,0
-		adh_program_mode_changed()
-	}
-	return
-}
-
-; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
-adh_control_name_to_set_method(name){
-	if (name == "DropDownList"){
-		return "ChooseString"
-	} else {
-		return ""
-	}
-}
-
-adh_get_string_for_hotkey(hk){
-	tmp := adh_hk_m_1
-	return %tmp%
-}
 
 adh_key_changed:
-	adh_key_changed()
+	ADH.key_changed()
 	return
-
-adh_key_changed(){
-	tmp := %A_GuiControl%
-	ctr := 0
-	max := StrLen(tmp)
-	Loop, %max%
-	{
-		chr := substr(tmp,ctr,1)
-		if (chr != "^" && chr != "!" && chr != "+"){
-			ctr := ctr + 1
-		}
-	}
-	; Only modifier keys pressed?
-	if (ctr == 0){
-		return
-	}
-	
-	; key pressed
-	if (ctr < max){
-		GuiControl,, %A_GuiControl%, None
-		adh_debug("key_changed calling option_changed")
-		Gosub, adh_option_changed
-	}
-	else
-	{
-		tmp := SubStr(A_GuiControl,10)
-		; Set the mouse field to blank
-		GuiControl,ChooseString, adh_hk_m_%tmp%, None
-		adh_debug("key_changed calling option_changed")
-		Gosub, adh_option_changed
-	}
-	return
-}
 
 adh_mouse_changed:
-	adh_mouse_changed()
+	ADH.mouse_changed()
 	return
 
-adh_mouse_changed(){
-	tmp := SubStr(A_GuiControl,10)
-	; Set the keyboard field to blank
-	GuiControl,, adh_hk_k_%tmp%, None
-	adh_debug("mouse_changed calling option_changed")
-	Gosub, adh_option_changed
-	return
-}
 
 adh_get_hotkey_string(hk){
 	;Get hotkey string - could be keyboard or mouse
