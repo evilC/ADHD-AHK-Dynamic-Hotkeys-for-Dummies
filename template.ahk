@@ -536,6 +536,10 @@ adh_option_changed:
 	}
 	return
 
+; Add and remove glabel is useful because:
+; When you use GuiControl to set the contents of an edit...
+; .. it's glabel is fired.
+; So remove glabel, set editbox value, re-add glabel to solve
 adh_add_glabel(ctrl){
 	GuiControl, +gadh_option_changed, %ctrl%
 }
