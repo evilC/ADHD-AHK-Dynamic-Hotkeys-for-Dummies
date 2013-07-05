@@ -642,13 +642,20 @@ adh_send_keyup_on_press(sub,mod){
 }
 
 adh_tab_changed:
+	adh_tab_changed()
+	return
+
+adh_tab_changed(){
+	global adh_program_mode
+	
 	; If in program mode on tab change, disable program mode
 	if (adh_program_mode == 1){
 		GuiControl,,adh_program_mode,0
-		Gosub, adh_program_mode_toggle
+		adh_program_mode_toggle()
 	}
 	return
-	
+}
+
 ; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
 adh_control_name_to_set_method(name){
 	if (name == "DropDownList"){
