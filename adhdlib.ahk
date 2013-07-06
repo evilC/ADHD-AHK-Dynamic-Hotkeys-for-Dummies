@@ -71,6 +71,7 @@ Class ADHDLib
 		if (A_IsCompiled){
 			if (A_Ptrsize == 8 && this.x64_warning){
 				Msgbox, You have compiled this script under 64-bit AutoHotkey.`n`nAs a result, it will not work for people on 32-bit windows.`n`nDo one of the following:`n`nReinstall Autohotkey and choose a 32-bit option.`n`nCreate an x64 exe without this warning by calling config_ignore_x64_warning()
+				ExitApp
 			}
 		}
 
