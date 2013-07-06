@@ -894,7 +894,7 @@ Class ADH
 		if (adh_program_mode == 1){
 			;adh_debug("Entering Program Mode")
 			; Enable controls, stop hotkeys, kill timers
-			GoSub, adh_disable_hotkeys
+			this.disable_hotkeys()
 			Gosub, adh_disable_author_timers
 			this.disable_heartbeat()
 			GuiControl, enable, adh_limit_application
@@ -902,7 +902,7 @@ Class ADH
 		} else {
 			; Disable controls, start hotkeys, start heartbeat timer
 			;adh_debug("Exiting Program Mode")
-			GoSub, adh_enable_hotkeys
+			this.enable_hotkeys()
 			this.enable_heartbeat()
 			GuiControl, disable, adh_limit_application
 			GuiControl, disable, adh_limit_application_on
@@ -1133,11 +1133,9 @@ adh_profile_changed:
 	ADH.profile_changed()
 	return
 
-
 adh_option_changed:
 	ADH.option_changed()
 	return
-
 
 adh_add_profile:
 	ADH.add_profile("")	; just clicking the button calls with empty param
@@ -1148,7 +1146,6 @@ adh_delete_profile:
 	ADH.delete_profile(adh_current_profile)	; Just clicking the button deletes the current profile
 	return
 
-
 adh_duplicate_profile:
 	ADH.duplicate_profile("")
 	return
@@ -1156,7 +1153,6 @@ adh_duplicate_profile:
 adh_rename_profile:
 	ADH.rename_profile()
 	return
-
 
 adh_tab_changed:
 	ADH.tab_changed()
@@ -1170,24 +1166,12 @@ adh_mouse_changed:
 	ADH.mouse_changed()
 	return
 
-
 adh_enable_hotkeys:
 	ADH.enable_hotkeys()
 	return
 
 adh_disable_hotkeys:
 	ADH.disable_hotkeys()
-	return
-
-; An empty stub to redirect unbound hotkeys to
-adh_do_nothing:
-	return
-
-
-; Kill the macro if the GUI is closed
-adh_exit_app:
-GuiClose:
-	ADH.exit_app()
 	return
 
 adh_show_window_spy:
@@ -1213,6 +1197,17 @@ adh_program_mode_changed:
 adh_heartbeat:
 	ADH.heartbeat()
 	return
+
+; An empty stub to redirect unbound hotkeys to
+adh_do_nothing:
+	return
+
+; Kill the macro if the GUI is closed
+adh_exit_app:
+GuiClose:
+	ADH.exit_app()
+	return
+
 	
 
 ; ==========================================================================================================================
