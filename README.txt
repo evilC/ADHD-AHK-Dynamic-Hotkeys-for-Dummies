@@ -1,4 +1,4 @@
-AHK-Dynamic-Hotkeys
+ADHD - AHK-Dynamic-Hotkeys
 =====================
 
 By Clive Galway - evilc@evilc.com
