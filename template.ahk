@@ -72,7 +72,9 @@ Gui, Tab, 1
 ; The format is Name, Control Type, Default Value
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
 
-Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
+tabtop := 40
+
+Gui, Add, Text, x5 y%tabtop%, Fire Sequence
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
 ADH.ini_vars.Insert(["FireSequence","Edit",""])
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
@@ -332,8 +334,6 @@ Class ADH
 		; Set up the GUI ====================================================
 		Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
 
-		adh_tabtop := 40
-		adh_current_row := adh_tabtop + 20
 
 	}
 	
@@ -345,6 +345,9 @@ Class ADH
 		; Also, gui commands do not accept objects
 		; So declare temp vars as local in here
 		global
+
+		local tabtop := 40
+		local current_row := tabtop + 20
 		
 		Gui, Tab, 2
 		; BINDINGS TAB
@@ -359,14 +362,14 @@ Class ADH
 		Loop, % adh_hotkeys.MaxIndex()
 		{
 			adh_tmpname := adh_hotkeys[A_Index,"uiname"]
-			Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
+			Gui, Add, Text,x5 W100 y%current_row%, %adh_tmpname%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
 			local mb := this.mouse_buttons
 			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%mb%
 			Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_a_%A_Index% gadh_option_changed
-			adh_current_row := adh_current_row + 30
+			current_row := current_row + 30
 		}
 		; Limit application toggle
 		Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
@@ -385,8 +388,8 @@ Class ADH
 
 		Gui, Tab, 3
 		; PROFILES TAB
-		adh_current_row := adh_tabtop + 20
-		Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
+		current_row := tabtop + 20
+		Gui, Add, Text,x5 W40 y%current_row%,Profile
 		local pl := this.profile_list
 		local cp := this.current_profile
 		Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%pl%
@@ -398,8 +401,8 @@ Class ADH
 
 		Gui, Tab, 4
 		; ABOUT TAB
-		adh_current_row := adh_tabtop + 20
-		Gui, Add, Link,x5 y%adh_current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
+		current_row := tabtop + 20
+		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 		Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
 		Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
 		Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
