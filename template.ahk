@@ -267,14 +267,21 @@ Class ADH
 	; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 	init(){
-		global		; global for now, phase out!
+		;global		; global for now, phase out!
+		global adh_gui_w
+		global adh_gui_h
+		
 		; ADH STARTUP AND GUI CREATION
 
-		; Debug vars
-		adh_debug_mode := 0
-		adh_debug_window := 0
-		adh_debug_ready := 0
-		adh_log_contents := ""
+		; Debug vars - globals are also control variables (v-labels) so do not keep them in class
+		global adh_debug_mode := 0
+		global adh_debug_window := 0
+		global adh_log_contents := ""
+		
+		;global adh_debug_ready
+		;adh_debug_ready := 0
+		this.debug_ready := 0
+		
 		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
 		;adh_starting_up := 1
 		this.starting_up := 1
@@ -438,7 +445,7 @@ Class ADH
 	
 	finish_startup(){
 		global	; Remove! phase out mass use of globals
-		adh_debug_ready := 1
+		this.debug_ready := 1
 
 		;Hook for Tooltips
 		OnMessage(0x200, "this.mouse_move")
@@ -464,11 +471,12 @@ Class ADH
 
 	; aka load profile
 	profile_changed(){
+		global adh_debug_mode
+
 		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
-		global adh_debug_mode
 		global adh_debug_window
 		
 		GuiControlGet,cp,,adh_current_profile
@@ -571,12 +579,12 @@ Class ADH
 
 	; aka save profile
 	option_changed(){
-		;global adh_starting_up
+		global adh_debug_mode
+
 		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
-		global adh_debug_mode
 		global adh_debug_window
 		
 		if (this.starting_up != 1){
@@ -910,13 +918,11 @@ Class ADH
 	debug(msg){
 		global adh_log_contents
 		global adh_debug_mode
-		;global adh_starting_up
-		global adh_debug_ready
 
 		; If in debug mode, or starting up...
 		if (adh_debug_mode || this.starting_up){
 			adh_log_contents := adh_log_contents "* " msg "`n"
-			if (adh_debug_ready){
+			if (this.debug_ready){
 				guicontrol,2:,adh_log_contents, % adh_log_contents
 				gui, 2:submit, nohide
 			}
