@@ -41,8 +41,9 @@ ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 ADHD.config_event("option_changed", "option_changed_hook")
 ADHD.config_event("program_mode_on", "")
 ADHD.config_event("program_mode_off", "")
-ADHD.config_event("app_active", "")
-ADHD.config_event("app_inactive", "")
+ADHD.config_event("app_active", "app_active_hook")
+ADHD.config_event("app_inactive", "app_inactive_hook")
+ADHD.config_event("disable_timers", "disable_timers_hook")
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -96,12 +97,16 @@ return
 
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 option_changed_hook(){
-	global fire_array
 	global FireSequence
-	
+	global fire_array := []
+	global current_weapon := 1
+	global fire_divider := 1
+	global nextfire := 0		; A timer for when we are next allowed to press the fire button
+	global weapon_toggle_mode := false
+	Gosub, ResetToggle
+
 	;soundplay, *16
 	; This gets called in Program Mode, so now would be a good time to re-initialize
-	Gosub, adhd_init_author_vars
 	StringSplit, tmp, FireSequence, `,
 	Loop, %tmp0%
 	{
@@ -112,31 +117,19 @@ option_changed_hook(){
 	return
 }
 
-; Initialize your variables and stuff here
-adhd_init_author_vars:
-	fire_array := []
-	current_weapon := 1
-	fire_divider := 1
-	nextfire := 0		; A timer for when we are next allowed to press the fire button
-	weapon_toggle_mode := false
-	Gosub, ResetToggle
+app_active_hook(){
+	
 	return
+}
 
-/*	
-; This is fired when settings change (including on load). Use it to pre-calculate values etc.
-; DO NOT delete it entirely or remove it. It can be empty though
-adhd_change_event:
-	; This gets called in Program Mode, so now would be a good time to re-initialize
-	Gosub, adhd_init_author_vars
-	StringSplit, tmp, FireSequence, `,
-	Loop, %tmp0%
-	{
-		if (tmp%A_Index% != ""){
-			fire_array[A_Index] := tmp%A_Index%
-		}
-	}
-	return
-*/
+app_inactive_hook(){
+	Gosub, DisableTimers
+}
+
+disable_timers_hook(){
+	Gosub, DisableTimers
+}
+
 
 ; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
@@ -292,6 +285,7 @@ Class ADHDLib
 		this.events.option_changed := ""
 		this.events.program_mode_on := ""
 		this.events.program_mode_off := ""
+		this.events.disable_timers := ""
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 	}
@@ -1093,15 +1087,18 @@ Class ADHDLib
 			if (this.app_act_curr != 1){
 				; Changing from inactive to active
 				this.app_act_curr := 1
+				this.fire_event(this.events.app_inactive)
 			}
 		} else {
 			if (this.app_act_curr != 0){
 				; Changing from active to inactive
 				; Stop Author Timers
-				Gosub, adhd_disable_author_timers	; Fire the Author hook
-				; Reset author macro
-				Gosub, adhd_init_author_vars		; Fire the Author hook
 				this.app_act_curr := 0
+				
+				; Fire event hooks
+				this.fire_event(this.events.disable_timers)
+				this.fire_event(this.events.app_inactive)
+				;Gosub, adhd_disable_author_timers	; Fire the Author hook
 			}
 		}
 	}
