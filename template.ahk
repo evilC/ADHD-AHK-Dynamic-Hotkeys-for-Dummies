@@ -268,8 +268,6 @@ Class ADH
 		global		; global for now, phase out!
 		; ADH STARTUP AND GUI CREATION
 
-		local this_is_not_global
-		
 		; Debug vars
 		adh_debug_mode := 0
 		adh_debug_window := 0
@@ -280,7 +278,7 @@ Class ADH
 		this.starting_up := 1
 
 		ADH.debug("Starting up...")
-		adh_num_hotkeys := adh_hotkeys.MaxIndex()
+		;adh_num_hotkeys := adh_hotkeys.MaxIndex()
 		adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 		; Start ADH init vars and settings
@@ -414,7 +412,7 @@ Class ADH
 			
 		adh_tmp := adh_gui_w - 180
 		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
-		msgbox, % this.starting_up
+
 		; Fire GuiSubmit while starting_up is on to set all the variables
 		Gui, Submit, NoHide
 
@@ -447,7 +445,7 @@ Class ADH
 	profile_changed(){
 		global adh_current_profile
 		global adh_hotkey_mappings
-		global adh_num_hotkeys
+		;global adh_num_hotkeys
 		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
@@ -466,7 +464,7 @@ Class ADH
 		adh_hotkey_mappings := {}
 		
 		; Load hotkey bindings
-		Loop, % adh_num_hotkeys
+		Loop, % adh_hotkeys.MaxIndex()
 		{
 			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
 			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
@@ -554,7 +552,7 @@ Class ADH
 	; aka save profile
 	option_changed(){
 		;global adh_starting_up
-		global adh_num_hotkeys
+		global adh_hotkeys
 		global adh_current_profile
 		global adh_profile_list
 		global adh_default_app
@@ -570,7 +568,7 @@ Class ADH
 			Gui, Submit, NoHide
 
 			; Hotkey bindings
-			Loop, % adh_num_hotkeys
+			Loop, % adh_hotkeys.MaxIndex()
 			{
 				this.update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
 				this.update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
@@ -998,7 +996,7 @@ Class ADH
 	
 	; Hotkey detection routines
 	enable_hotkeys(){
-		global adh_num_hotkeys
+		;global adh_num_hotkeys
 		global adh_limit_application
 		global adh_limit_application_on
 		global adh_hotkeys
@@ -1007,7 +1005,7 @@ Class ADH
 		;adh_debug("enable_hotkeys")
 
 		Gui, Submit, NoHide
-		Loop, % adh_num_hotkeys
+		Loop, % adh_hotkeys.MaxIndex()
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
@@ -1046,14 +1044,14 @@ Class ADH
 	}
 
 	disable_hotkeys(){
-		global adh_num_hotkeys
+		;global adh_num_hotkeys
 		global adh_limit_application
 		global adh_limit_application_on
 		global adh_hotkeys
 		
 		;adh_debug("disable_hotkeys")
 
-		Loop, % adh_num_hotkeys
+		Loop, % adh_hotkeys.MaxIndex()
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
