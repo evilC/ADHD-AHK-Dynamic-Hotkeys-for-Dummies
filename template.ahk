@@ -734,31 +734,42 @@ Class ADH
 		}
 	}
 
-	key_changed(){
-		tmp := %A_GuiControl%
-		ctr := 0
-		max := StrLen(tmp)
-		Loop, %max%
-		{
-			chr := substr(tmp,ctr,1)
-			if (chr != "^" && chr != "!" && chr != "+"){
-				ctr := ctr + 1
+	; Detects a key pressed and clears the mouse box
+	key_changed(ctrl){
+		; Special keys will have a value of ""
+		if (%ctrl% == ""){
+			ctr := 1
+			max := 1
+		} else {
+			; Check to see if just modifiers selected IN THE HOTKEY BOX
+			; We ignore modifiers in the hotkey box because we may want to bind ctrl+lbutton
+			ctr := 0
+			max := StrLen(ctrl)
+			Loop, %max%
+			{
+				chr := substr(ctrl,ctr,1)
+				if (chr != "^" && chr != "!" && chr != "+"){
+					ctr := ctr + 1
+				}
+			}
+			; Only modifier keys pressed?
+			if (ctr == 0){
+				; When you hold just modifiers in a hotkey box, they appear only so long as they are held
+				; On key up, if no other keys are held, they will disappear
+				; We are not interested in them, so ignore contents of hotkey box while it is just modifiers
+				return
 			}
 		}
-		; Only modifier keys pressed?
-		if (ctr == 0){
-			return
-		}
 		
+		; ToDo: We returned above - can I delete this block?
 		; key pressed
 		if (ctr < max){
-			GuiControl,, %A_GuiControl%, None
+			GuiControl,, %ctrl%, None
 			this.debug("key_changed calling option_changed")
 			Gosub, adh_option_changed
-		}
-		else
-		{
-			tmp := SubStr(A_GuiControl,10)
+		} else {
+			; Detect actual key (Not modified) - clear mouse box
+			tmp := SubStr(ctrl,10)
 			; Set the mouse field to blank
 			GuiControl,ChooseString, adh_hk_m_%tmp%, None
 			this.debug("key_changed calling option_changed")
@@ -767,6 +778,7 @@ Class ADH
 		return
 	}
 
+	; Detects mouse selected from list and clears key box
 	mouse_changed(){
 		tmp := SubStr(A_GuiControl,10)
 		; Set the keyboard field to blank
@@ -985,7 +997,7 @@ adh_tab_changed:
 	return
 
 adh_key_changed:
-	ADH.key_changed()
+	ADH.key_changed(A_GuiControl)
 	return
 
 adh_mouse_changed:
@@ -1173,8 +1185,10 @@ adh_heartbeat:
 	Else                                                     	;Otherwise,
 		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
 	;validateHK(ctrl)
-	ADH.debug("special key detect calling option_changed")
-	Gosub, adh_option_changed
+	ADH.debug("special key detect calling key_changed")
+	;Gosub, adh_option_changed
+	; ToDo: this is passing
+	ADH.key_changed(ctrl)
 	return
 #If
 
