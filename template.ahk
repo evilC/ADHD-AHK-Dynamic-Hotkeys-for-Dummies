@@ -8,7 +8,7 @@
 ; When writing code, as long as none of your function or variable names begin with adh_ then you should not have any conflicts!
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; SETUP SECTION
+; SETUP SECTION - TO GO IN CONSTRUCTOR? STUFF THAT NEEDS TO BE SET BEFORE ADH STARTS UP
 
 ; Authors - configure this section according to your macro.
 ; You should not add extra things here (except add more records to adh_hotkeys etc)
@@ -58,6 +58,9 @@ Loop, % adh_hotkeys.MaxIndex()
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+; ADH STARTUP AND GUI CREATION
+
 ; Debug vars
 adh_debug_mode := 0
 adh_debug_window := 0
@@ -260,6 +263,8 @@ ADH.debug("Finished startup")
 adh_starting_up := 0
 
 return
+; END OF ADH STARTUP
+; "AUTHOR" MACRO STARTS HERE
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; AUTHORS - PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
@@ -1210,8 +1215,6 @@ adh_exit_app:
 GuiClose:
 	ADH.exit_app()
 	return
-
-	
 
 ; ==========================================================================================================================
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
