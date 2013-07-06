@@ -99,7 +99,7 @@ option_changed_hook(){
 	global fire_array
 	global FireSequence
 	
-	soundplay, *16
+	;soundplay, *16
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	Gosub, adh_init_author_vars
 	StringSplit, tmp, FireSequence, `,
@@ -603,27 +603,27 @@ Class ADHDLib
 			}
 
 			; Control Modifier
-			adh_modstring := ""
+			modstring := ""
 			tmp := this.read_ini("adh_hk_c_" A_Index,this.current_profile,0)
 			GuiControl,, adh_hk_c_%A_Index%, %tmp%
 			if (tmp == 1){
-				adh_modstring := adh_modstring "^"
+				modstring := modstring "^"
 			}
 			
 			; Shift Modifier
 			tmp := this.read_ini("adh_hk_s_" A_Index,this.current_profile,0)
 			GuiControl,, adh_hk_s_%A_Index%, %tmp%
 			if (tmp == 1){
-				adh_modstring := adh_modstring "+"
+				modstring := modstring "+"
 			}
 			
 			; Alt Modifier
 			tmp := this.read_ini("adh_hk_a_" A_Index,this.current_profile,0)
 			GuiControl,, adh_hk_a_%A_Index%, %tmp%
 			if (tmp == 1){
-				adh_modstring := adh_modstring "!"
+				modstring := modstring "!"
 			}
-			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["modified"] := adh_modstring this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"]
+			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["modified"] := modstring this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"]
 		}
 		
 		; limit application name
@@ -642,17 +642,17 @@ Class ADHDLib
 		; Get author vars from ini
 		Loop, % this.ini_vars.MaxIndex()
 		{
-			adh_def := this.ini_vars[A_Index,3]
-			if (adh_def == ""){
-				adh_def := A_Space
+			def := this.ini_vars[A_Index,3]
+			if (def == ""){
+				def := A_Space
 			}
-			adh_key := this.ini_vars[A_Index,1]
-			adh_sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
+			key := this.ini_vars[A_Index,1]
+			sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
 			
-			this.remove_glabel(adh_key)
-			tmp := this.read_ini(adh_key,this.current_profile,adh_def)
-			GuiControl,%adh_sm%, %adh_key%, %tmp%
-			this.add_glabel(adh_key)
+			this.remove_glabel(key)
+			tmp := this.read_ini(key,this.current_profile,def)
+			GuiControl,%sm%, %key%, %tmp%
+			this.add_glabel(key)
 		}
 
 		; Debug settings
@@ -1224,18 +1224,18 @@ Class ADHDLib
 
 	; Special key detection routines
 	special_key_pressed(ctrl){
-		adh_modifier := ""
+		modifier := ""
 		If GetKeyState("Shift","P")
-			adh_modifier .= "+"
+			modifier .= "+"
 		If GetKeyState("Ctrl","P")
-			adh_modifier .= "^"
+			modifier .= "^"
 		If GetKeyState("Alt","P")
-			adh_modifier .= "!"
+			modifier .= "!"
 		Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
-		If (A_ThisHotkey == "*BackSpace" && %ctrl% && !adh_modifier)	;If the control has text but no modifiers held,
+		If (A_ThisHotkey == "*BackSpace" && %ctrl% && !modifier)	;If the control has text but no modifiers held,
 			GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
 		Else                                                     	;Otherwise,
-			GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
+			GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
 		this.debug("special key detect calling key_changed")
 		this.key_changed(ctrl)
 		return
