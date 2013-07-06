@@ -1130,6 +1130,7 @@ Class ADH
 
 }
 
+; Label triggers
 
 adh_profile_changed:
 	ADH.profile_changed()
