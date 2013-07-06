@@ -264,18 +264,20 @@ Class ADH
 	; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
 	; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
 	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-		
 	init(){
 		global		; global for now, phase out!
 		; ADH STARTUP AND GUI CREATION
 
+		local this_is_not_global
+		
 		; Debug vars
 		adh_debug_mode := 0
 		adh_debug_window := 0
 		adh_debug_ready := 0
 		adh_log_contents := ""
 		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
-		adh_starting_up := 1
+		;adh_starting_up := 1
+		this.starting_up := 1
 
 		ADH.debug("Starting up...")
 		adh_num_hotkeys := adh_hotkeys.MaxIndex()
@@ -412,8 +414,8 @@ Class ADH
 			
 		adh_tmp := adh_gui_w - 180
 		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
-			
-		; Fire GuiSubmit while adh_starting_up is on to set all the variables
+		msgbox, % this.starting_up
+		; Fire GuiSubmit while starting_up is on to set all the variables
 		Gui, Submit, NoHide
 
 		; Create the debug GUI, but do not show yet
@@ -437,7 +439,7 @@ Class ADH
 		ADH.debug("Finished startup")
 
 		; Finished startup, allow change of controls to fire events
-		adh_starting_up := 0
+		this.starting_up := 0
 
 	}
 	
@@ -551,7 +553,7 @@ Class ADH
 
 	; aka save profile
 	option_changed(){
-		global adh_starting_up
+		;global adh_starting_up
 		global adh_num_hotkeys
 		global adh_current_profile
 		global adh_profile_list
@@ -562,7 +564,7 @@ Class ADH
 		global adh_debug_mode
 		global adh_debug_window
 		
-		if (adh_starting_up != 1){
+		if (this.starting_up != 1){
 			this.debug("option_changed - control: " A_guicontrol)
 			
 			Gui, Submit, NoHide
@@ -867,7 +869,7 @@ Class ADH
 		global adh_gui_y
 		global adh_gui_w
 		global adh_gui_h
-		global adh_starting_up
+		;global adh_starting_up
 		
 		gui, submit, nohide
 		if (adh_debug_window == 1){
@@ -877,7 +879,7 @@ Class ADH
 			gui, 2:hide
 		}
 		; On startup do not call option_changed, we are just setting the window open or closed
-		if (!adh_starting_up){
+		if (!this.starting_up){
 			this.option_changed()
 		}
 		return
@@ -892,11 +894,11 @@ Class ADH
 	debug(msg){
 		global adh_log_contents
 		global adh_debug_mode
-		global adh_starting_up
+		;global adh_starting_up
 		global adh_debug_ready
 
 		; If in debug mode, or starting up...
-		if (adh_debug_mode || adh_starting_up){
+		if (adh_debug_mode || this.starting_up){
 			adh_log_contents := adh_log_contents "* " msg "`n"
 			if (adh_debug_ready){
 				guicontrol,2:,adh_log_contents, % adh_log_contents
