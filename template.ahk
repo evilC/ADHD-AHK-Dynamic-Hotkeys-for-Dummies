@@ -516,6 +516,7 @@ Class ADH
 
 		this.program_mode_changed()
 		
+		; Fire the Author hook
 		Gosub, adh_change_event
 
 		return
@@ -566,6 +567,7 @@ Class ADH
 				tmp := adh_ini_vars[A_Index,1]
 				this.update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
 			}
+			; Fire the Author hook
 			Gosub, adh_change_event
 			
 			; Debug settings
@@ -895,7 +897,7 @@ Class ADH
 			;adh_debug("Entering Program Mode")
 			; Enable controls, stop hotkeys, kill timers
 			this.disable_hotkeys()
-			Gosub, adh_disable_author_timers
+			Gosub, adh_disable_author_timers	; Fire the Author hook
 			this.disable_heartbeat()
 			GuiControl, enable, adh_limit_application
 			GuiControl, enable, adh_limit_application_on
@@ -956,9 +958,9 @@ Class ADH
 			if (adh_app_act_curr != 0){
 				; Changing from active to inactive
 				; Stop Author Timers
-				Gosub, adh_disable_author_timers
+				Gosub, adh_disable_author_timers	; Fire the Author hook
 				; Reset author macro
-				Gosub, adh_init_author_vars
+				Gosub, adh_init_author_vars		; Fire the Author hook
 				adh_app_act_curr := 0
 			}
 		}
