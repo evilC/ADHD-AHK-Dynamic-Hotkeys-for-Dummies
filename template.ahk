@@ -194,7 +194,8 @@ Loop, % adh_hotkeys.MaxIndex()
 Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
 
 ; Limit application Text box
-Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+;Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+ADH.gui_test()
 
 ; Launch window spy
 Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
@@ -263,6 +264,7 @@ ADH.debug("Finished startup")
 adh_starting_up := 0
 
 return
+
 ; END OF ADH STARTUP
 ; "AUTHOR" MACRO STARTS HERE
 
@@ -417,7 +419,12 @@ DisableTimers:
 
 Class ADH
 {
+	
 	; ADH Library
+	gui_test(){
+		static adh_limit_application
+		Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+	}
 	
 	; aka load profile
 	profile_changed(){
