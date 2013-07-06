@@ -43,6 +43,7 @@ ADHD.config_event("disable_timers", "disable_timers_hook")
 ADHD.init()
 ADHD.create_gui()
 
+msgbox % A_PtrSize
 ; The "Main" tab is tab 1
 Gui, Tab, 1
 ; ============================================================================================

@@ -36,8 +36,10 @@ Class ADHDLib
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 		
+		this.x64_warning := 1
 		; strip extension from end of script name for basis of INI name
-		this.ini_name := this.build_ini_name()
+		;this.ini_name := this.build_ini_name()
+		this.build_ini_name()
 	}
 
 	; EXPOSED METHODS
@@ -57,22 +59,34 @@ Class ADHDLib
 			}
 			last := tmp%A_Index%
 		}
-		ini_name := ini_name ".ini"
-		return ini_name
+		this.ini_name := ini_name ".ini"
+		return
 	}
 	
 	; Load settings etc
 	init(){
+		; Perform some sanity checks
+		
+		; Check if compiled and x64
+		if (A_IsCompiled){
+			if (A_Ptrsize == 8 && this.x64_warning){
+				Msgbox, You have compiled this script under 64-bit AutoHotkey.`n`nAs a result, it will not work for people on 32-bit windows.`n`nDo one of the following:`n`nReinstall Autohotkey and choose a 32-bit option.`n`nCreate an x64 exe without this warning by calling config_ignore_x64_warning()
+			}
+		}
+
+		; Check the user instantiated the class
 		if (this.instantiated != 1){
 			msgbox You must use an instance of this class, not the class itself.`nPut something like ADHD := New ADHDLib at the start of your script
 			ExitApp
 		}
 		
+		; Check the user defined a hotkey
 		if (this.hotkey_list.MaxIndex() < 1){
 			msgbox, No Actions defined, Exiting...
 			ExitApp
 		}
 
+		; Check that labels specified as targets for hotkeys actually exist
 		Loop, % this.hotkey_list.MaxIndex()
 		{
 			If (IsLabel(this.hotkey_list[A_Index,"subroutine"]) == false){
@@ -282,6 +296,10 @@ Class ADHDLib
 
 	}
 
+	config_ignore_x64_warning(){
+		this.x64_warning := 0
+	}
+	
 	; Setup stuff
 	config_hotkey_add(data){
 		this.hotkey_list.Insert(data)

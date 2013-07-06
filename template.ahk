@@ -16,7 +16,7 @@ SendMode, Event
 SetKeyDelay, 0, 50
 
 ; Stuff for the About box
-
+;ADHD.config_ignore_x64_warning()	; Uncomment this if you need to compile an x64 ADHD exe
 ADHD.config_about({name: "Template", version: 1.0, author: "nobody", link: "<a href=""http://google.com"">Somewhere</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
