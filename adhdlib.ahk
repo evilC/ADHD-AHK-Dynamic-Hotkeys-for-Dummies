@@ -113,8 +113,8 @@ Class ADHDLib
 		this.mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
 		ini := this.ini_name
-		IniRead, x, %ini%, Settings, gui_x, unset
-		IniRead, y, %ini%, Settings, gui_y, unset
+		IniRead, x, %ini%, Settings, adhd_gui_x, unset
+		IniRead, y, %ini%, Settings, adhd_gui_y, unset
 		if (x == "unset"){
 			msgbox, Welcome to this ADHD based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
 			x := 0	; initialize
@@ -738,11 +738,11 @@ Class ADHDLib
 		Gui, +Hwndgui_id
 		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
 		ini := this.ini_name
-		if (this.read_ini("gui_x","Settings", -1) != gui_x){
-			IniWrite, %gui_x%, %ini%, Settings, gui_x
+		if (this.read_ini("adhd_gui_x","Settings", -1) != gui_x){
+			IniWrite, %gui_x%, %ini%, Settings, adhd_gui_x
 		}
 		if (this.read_ini("gui_y","Settings", -1) != gui_y){
-			IniWrite, %gui_y%, %ini%, Settings, gui_y
+			IniWrite, %gui_y%, %ini%, Settings, adhd_gui_y
 		}
 		ExitApp
 		return
