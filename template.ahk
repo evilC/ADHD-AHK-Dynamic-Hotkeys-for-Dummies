@@ -303,23 +303,25 @@ Class ADH
 		; List of mouse buttons
 		this.mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
-		IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
-		IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
-		if (adh_gui_x == "unset"){
+		IniRead, x, %A_ScriptName%.ini, Settings, gui_x, unset
+		IniRead, y, %A_ScriptName%.ini, Settings, gui_y, unset
+		if (x == "unset"){
 			msgbox, Welcome to this ADH based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
-			adh_gui_x := 0	; initialize
+			x := 0	; initialize
 		}
-		if (adh_gui_y == "unset"){
-			adh_gui_y := 0
-		}
-
-		if (adh_gui_x == ""){
-			adh_gui_x := 0	; in case of crash empty values can get written
-		}
-		if (adh_gui_y == ""){
-			adh_gui_y := 0
+		if (y == "unset"){
+			y := 0
 		}
 
+		if (x == ""){
+			x := 0	; in case of crash empty values can get written
+		}
+		if (y == ""){
+			y := 0
+		}
+		this.gui_x := x
+		this.gui_y := y
+		
 		; Get list of profiles
 		IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
 		; Get current profile
@@ -406,7 +408,9 @@ Class ADH
 
 		; Show the GUI =====================================
 		local ver := this.core_version
-		Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%ver%)
+		local x := this.gui_x
+		local y := this.gui_y
+		Gui, Show, x%x% y%y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%ver%)
 
 		; Add Debug window controls
 		Gui, Tab
@@ -868,8 +872,6 @@ Class ADH
 	; Debug functions
 	debug_window_change(){
 		global adh_debug_window
-		global adh_gui_x
-		global adh_gui_y
 		global adh_gui_w
 		global adh_gui_h
 		
@@ -877,8 +879,10 @@ Class ADH
 		
 		gui, submit, nohide
 		if (adh_debug_window == 1){
-			tmp := adh_gui_y - 440
-			Gui, 2:Show, x%adh_gui_x% y%tmp% w%adh_gui_w% h400, ADH Debug Window
+			x := this.gui_x
+			y := this.gui_y - 440
+			; Bug: This is the GUI position at START, now now
+			Gui, 2:Show, x%x% y%y% w%adh_gui_w% h400, ADH Debug Window
 		} else {
 			gui, 2:hide
 		}
