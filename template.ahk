@@ -75,7 +75,7 @@ Gui, Tab, 1
 
 tabtop := 40
 Gui, Add, Text, x5 y%tabtop%, Fire Sequence
-ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "")
+ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
 /*
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
 ADH.ini_vars.Insert(["FireSequence","Edit",""])
@@ -447,13 +447,13 @@ Class ADH
 		Gui, 2:Add, Button, gadh_clear_log, clear
 	}
 	
-	gui_add(ctype, cname, copts, cdef){
+	; Adds a GUI item and registers it for storage in the INI file
+	; type(edit etc), name(variable name), options(eg xp+50), param3(eg dropdown list, label), default(used for ini file)
+	gui_add(ctype, cname, copts, cparam3, cdef){
+		; Note this function assumes global so it can create gui items
 		Global
-		;gui_add("Edit", "FireSequence", "xp+120 yp W120")
-		;Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
-		Gui, Add, %ctype%, %copts% v%cname% gadh_option_changed,
+		Gui, Add, %ctype%, %copts% v%cname% gadh_option_changed, cparam3
 		this.ini_vars.Insert([cname,ctype,cdef])
-
 	}
 
 	finish_startup(){
