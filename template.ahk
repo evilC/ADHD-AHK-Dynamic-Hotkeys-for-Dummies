@@ -357,7 +357,7 @@ Class ADH
 			adh_tmpname := adh_hotkeys[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
-			local mb := this.adh_mouse_buttons
+			local mb := this.mouse_buttons
 			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%mb%
 			Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
