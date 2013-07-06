@@ -983,7 +983,26 @@ Class ADH
 		return
 	}
 
-
+	special_key_pressed(ctrl){
+		adh_modifier := ""
+		If GetKeyState("Shift","P")
+			adh_modifier .= "+"
+		If GetKeyState("Ctrl","P")
+			adh_modifier .= "^"
+		If GetKeyState("Alt","P")
+			adh_modifier .= "!"
+		Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
+		If (A_ThisHotkey == "*BackSpace" && %ctrl% && !adh_modifier)	;If the control has text but no modifiers held,
+			GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
+		Else                                                     	;Otherwise,
+			GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
+		;validateHK(ctrl)
+		this.debug("special key detect calling key_changed")
+		;Gosub, adh_option_changed
+		; ToDo: this is passing
+		this.key_changed(ctrl)
+		return
+	}
 }
 
 
@@ -1184,7 +1203,7 @@ adh_heartbeat:
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If ctrl := adh_hotkey_ctrl_has_focus()
+#If adh_ctrl := adh_hotkey_ctrl_has_focus()
 	*AppsKey::                       ;Add support for these special keys,
 	*BackSpace::                     ;  which the hotkey control does not normally allow.
 	*Delete::
@@ -1196,23 +1215,8 @@ adh_heartbeat:
 	*Tab::
 	; Can use mouse hotkeys like this - it detects them but does not display them
 	;~*WheelUp::
-	adh_modifier := ""
-	If GetKeyState("Shift","P")
-		adh_modifier .= "+"
-	If GetKeyState("Ctrl","P")
-		adh_modifier .= "^"
-	If GetKeyState("Alt","P")
-		adh_modifier .= "!"
-	Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
-	If (A_ThisHotkey == "*BackSpace" && %ctrl% && !adh_modifier)	;If the control has text but no modifiers held,
-		GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
-	Else                                                     	;Otherwise,
-		GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
-	;validateHK(ctrl)
-	ADH.debug("special key detect calling key_changed")
-	;Gosub, adh_option_changed
-	; ToDo: this is passing
-	ADH.key_changed(ctrl)
+	; ToDo: Pass A_ThisHotkey also?
+	ADH.special_key_pressed(adh_ctrl)
 	return
 #If
 
