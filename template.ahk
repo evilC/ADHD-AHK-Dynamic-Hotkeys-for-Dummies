@@ -43,7 +43,11 @@ ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
 ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
-ADH.events.option_changed := "option_hook"
+ADH.events.option_changed := "option_changed_hook"
+ADH.events.program_mode_on := ""
+ADH.events.program_mode_off := ""
+ADH.events.app_active := ""								; When the "Limited" app comes into focus
+ADH.events.app_inactive := ""							; When the "Limited" app goes out of focus
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,8 +99,20 @@ return
 ; When writing code, DO NOT create variables or functions starting adh_
 ; You can use the existing ones obviously
 
-option_hook(){
-	soundplay, *16
+; This is fired when settings change (including on load). Use it to pre-calculate values etc.
+option_changed_hook(){
+	global fire_array
+	
+	; This gets called in Program Mode, so now would be a good time to re-initialize
+	Gosub, adh_init_author_vars
+	StringSplit, tmp, FireSequence, `,
+	Loop, %tmp0%
+	{
+		if (tmp%A_Index% != ""){
+			fire_array[A_Index] := tmp%A_Index%
+		}
+	}
+	return
 }
 
 ; Initialize your variables and stuff here
@@ -108,7 +124,8 @@ adh_init_author_vars:
 	weapon_toggle_mode := false
 	Gosub, ResetToggle
 	return
-	
+
+/*	
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 ; DO NOT delete it entirely or remove it. It can be empty though
 adh_change_event:
@@ -122,6 +139,7 @@ adh_change_event:
 		}
 	}
 	return
+*/
 
 ; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
@@ -275,6 +293,8 @@ Class ADHDLib
 		this.events := {}
 		;this.events.profile_load := ""
 		this.events.option_changed := ""
+		this.events.program_mode_on := ""
+		this.events.program_mode_off := ""
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 	}
@@ -665,9 +685,6 @@ Class ADHDLib
 			
 			Tooltip, % this.events.option_changed
 			this.fire_event(this.events.option_changed)
-			
-			;Func("option_hook")
-			;Func(this.events.option_changed)
 			
 			; Debug settings
 			this.update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
