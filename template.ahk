@@ -251,7 +251,7 @@ Gui, 2:Add, Button, gadh_clear_log, clear
 adh_debug_ready := 1
 
 ; Finish setup =====================================
-GoSub, adh_profile_changed
+ADH.profile_changed()
 ADH.debug_window_change()
 
 ADH.debug("Finished startup")
@@ -642,8 +642,7 @@ Class ADH
 			; Trigger save
 			Gui, Submit, NoHide
 			
-			; Trigger Author Event
-			Gosub, adh_profile_changed
+			this.profile_changed()
 		}
 		return
 	}
@@ -677,9 +676,9 @@ Class ADH
 		; Update the profile list in the INI
 		this.update_ini("profile_list", "Settings", adh_profile_list, "")
 		
-		; Firing adh_option_changed saves the current state to the new profile name in the INI
+		; Firing option_changed saves the current state to the new profile name in the INI
 		this.debug("duplicate_profile calling option_changed")
-		Gosub, adh_option_changed
+		this.option_changed()
 
 		return
 	}
@@ -766,14 +765,14 @@ Class ADH
 		if (ctr < max){
 			GuiControl,, %ctrl%, None
 			this.debug("key_changed calling option_changed")
-			Gosub, adh_option_changed
+			this.option_changed()
 		} else {
 			; Detect actual key (Not modified) - clear mouse box
 			tmp := SubStr(ctrl,10)
 			; Set the mouse field to blank
 			GuiControl,ChooseString, adh_hk_m_%tmp%, None
 			this.debug("key_changed calling option_changed")
-			Gosub, adh_option_changed
+			this.option_changed()
 		}
 		return
 	}
@@ -784,7 +783,7 @@ Class ADH
 		; Set the keyboard field to blank
 		GuiControl,, adh_hk_k_%tmp%, None
 		this.debug("mouse_changed calling option_changed")
-		Gosub, adh_option_changed
+		this.option_changed()
 		return
 	}
 
@@ -848,16 +847,16 @@ Class ADH
 		} else {
 			gui, 2:hide
 		}
-		; On startup do not call adh_option_changed, we are just setting the window open or closed
+		; On startup do not call option_changed, we are just setting the window open or closed
 		if (!adh_starting_up){
-			gosub, adh_option_changed
+			this.option_changed()
 		}
 		return
 	}
 
 	debug_change(){
 		gui, 2:submit, nohide
-		gosub, adh_option_changed
+		this.option_changed()
 		return
 	}
 
