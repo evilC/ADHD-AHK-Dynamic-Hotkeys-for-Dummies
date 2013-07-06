@@ -35,9 +35,15 @@ ADH.config_size(375,220)
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
+/*
 ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
 ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
+*/
+
+ADH.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
+ADH.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
+ADH.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
 ADH.events.option_changed := "option_changed_hook"
 ADH.events.program_mode_on := ""
@@ -518,6 +524,10 @@ Class ADHDLib
 	}
 
 	; Setup stuff
+	config_hotkey_add(data){
+		this.hotkey_list.Insert(data)
+	}
+	
 	config_size(w,h){
 		this.gui_w := w
 		this.gui_h := h
