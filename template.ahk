@@ -326,7 +326,8 @@ Class ADH
 		IniRead, pl, %A_ScriptName%.ini, Settings, profile_list, Default
 		this.profile_list := pl
 		; Get current profile
-		IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
+		IniRead, cp, %A_ScriptName%.ini, Settings, current_profile, Default
+		this.current_profile := cp
 
 		; Set up the GUI ====================================================
 		Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
@@ -387,12 +388,13 @@ Class ADH
 		adh_current_row := adh_tabtop + 20
 		Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
 		local pl := this.profile_list
+		local cp := this.current_profile
 		Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%pl%
 		Gui, Add, Button, xp+152 yp-1 gadh_add_profile, Add
 		Gui, Add, Button, xp+35 yp gadh_delete_profile, Delete
 		Gui, Add, Button, xp+47 yp gadh_duplicate_profile, Copy
 		Gui, Add, Button, xp+40 yp gadh_rename_profile, Rename
-		GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
+		GuiControl,ChooseString, adh_current_profile, %cp%
 
 		Gui, Tab, 4
 		; ABOUT TAB
@@ -459,7 +461,6 @@ Class ADH
 
 	; aka load profile
 	profile_changed(){
-		global adh_current_profile
 		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
@@ -467,12 +468,15 @@ Class ADH
 		global adh_debug_mode
 		global adh_debug_window
 		
-		this.debug("profile_changed")
+		GuiControlGet,cp,,adh_current_profile
+		this.current_profile := cp
+		
+		this.debug("profile_changed - " this.current_profile)
 		Gui, Submit, NoHide
 
-		this.update_ini("current_profile", "Settings", adh_current_profile,"")
+		this.update_ini("current_profile", "Settings", this.current_profile,"")
 		
-		SB_SetText("Current profile: " adh_current_profile) 
+		SB_SetText("Current profile: " this.current_profile) 
 		
 		this.hotkey_mappings := {}
 		
@@ -483,12 +487,12 @@ Class ADH
 			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
 
 			; Keyboard bindings
-			tmp := this.read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
+			tmp := this.read_ini("adh_hk_k_" A_Index,this.current_profile,A_Space)
 			GuiControl,,adh_hk_k_%A_Index%, %tmp%
 			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
 			
 			; Mouse bindings
-			tmp := this.read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
+			tmp := this.read_ini("adh_hk_m_" A_Index,this.current_profile,A_Space)
 			GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
 			if (tmp != "None"){
 				this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
@@ -496,21 +500,21 @@ Class ADH
 
 			; Control Modifier
 			adh_modstring := ""
-			tmp := this.read_ini("adh_hk_c_" A_Index,adh_current_profile,0)
+			tmp := this.read_ini("adh_hk_c_" A_Index,this.current_profile,0)
 			GuiControl,, adh_hk_c_%A_Index%, %tmp%
 			if (tmp == 1){
 				adh_modstring := adh_modstring "^"
 			}
 			
 			; Shift Modifier
-			tmp := this.read_ini("adh_hk_s_" A_Index,adh_current_profile,0)
+			tmp := this.read_ini("adh_hk_s_" A_Index,this.current_profile,0)
 			GuiControl,, adh_hk_s_%A_Index%, %tmp%
 			if (tmp == 1){
 				adh_modstring := adh_modstring "+"
 			}
 			
 			; Alt Modifier
-			tmp := this.read_ini("adh_hk_a_" A_Index,adh_current_profile,0)
+			tmp := this.read_ini("adh_hk_a_" A_Index,this.current_profile,0)
 			GuiControl,, adh_hk_a_%A_Index%, %tmp%
 			if (tmp == 1){
 				adh_modstring := adh_modstring "!"
@@ -523,12 +527,12 @@ Class ADH
 		if (adh_default_app == "" || adh_default_app == null){
 			adh_default_app := A_Space
 		}
-		tmp := this.read_ini("adh_limit_app",adh_current_profile,adh_default_app)
+		tmp := this.read_ini("adh_limit_app",this.current_profile,adh_default_app)
 		GuiControl,, adh_limit_application, %tmp%
 		this.add_glabel("adh_limit_application")
 		
 		; limit application status
-		tmp := this.read_ini("adh_limit_app_on",adh_current_profile,0)
+		tmp := this.read_ini("adh_limit_app_on",this.current_profile,0)
 		GuiControl,, adh_limit_application_on, %tmp%
 		
 		; Get author vars from ini
@@ -542,7 +546,7 @@ Class ADH
 			adh_sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
 			
 			this.remove_glabel(adh_key)
-			tmp := this.read_ini(adh_key,adh_current_profile,adh_def)
+			tmp := this.read_ini(adh_key,this.current_profile,adh_def)
 			GuiControl,%adh_sm%, %adh_key%, %tmp%
 			this.add_glabel(adh_key)
 		}
@@ -566,7 +570,6 @@ Class ADH
 	option_changed(){
 		;global adh_starting_up
 		global adh_hotkeys
-		global adh_current_profile
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
@@ -581,11 +584,11 @@ Class ADH
 			; Hotkey bindings
 			Loop, % adh_hotkeys.MaxIndex()
 			{
-				this.update_ini("adh_hk_k_" A_Index, adh_current_profile, adh_hk_k_%A_Index%, "")
-				this.update_ini("adh_hk_m_" A_Index, adh_current_profile, adh_hk_m_%A_Index%, "None")
-				this.update_ini("adh_hk_c_" A_Index, adh_current_profile, adh_hk_c_%A_Index%, 0)
-				this.update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
-				this.update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
+				this.update_ini("adh_hk_k_" A_Index, this.current_profile, adh_hk_k_%A_Index%, "")
+				this.update_ini("adh_hk_m_" A_Index, this.current_profile, adh_hk_m_%A_Index%, "None")
+				this.update_ini("adh_hk_c_" A_Index, this.current_profile, adh_hk_c_%A_Index%, 0)
+				this.update_ini("adh_hk_s_" A_Index, this.current_profile, adh_hk_s_%A_Index%, 0)
+				this.update_ini("adh_hk_a_" A_Index, this.current_profile, adh_hk_a_%A_Index%, 0)
 			}
 			this.update_ini("profile_list", "Settings", this.profile_list,"")
 			
@@ -593,17 +596,17 @@ Class ADH
 			if (adh_default_app == "" || adh_default_app == null){
 				adh_default_app := A_Space
 			}
-			this.update_ini("adh_limit_app", adh_current_profile, adh_limit_application, adh_default_app)
-			SB_SetText("Current profile: " adh_current_profile)
+			this.update_ini("adh_limit_app", this.current_profile, adh_limit_application, adh_default_app)
+			SB_SetText("Current profile: " this.current_profile)
 			
 			; Limit app toggle
-			this.update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
+			this.update_ini("adh_limit_app_on", this.current_profile, adh_limit_application_on, 0)
 			
 			; Add author vars to ini
 			Loop, % this.ini_vars.MaxIndex()
 			{
 				tmp := this.ini_vars[A_Index,1]
-				this.update_ini(tmp, adh_current_profile, %tmp%, this.ini_vars[A_Index,3])
+				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
 			}
 			; Fire the Author hook
 			Gosub, adh_change_event
@@ -632,6 +635,8 @@ Class ADH
 
 	; Profile management - functions to manage preserving user settings
 	add_profile(name){
+		global adh_current_profile
+		
 		if (name == ""){
 			InputBox, name, Profile Name, Please enter a profile name
 			if (ErrorLevel){
@@ -710,6 +715,7 @@ Class ADH
 		Sort, pl, D|
 		this.profile_list := pl
 		
+		this.current_profile := name
 		adh_current_profile := name
 		; Push the new list to the profile select box
 		GuiControl,, adh_current_profile, |Default||%pl%
@@ -726,10 +732,8 @@ Class ADH
 	}
 
 	rename_profile(){
-		global adh_current_profile
-		
-		if (adh_current_profile != "Default"){
-			old_prof := adh_current_profile
+		if (this.current_profile != "Default"){
+			old_prof := this.current_profile
 			InputBox, new_prof, Profile Name, Please enter a new name
 			if (!ErrorLevel){
 				this.duplicate_profile(new_prof)
