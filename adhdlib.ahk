@@ -9,7 +9,6 @@ Class ADHDLib
 	; Features:
 
 	; Long-term:
-	; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
 	; Perform checking on hotkey_list to ensure sane values (No dupes, labels do not already exist etc)
 	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 	

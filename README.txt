@@ -59,5 +59,7 @@ Put the xml file in your notepad++ folder, restart then Language -> Autohotkey i
 
 If trying to compile an ADHD script to exe, be sure to be running the x86 (32-bit) version of AHK.
 x64 exes will not work on x86 windows, but x86 exes will work on x64 windows
+An ADHD macro will warn you on startup if you have compiled an x64 exe
+So if compiling to exe on x64 windows, just run the compiled exe, and if you do not get a warning, anyone should be able to run it
 
 
