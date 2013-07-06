@@ -37,6 +37,7 @@ ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
+; Hook into ADHD events
 ADHD.config_event("option_changed", "option_changed_hook")
 ADHD.config_event("program_mode_on", "")
 ADHD.config_event("program_mode_off", "")
@@ -127,11 +128,11 @@ adh_init_author_vars:
 adh_change_event:
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	Gosub, adh_init_author_vars
-	StringSplit, adh_tmp, FireSequence, `,
-	Loop, %adh_tmp0%
+	StringSplit, tmp, FireSequence, `,
+	Loop, %tmp0%
 	{
-		if (adh_tmp%A_Index% != ""){
-			fire_array[A_Index] := adh_tmp%A_Index%
+		if (tmp%A_Index% != ""){
+			fire_array[A_Index] := tmp%A_Index%
 		}
 	}
 	return
@@ -405,8 +406,8 @@ Class ADHDLib
 		; Add hotkeys
 		Loop, % this.hotkey_list.MaxIndex()
 		{
-			adh_tmpname := this.hotkey_list[A_Index,"uiname"]
-			Gui, Add, Text,x5 W100 y%current_row%, %adh_tmpname%
+			local name := this.hotkey_list[A_Index,"uiname"]
+			Gui, Add, Text,x5 W100 y%current_row%, %name%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
 			local mb := this.mouse_buttons
 			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%mb%
@@ -472,18 +473,19 @@ Class ADHDLib
 
 		; Add Debug window controls
 		Gui, Tab
-		adh_tmp := w - 90
-		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
+		local tmp
+		tmp := w - 90
+		Gui, Add, CheckBox, x%tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
 			
-		adh_tmp := w - 180
-		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
+		tmp := w - 180
+		Gui, Add, CheckBox, x%tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
 
 		; Fire GuiSubmit while starting_up is on to set all the variables
 		Gui, Submit, NoHide
 
 		; Create the debug GUI, but do not show yet
-		adh_tmp := w - 30
-		Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
+		tmp := w - 30
+		Gui, 2:Add,Edit,w%tmp% h350 vadh_log_contents ReadOnly,
 		Gui, 2:Add, Button, gadh_clear_log, clear
 	}
 
