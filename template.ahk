@@ -1026,7 +1026,7 @@ Class ADH
 		Loop, % adh_num_hotkeys
 		{
 			hotkey_prefix := adh_build_prefix(A_Index)
-			hotkey_keys :=  := adh_get_hotkey_string(A_Index)
+			hotkey_keys := adh_get_hotkey_string(A_Index)
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
 				; ToDo: Is there a better way to remove a hotkey?
