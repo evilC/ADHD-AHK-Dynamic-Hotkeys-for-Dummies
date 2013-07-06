@@ -7,6 +7,8 @@
 
 ; When writing code, as long as none of your function or variable names begin with adh_ then you should not have any conflicts!
 
+ADH := New ADHDLib
+
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; SETUP SECTION - TO GO IN CONSTRUCTOR? STUFF THAT NEEDS TO BE SET BEFORE ADH STARTS UP
 
@@ -237,7 +239,8 @@ DisableTimers:
 
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
-Class ADH
+Class ADHDLib
+	; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
 {
 	; ToDo:
 	; BUGS:
@@ -250,17 +253,23 @@ Class ADH
 	; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
 	; Perform checking on hotkey_list to ensure sane values (No dupes, labels do not already exist etc)
 	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
+	
+	; Constructor - init default values
+	__New(){
+		this.instantiated := 1
+	}
+	
+	; EXPOSED METHODS
+	
+	; Load settings etc
 	init(){
-		;global		; global for now, phase out!
 		global adh_gui_w
 		global adh_gui_h
 		
-		; ADH STARTUP AND GUI CREATION
-
-		; Debug vars - globals are also control variables (v-labels) so do not keep them in class
-		global adh_debug_mode := 0
-		global adh_debug_window := 0
-		global adh_log_contents := ""
+		if (this.instantiated != 1){
+			msgbox You must use an instance of this class, not the class itself.`nPut something like ADH := New ADH at the start of your script
+			ExitApp
+		}
 		
 		if (this.hotkey_list.MaxIndex() < 1){
 			msgbox, No Actions defined, Exiting...
@@ -275,12 +284,9 @@ Class ADH
 			}
 
 		}
-		;global adh_debug_ready
-		;adh_debug_ready := 0
 		this.debug_ready := 0
 		
 		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
-		;adh_starting_up := 1
 		this.starting_up := 1
 
 		ADH.debug("Starting up...")
@@ -337,11 +343,9 @@ Class ADH
 
 		; Set up the GUI ====================================================
 		Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
-
-
 	}
 	
-	; ADH Library
+	; Creates the ADHD gui
 	create_gui(){
 		; IMPORTANT !!
 		; Declare global for gui creation routine.
@@ -421,7 +425,7 @@ Class ADH
 		local ver := this.core_version
 		local x := this.gui_x
 		local y := this.gui_y
-		Gui, Show, x%x% y%y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%ver%)
+		Gui, Show, x%x% y%y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADHD v%ver%)
 
 		; Add Debug window controls
 		Gui, Tab
