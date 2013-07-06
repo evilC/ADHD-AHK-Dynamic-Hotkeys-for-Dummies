@@ -965,6 +965,59 @@ Class ADH
 		}
 	}
 
+	
+	; Hotkey detection routines
+	enable_hotkeys(){
+		global adh_num_hotkeys
+		global adh_limit_application
+		global adh_limit_application_on
+		global adh_hotkeys
+		
+		; ToDo: Should not submit gui here, triggering save...
+		;adh_debug("enable_hotkeys")
+
+		Gui, Submit, NoHide
+		Loop, % adh_num_hotkeys
+		{
+			hotkey_prefix := adh_build_prefix(A_Index)
+			hotkey_keys := adh_get_hotkey_string(A_Index)
+			
+			if (hotkey_keys != ""){
+				hotkey_string := hotkey_prefix hotkey_keys
+				hotkey_subroutine := adh_hotkeys[A_Index,"subroutine"]
+				if (adh_limit_application_on == 1){
+					if (adh_limit_application !=""){
+						; Enable Limit Application for all subsequently declared hotkeys
+						Hotkey, IfWinActive, ahk_class %adh_limit_application%
+					}
+				} else {
+					; Disable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive
+				}
+				
+				; Bind down action of hotkey
+				Hotkey, ~%hotkey_string% , %hotkey_subroutine%
+				
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
+				}
+				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
+			}
+			
+			; ToDo: Disabling of GUI controls should not be in here - put them in program mode
+			GuiControl, Disable, adh_hk_k_%A_Index%
+			GuiControl, Disable, adh_hk_m_%A_Index%
+			GuiControl, Disable, adh_hk_c_%A_Index%
+			GuiControl, Disable, adh_hk_s_%A_Index%
+			GuiControl, Disable, adh_hk_a_%A_Index%
+		}
+		return
+	}
+
+
+	
+	
 	; 3rd party functions
 	; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
 	mouse_move(){
@@ -1016,7 +1069,6 @@ Class ADH
 		}
 	}
 		
-
 }
 
 
@@ -1075,56 +1127,8 @@ adh_get_hotkey_string(hk){
 }
 
 adh_enable_hotkeys:
-	adh_enable_hotkeys()
+	ADH.enable_hotkeys()
 	return
-
-adh_enable_hotkeys(){
-	global adh_num_hotkeys
-	global adh_limit_application
-	global adh_limit_application_on
-	global adh_hotkeys
-	
-	; ToDo: Should not submit gui here, triggering save...
-	;adh_debug("enable_hotkeys")
-
-	Gui, Submit, NoHide
-	Loop, % adh_num_hotkeys
-	{
-		hotkey_prefix := adh_build_prefix(A_Index)
-		hotkey_keys := adh_get_hotkey_string(A_Index)
-		
-		if (hotkey_keys != ""){
-			hotkey_string := hotkey_prefix hotkey_keys
-			hotkey_subroutine := adh_hotkeys[A_Index,"subroutine"]
-			if (adh_limit_application_on == 1){
-				if (adh_limit_application !=""){
-					; Enable Limit Application for all subsequently declared hotkeys
-					Hotkey, IfWinActive, ahk_class %adh_limit_application%
-				}
-			} else {
-				; Disable Limit Application for all subsequently declared hotkeys
-				Hotkey, IfWinActive
-			}
-			
-			; Bind down action of hotkey
-			Hotkey, ~%hotkey_string% , %hotkey_subroutine%
-			
-			if (IsLabel(hotkey_subroutine "Up")){
-				; Bind up action of hotkey
-				Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
-			}
-			; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-		}
-		
-		; ToDo: Disabling of GUI controls should not be in here - put them in program mode
-		GuiControl, Disable, adh_hk_k_%A_Index%
-		GuiControl, Disable, adh_hk_m_%A_Index%
-		GuiControl, Disable, adh_hk_c_%A_Index%
-		GuiControl, Disable, adh_hk_s_%A_Index%
-		GuiControl, Disable, adh_hk_a_%A_Index%
-	}
-	return
-}
 
 adh_disable_hotkeys:
 	adh_disable_hotkeys()
