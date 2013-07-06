@@ -133,7 +133,7 @@ Class ADHDLib
 		this.gui_y := y
 		
 		; Get list of profiles
-		IniRead, pl, %ini%, Settings, profile_list, %A_Space%
+		IniRead, pl, %ini%, Settings, adhd_profile_list, %A_Space%
 		this.profile_list := pl
 		; Get current profile
 		IniRead, cp, %ini%, Settings, adhd_current_profile, Default
@@ -453,7 +453,7 @@ Class ADHDLib
 				this.update_ini("adhd_hk_s_" A_Index, this.current_profile, adhd_hk_s_%A_Index%, 0)
 				this.update_ini("adhd_hk_a_" A_Index, this.current_profile, adhd_hk_a_%A_Index%, 0)
 			}
-			this.update_ini("profile_list", "Settings", this.profile_list,"")
+			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
 			
 			; Limit app
 			if (this.default_app == "" || this.default_app == null){
@@ -531,7 +531,7 @@ Class ADHDLib
 		GuiControl,, adhd_current_profile, |Default||%pl%
 		GuiControl,ChooseString, adhd_current_profile, %name%
 		
-		this.update_ini("profile_list", "Settings", this.profile_list, "")
+		this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")
 	}
 
 	delete_profile(name, gotoprofile = "Default"){
@@ -554,7 +554,7 @@ Class ADHDLib
 			
 			ini := this.ini_name
 			IniDelete, %ini%, %name%
-			this.update_ini("profile_list", "Settings", this.profile_list, "")		
+			this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")		
 			
 			; Set new contents of list
 			GuiControl,, adhd_current_profile, |Default|%pl%
@@ -599,7 +599,7 @@ Class ADHDLib
 		; Set the new profile to the currently selected item
 		GuiControl,ChooseString, adhd_current_profile, %name%
 		; Update the profile list in the INI
-		this.update_ini("profile_list", "Settings", this.profile_list, "")
+		this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")
 		
 		; Firing option_changed saves the current state to the new profile name in the INI
 		this.debug("duplicate_profile calling option_changed")
