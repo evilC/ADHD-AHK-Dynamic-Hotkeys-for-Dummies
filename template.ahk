@@ -43,19 +43,6 @@ adh_hotkeys.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 adh_hotkeys.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
 
-if (adh_hotkeys.MaxIndex() < 1){
-	msgbox, No Actions defined, Exiting...
-	ExitApp
-}
-
-Loop, % adh_hotkeys.MaxIndex()
-{
-	If (IsLabel(adh_hotkeys[A_Index,"subroutine"]) == false){
-		msgbox, % "The label`n`n" adh_hotkeys[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
-		ExitApp
-	}
-
-}
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -274,7 +261,21 @@ Class ADH
 		global adh_debug_mode := 0
 		global adh_debug_window := 0
 		global adh_log_contents := ""
+		global adh_hotkeys
 		
+		if (adh_hotkeys.MaxIndex() < 1){
+			msgbox, No Actions defined, Exiting...
+			ExitApp
+		}
+
+		Loop, % adh_hotkeys.MaxIndex()
+		{
+			If (IsLabel(adh_hotkeys[A_Index,"subroutine"]) == false){
+				msgbox, % "The label`n`n" adh_hotkeys[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
+				ExitApp
+			}
+
+		}
 		;global adh_debug_ready
 		;adh_debug_ready := 0
 		this.debug_ready := 0
