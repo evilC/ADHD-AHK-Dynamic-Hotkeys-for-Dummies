@@ -7,10 +7,10 @@
 
 ; When writing code, as long as none of your function or variable names begin with adh_ then you should not have any conflicts!
 
-ADH := New ADHDLib
+ADHD := New ADHDLib
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; SETUP SECTION - TO GO IN CONSTRUCTOR? STUFF THAT NEEDS TO BE SET BEFORE ADH STARTS UP
+; SETUP SECTION - TO GO IN CONSTRUCTOR? STUFF THAT NEEDS TO BE SET BEFORE ADHD STARTS UP
 
 ; Authors - configure this section according to your macro.
 ; You should not add extra things here (except add more records to hotkey_list etc)
@@ -22,40 +22,33 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADH.config_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
-;ADH.config.test()
+ADHD.config_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ; Set it to blank ("") to disable altogether, DO NOT DELETE!
-ADH.config_default_app("CryENGINE")
+ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADH.config_size(375,220)
+ADHD.config_size(375,220)
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-/*
-ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
-ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
-ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
-*/
+ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
+ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
+ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
-ADH.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
-ADH.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
-ADH.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
-
-ADH.events.option_changed := "option_changed_hook"
-ADH.events.program_mode_on := ""
-ADH.events.program_mode_off := ""
-ADH.events.app_active := ""								; When the "Limited" app comes into focus
-ADH.events.app_inactive := ""							; When the "Limited" app goes out of focus
+ADHD.events.option_changed := "option_changed_hook"
+ADHD.events.program_mode_on := ""
+ADHD.events.program_mode_off := ""
+ADHD.events.app_active := ""								; When the "Limited" app comes into focus
+ADHD.events.app_inactive := ""							; When the "Limited" app goes out of focus
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-ADH.init()
-ADH.create_gui()
+ADHD.init()
+ADHD.create_gui()
 
 
 Gui, Tab, 1
@@ -63,37 +56,37 @@ Gui, Tab, 1
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; AUTHORS - PLACE CUSTOM GUI ITEMS IN HERE
 ; If you want their state saved in the ini file, add a line like this after you add the control:
-; ADH.ini_vars.Insert(["MyControl","DropDownList",1])
+; ADHD.gui_add("ControlType", "MyControl", "MyOptions", "Param3", "Default")
 ; The format is Name, Control Type, Default Value
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
 
 
 Gui, Add, Text, x5 y40, Fire Sequence
-ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
+ADHD.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
-ADH.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
+ADHD.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
-ADH.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
+ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
 
-ADH.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
+ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
-h := ADH.gui_h - 40
-name := ADH.author_macro_name
-Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
+h := ADHD.gui_h - 40
+name := ADHD.author_macro_name
+Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
 
 ; End GUI creation section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-ADH.finish_startup()
+ADHD.finish_startup()
 return
 
-; END OF ADH STARTUP
+; END OF ADHD STARTUP
 ; "AUTHOR" MACRO STARTS HERE
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -154,7 +147,7 @@ Fire:
 	; Many games do not work properly with autofire unless this is enabled.
 	; You can try leaving it out.
 	; MechWarrior Online for example will not do fast (<~500ms) chain fire with weapons all in one group without this enabled
-	ADH.send_keyup_on_press("Fire","unmodified")
+	ADHD.send_keyup_on_press("Fire","unmodified")
 
 
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
@@ -252,7 +245,7 @@ ResetToggle:
 	SetScrollLockState, Off
 	return
 
-; Keep this duplicate label here so ADH can stop any timers you start
+; Keep this duplicate label here so ADHD can stop any timers you start
 adh_disable_author_timers:
 ; Keep all timer disables in here so when we leave app we can stop timers
 DisableTimers:
@@ -308,7 +301,7 @@ Class ADHDLib
 	; Load settings etc
 	init(){
 		if (this.instantiated != 1){
-			msgbox You must use an instance of this class, not the class itself.`nPut something like ADH := New ADH at the start of your script
+			msgbox You must use an instance of this class, not the class itself.`nPut something like ADHD := New ADHDLib at the start of your script
 			ExitApp
 		}
 		
@@ -330,10 +323,10 @@ Class ADHDLib
 		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
 		this.starting_up := 1
 
-		ADH.debug("Starting up...")
+		this.debug("Starting up...")
 		this.app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
-		; Start ADH init vars and settings
+		; Start ADHD init vars and settings
 		this.core_version := 0.3
 
 		; Variables to be stored in the INI file - will be populated by code later
@@ -359,7 +352,7 @@ Class ADHDLib
 		IniRead, x, %A_ScriptName%.ini, Settings, gui_x, unset
 		IniRead, y, %A_ScriptName%.ini, Settings, gui_y, unset
 		if (x == "unset"){
-			msgbox, Welcome to this ADH based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
+			msgbox, Welcome to this ADHD based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
 			x := 0	; initialize
 		}
 		if (y == "unset"){
@@ -510,14 +503,14 @@ Class ADHDLib
 
 		;Hook for Tooltips
 		OnMessage(0x200, "this.mouse_move")
-		;OnMessage(0x47, "ADH.gui_move")
+		;OnMessage(0x47, "ADHD.gui_move")
 
 
 		; Finish setup =====================================
-		ADH.profile_changed()
-		ADH.debug_window_change()
+		this.profile_changed()
+		this.debug_window_change()
 
-		ADH.debug("Finished startup")
+		this.debug("Finished startup")
 
 		; Finished startup, allow change of controls to fire events
 		this.starting_up := 0
@@ -989,7 +982,7 @@ Class ADHDLib
 			WinGetPos, x, y,,, ahk_id %gui_id%
 			y := y - 440
 			w := this.gui_w
-			Gui, 2:Show, x%x% y%y% w%w% h400, ADH Debug Window
+			Gui, 2:Show, x%x% y%y% w%w% h400, ADHD Debug Window
 		} else {
 			gui, 2:hide
 		}
@@ -1270,72 +1263,72 @@ Class ADHDLib
 ; Label triggers
 
 adh_profile_changed:
-	ADH.profile_changed()
+	ADHD.profile_changed()
 	return
 
 adh_option_changed:
-	ADH.option_changed()
+	ADHD.option_changed()
 	return
 
 adh_add_profile:
-	ADH.add_profile("")	; just clicking the button calls with empty param
+	ADHD.add_profile("")	; just clicking the button calls with empty param
 	return
 
 ; Delete Profile pressed
 adh_delete_profile:
-	ADH.delete_profile(adh_current_profile)	; Just clicking the button deletes the current profile
+	ADHD.delete_profile(adh_current_profile)	; Just clicking the button deletes the current profile
 	return
 
 adh_duplicate_profile:
-	ADH.duplicate_profile("")
+	ADHD.duplicate_profile("")
 	return
 	
 adh_rename_profile:
-	ADH.rename_profile()
+	ADHD.rename_profile()
 	return
 
 adh_tab_changed:
-	ADH.tab_changed()
+	ADHD.tab_changed()
 	return
 
 adh_key_changed:
-	ADH.key_changed(A_GuiControl)
+	ADHD.key_changed(A_GuiControl)
 	return
 
 adh_mouse_changed:
-	ADH.mouse_changed()
+	ADHD.mouse_changed()
 	return
 
 adh_enable_hotkeys:
-	ADH.enable_hotkeys()
+	ADHD.enable_hotkeys()
 	return
 
 adh_disable_hotkeys:
-	ADH.disable_hotkeys()
+	ADHD.disable_hotkeys()
 	return
 
 adh_show_window_spy:
-	ADH.show_window_spy()
+	ADHD.show_window_spy()
 	return
 
 adh_debug_window_change:
-	ADH.debug_window_change()
+	ADHD.debug_window_change()
 	return
 
 adh_debug_change:
-	ADH.debug_change()
+	ADHD.debug_change()
 	return
 	
 adh_clear_log:
-	ADH.clear_log()
+	ADHD.clear_log()
 	return
 
 adh_program_mode_changed:
-	ADH.program_mode_changed()
+	ADHD.program_mode_changed()
 	return
 
 adh_heartbeat:
-	ADH.heartbeat()
+	ADHD.heartbeat()
 	return
 
 ; An empty stub to redirect unbound hotkeys to
@@ -1345,14 +1338,14 @@ adh_do_nothing:
 ; Kill the macro if the GUI is closed
 adh_exit_app:
 GuiClose:
-	ADH.exit_app()
+	ADHD.exit_app()
 	return
 
 ; ==========================================================================================================================
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If adh_ctrl := ADH.hotkey_ctrl_has_focus()
+#If adh_ctrl := ADHD.hotkey_ctrl_has_focus()
 	*AppsKey::                       ;Add support for these special keys,
 	*BackSpace::                     ;  which the hotkey control does not normally allow.
 	*Delete::
@@ -1365,6 +1358,6 @@ GuiClose:
 	; Can use mouse hotkeys like this - it detects them but does not display them
 	;~*WheelUp::
 	; ToDo: Pass A_ThisHotkey also?
-	ADH.special_key_pressed(adh_ctrl)
+	ADHD.special_key_pressed(adh_ctrl)
 	return
 #If
