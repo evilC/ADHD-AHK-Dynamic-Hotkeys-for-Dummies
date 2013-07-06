@@ -25,7 +25,6 @@ SetKeyDelay, 0, 50
 ADHD.config_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
-; Set it to blank ("") to disable altogether, DO NOT DELETE!
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
@@ -38,11 +37,11 @@ ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
-ADHD.events.option_changed := "option_changed_hook"
-ADHD.events.program_mode_on := ""
-ADHD.events.program_mode_off := ""
-ADHD.events.app_active := ""								; When the "Limited" app comes into focus
-ADHD.events.app_inactive := ""							; When the "Limited" app goes out of focus
+ADHD.config_event("option_changed", "option_changed_hook")
+ADHD.config_event("program_mode_on", "")
+ADHD.config_event("program_mode_off", "")
+ADHD.config_event("app_active", "")
+ADHD.config_event("app_inactive", "")
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -99,6 +98,7 @@ option_changed_hook(){
 	global fire_array
 	global FireSequence
 	
+	soundplay, *16
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	Gosub, adh_init_author_vars
 	StringSplit, tmp, FireSequence, `,
@@ -520,6 +520,11 @@ Class ADHDLib
 	; Setup stuff
 	config_hotkey_add(data){
 		this.hotkey_list.Insert(data)
+	}
+	
+	;ADHD.config_event("option_changed", "option_changed_hook")
+	config_event(name, hook){
+		this.events[name] := hook
 	}
 	
 	config_size(w,h){
