@@ -47,6 +47,7 @@ if (adh_hotkeys.MaxIndex() < 1){
 	msgbox, No Actions defined, Exiting...
 	ExitApp
 }
+
 Loop, % adh_hotkeys.MaxIndex()
 {
 	If (IsLabel(adh_hotkeys[A_Index,"subroutine"]) == false){
@@ -73,10 +74,12 @@ Gui, Tab, 1
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
 
 tabtop := 40
-
 Gui, Add, Text, x5 y%tabtop%, Fire Sequence
+ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "")
+/*
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
 ADH.ini_vars.Insert(["FireSequence","Edit",""])
+*/
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
@@ -95,7 +98,8 @@ Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwo
 adh_tmp := adh_gui_h - 40
 Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%adh_macro_name% Instructions</a>
 
-
+; End GUI creation section
+; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 ADH.finish_startup()
@@ -443,6 +447,15 @@ Class ADH
 		Gui, 2:Add, Button, gadh_clear_log, clear
 	}
 	
+	gui_add(ctype, cname, copts, cdef){
+		Global
+		;gui_add("Edit", "FireSequence", "xp+120 yp W120")
+		;Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
+		Gui, Add, %ctype%, %copts% v%cname% gadh_option_changed,
+		this.ini_vars.Insert([cname,ctype,cdef])
+
+	}
+
 	finish_startup(){
 		global	; Remove! phase out mass use of globals
 		this.debug_ready := 1
