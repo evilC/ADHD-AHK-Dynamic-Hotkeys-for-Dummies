@@ -231,7 +231,7 @@ Gui, Add, StatusBar,,
 Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
 
 ;Hook for Tooltips
-OnMessage(0x200, "adh_mouse_move")
+OnMessage(0x200, "ADH.mouse_move")
 
 ; Add Debug window controls
 Gui, Tab
@@ -959,6 +959,30 @@ Class ADH
 		}
 	}
 
+	; 3rd party functions
+	; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
+	mouse_move(){
+		static CurrControl, PrevControl, _TT
+		CurrControl := A_GuiControl
+		If (CurrControl <> PrevControl){
+				SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
+				PrevControl := CurrControl
+		}
+		return
+		
+		DisplayToolTip:
+		try
+				ToolTip % %CurrControl%_TT
+		catch
+				ToolTip
+		SetTimer, RemoveToolTip, -10000
+		return
+		
+		RemoveToolTip:
+		ToolTip
+		return
+	}
+
 
 }
 
@@ -1200,25 +1224,3 @@ adh_hotkey_ctrl_has_focus() {
 	}
 }
 	
-; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
-adh_mouse_move(){
-	static CurrControl, PrevControl, _TT
-	CurrControl := A_GuiControl
-	If (CurrControl <> PrevControl){
-			SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
-			PrevControl := CurrControl
-	}
-	return
-	
-	DisplayToolTip:
-	try
-			ToolTip % %CurrControl%_TT
-	catch
-			ToolTip
-	SetTimer, RemoveToolTip, -10000
-	return
-	
-	RemoveToolTip:
-	ToolTip
-	return
-}
