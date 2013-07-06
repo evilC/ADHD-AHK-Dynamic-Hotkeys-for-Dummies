@@ -11,7 +11,7 @@
 ; SETUP SECTION - TO GO IN CONSTRUCTOR? STUFF THAT NEEDS TO BE SET BEFORE ADH STARTS UP
 
 ; Authors - configure this section according to your macro.
-; You should not add extra things here (except add more records to adh_hotkeys etc)
+; You should not add extra things here (except add more records to hotkey_list etc)
 ; Also you should generally not delete things here - set them to a different value instead
 
 ; You may need to edit these depending on game
@@ -37,10 +37,10 @@ adh_gui_h := 220
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-adh_hotkeys := []
-adh_hotkeys.Insert({uiname: "Fire", subroutine: "Fire"})
-adh_hotkeys.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
-adh_hotkeys.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
+ADH.hotkey_list := []
+ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
+ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
+ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
 
 
@@ -248,7 +248,7 @@ Class ADH
 
 	; Long-term:
 	; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
-	; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
+	; Perform checking on hotkey_list to ensure sane values (No dupes, labels do not already exist etc)
 	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
 	init(){
 		;global		; global for now, phase out!
@@ -261,17 +261,16 @@ Class ADH
 		global adh_debug_mode := 0
 		global adh_debug_window := 0
 		global adh_log_contents := ""
-		global adh_hotkeys
 		
-		if (adh_hotkeys.MaxIndex() < 1){
+		if (this.hotkey_list.MaxIndex() < 1){
 			msgbox, No Actions defined, Exiting...
 			ExitApp
 		}
 
-		Loop, % adh_hotkeys.MaxIndex()
+		Loop, % this.hotkey_list.MaxIndex()
 		{
-			If (IsLabel(adh_hotkeys[A_Index,"subroutine"]) == false){
-				msgbox, % "The label`n`n" adh_hotkeys[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
+			If (IsLabel(this.hotkey_list[A_Index,"subroutine"]) == false){
+				msgbox, % "The label`n`n" this.hotkey_list[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
 				ExitApp
 			}
 
@@ -364,9 +363,9 @@ Class ADH
 		Gui, Add, Text, xp+30 W30 Center, Alt
 
 		; Add hotkeys
-		Loop, % adh_hotkeys.MaxIndex()
+		Loop, % this.hotkey_list.MaxIndex()
 		{
-			adh_tmpname := adh_hotkeys[A_Index,"uiname"]
+			adh_tmpname := this.hotkey_list[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%current_row%, %adh_tmpname%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
 			local mb := this.mouse_buttons
@@ -480,7 +479,6 @@ Class ADH
 	profile_changed(){
 		global adh_debug_mode
 
-		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
@@ -499,21 +497,21 @@ Class ADH
 		this.hotkey_mappings := {}
 		
 		; Load hotkey bindings
-		Loop, % adh_hotkeys.MaxIndex()
+		Loop, % this.hotkey_list.MaxIndex()
 		{
-			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
-			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
+			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]] := {}
+			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["index"] := A_Index
 
 			; Keyboard bindings
 			tmp := this.read_ini("adh_hk_k_" A_Index,this.current_profile,A_Space)
 			GuiControl,,adh_hk_k_%A_Index%, %tmp%
-			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
 			
 			; Mouse bindings
 			tmp := this.read_ini("adh_hk_m_" A_Index,this.current_profile,A_Space)
 			GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
 			if (tmp != "None"){
-				this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+				this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
 			}
 
 			; Control Modifier
@@ -537,7 +535,7 @@ Class ADH
 			if (tmp == 1){
 				adh_modstring := adh_modstring "!"
 			}
-			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
+			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["modified"] := adh_modstring this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"]
 		}
 		
 		; limit application name
@@ -588,7 +586,6 @@ Class ADH
 	option_changed(){
 		global adh_debug_mode
 
-		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
@@ -600,7 +597,7 @@ Class ADH
 			Gui, Submit, NoHide
 
 			; Hotkey bindings
-			Loop, % adh_hotkeys.MaxIndex()
+			Loop, % this.hotkey_list.MaxIndex()
 			{
 				this.update_ini("adh_hk_k_" A_Index, this.current_profile, adh_hk_k_%A_Index%, "")
 				this.update_ini("adh_hk_m_" A_Index, this.current_profile, adh_hk_m_%A_Index%, "None")
@@ -1027,20 +1024,19 @@ Class ADH
 	enable_hotkeys(){
 		global adh_limit_application
 		global adh_limit_application_on
-		global adh_hotkeys
 		
 		; ToDo: Should not submit gui here, triggering save...
 		this.debug("enable_hotkeys")
 
 		Gui, Submit, NoHide
-		Loop, % adh_hotkeys.MaxIndex()
+		Loop, % this.hotkey_list.MaxIndex()
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
 			
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
-				hotkey_subroutine := adh_hotkeys[A_Index,"subroutine"]
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 				if (adh_limit_application_on == 1){
 					if (adh_limit_application !=""){
 						; Enable Limit Application for all subsequently declared hotkeys
@@ -1074,11 +1070,10 @@ Class ADH
 	disable_hotkeys(){
 		global adh_limit_application
 		global adh_limit_application_on
-		global adh_hotkeys
 		
 		this.debug("disable_hotkeys")
 
-		Loop, % adh_hotkeys.MaxIndex()
+		Loop, % this.hotkey_list.MaxIndex()
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
