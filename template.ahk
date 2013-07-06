@@ -21,11 +21,10 @@ SendMode, Event
 SetKeyDelay, 0, 50
 
 ; Stuff for the About box
-adh_macro_name := "Fire Control"					; Change this to your macro name
-adh_version := 1.0									; The version number of your script
-adh_author := "evilC"								; Your Name
-adh_link_text := "HomePage"							; The text of a link to your page about this macro
-adh_link_url := "http://evilc.com/proj/firectrl"		; The URL for the homepage of your script
+ADH.author_macro_name := "Fire Control"					; Change this to your macro name
+ADH.author_version := 1.0									; The version number of your script
+ADH.author_name := "evilC"								; Your Name
+ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
 
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
@@ -39,7 +38,7 @@ adh_gui_h := 220
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-ADH.hotkey_list := []
+;ADH.hotkey_list := []
 ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
 ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
@@ -77,8 +76,9 @@ ADH.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified r
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
-adh_tmp := adh_gui_h - 40
-Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%adh_macro_name% Instructions</a>
+tmp := adh_gui_h - 40
+name := ADH.author_macro_name
+Gui, Add, Link, x5 y%tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
 
 ; End GUI creation section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -257,6 +257,11 @@ Class ADHDLib
 	; Constructor - init default values
 	__New(){
 		this.instantiated := 1
+		this.hotkey_list := []
+		this.author_macro_name := "An ADHD Macro"					; Change this to your macro name
+		this.author_version := 1.0									; The version number of your script
+		this.author_name := "Unknown"							; Your Name
+		this.author_link := ""
 	}
 	
 	; EXPOSED METHODS
@@ -412,8 +417,10 @@ Class ADHDLib
 		current_row := tabtop + 20
 		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 		Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
-		Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
-		Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
+		local name := this.author_macro_name
+		Gui, Add, Link,x5 yp+35, This macro ("%name%") was created by %name%
+		local link := this.author_link
+		Gui, Add, Link,x5 yp+25, %link%
 
 		Gui, Tab
 
@@ -423,9 +430,10 @@ Class ADHDLib
 
 		; Show the GUI =====================================
 		local ver := this.core_version
+		local aver := this.author_version
 		local x := this.gui_x
 		local y := this.gui_y
-		Gui, Show, x%x% y%y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADHD v%ver%)
+		Gui, Show, x%x% y%y% w%adh_gui_w% h%adh_gui_h%, %name% v%aver% (ADHD v%ver%)
 
 		; Add Debug window controls
 		Gui, Tab
@@ -443,6 +451,7 @@ Class ADHDLib
 		Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
 		Gui, 2:Add, Button, gadh_clear_log, clear
 	}
+
 	
 	; Adds a GUI item and registers it for storage in the INI file
 	; type(edit etc), name(variable name), options(eg xp+50), param3(eg dropdown list, label), default(used for ini file)
