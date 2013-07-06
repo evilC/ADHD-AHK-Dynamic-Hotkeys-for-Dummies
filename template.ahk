@@ -301,7 +301,7 @@ Class ADH
 		OnExit, GuiClose
 
 		; List of mouse buttons
-		adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
+		this.mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
 		IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
 		IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
@@ -338,6 +338,8 @@ Class ADH
 		; IMPORTANT !!
 		; Declare global for gui creation routine.
 		; Limitation of AHK - no dynamic creation of vars, and guicontrols need a global or static var
+		; Also, gui commands do not accept objects
+		; So declare temp vars as local in here
 		global
 		
 		Gui, Tab, 2
@@ -355,7 +357,8 @@ Class ADH
 			adh_tmpname := adh_hotkeys[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
-			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
+			local mb := this.adh_mouse_buttons
+			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%mb%
 			Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_a_%A_Index% gadh_option_changed
