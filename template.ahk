@@ -75,16 +75,19 @@ Gui, Tab, 1
 
 tabtop := 40
 Gui, Add, Text, x5 y%tabtop%, Fire Sequence
-ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
 /*
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
 ADH.ini_vars.Insert(["FireSequence","Edit",""])
 */
+ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
+/*
 Gui, Add, Edit, xp+120 yp W120 vFireRate gadh_option_changed,
 ADH.ini_vars.Insert(["FireRate","Edit",100])
+*/
+ADH.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
 Gui, Add, DropDownList, xp+120 yp-2 W50 vWeaponToggle gadh_mouse_changed, None|1|2|3|4|5|6
