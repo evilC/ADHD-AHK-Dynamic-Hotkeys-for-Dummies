@@ -35,10 +35,31 @@ Class ADHDLib
 		this.events.disable_timers := ""
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
+		
+		; strip extension from end of script name for basis of INI name
+		this.ini_name := this.build_ini_name()
 	}
 
 	; EXPOSED METHODS
 	
+	build_ini_name(){
+		tmp := A_Scriptname
+		Stringsplit, tmp, tmp,.
+		ini_name := ""
+		last := ""
+		Loop, % tmp0
+		{
+			if (last != ""){
+				if (ini_name != ""){
+					ini_name := ini_name "."
+				}
+				ini_name := ini_name last
+			}
+			last := tmp%A_Index%
+		}
+		ini_name := ini_name ".ini"
+		return ini_name
+	}
 	
 	; Load settings etc
 	init(){
