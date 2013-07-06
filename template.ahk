@@ -136,6 +136,9 @@ Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Pro
 adh_tabtop := 40
 adh_current_row := adh_tabtop + 20
 
+ADH.gui_test()
+
+
 Gui, Tab, 1
 ; MAIN TAB
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
@@ -168,7 +171,6 @@ Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructi
 
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-ADH.gui_test()
 /*
 Gui, Tab, 2
 ; BINDINGS TAB
@@ -234,9 +236,7 @@ Gui, Add, StatusBar,,
 
 ; Show the GUI =====================================
 Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
-*/
-;Hook for Tooltips
-OnMessage(0x200, "ADH.mouse_move")
+
 
 ; Add Debug window controls
 Gui, Tab
@@ -253,7 +253,12 @@ Gui, Submit, NoHide
 adh_tmp := adh_gui_w - 30
 Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
 Gui, 2:Add, Button, gadh_clear_log, clear
+*/
 adh_debug_ready := 1
+
+;Hook for Tooltips
+OnMessage(0x200, "ADH.mouse_move")
+
 
 ; Finish setup =====================================
 ADH.profile_changed()
@@ -492,6 +497,21 @@ Class ADH
 		; Show the GUI =====================================
 		Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
 
+		; Add Debug window controls
+		Gui, Tab
+		adh_tmp := adh_gui_w - 90
+		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
+			
+		adh_tmp := adh_gui_w - 180
+		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
+			
+		; Fire GuiSubmit while adh_starting_up is on to set all the variables
+		Gui, Submit, NoHide
+
+		; Create the debug GUI, but do not show yet
+		adh_tmp := adh_gui_w - 30
+		Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
+		Gui, 2:Add, Button, gadh_clear_log, clear
 	}
 	
 	; aka load profile
