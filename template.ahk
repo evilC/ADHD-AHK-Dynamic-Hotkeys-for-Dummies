@@ -73,31 +73,18 @@ Gui, Tab, 1
 ; The format is Name, Control Type, Default Value
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
 
-tabtop := 40
-Gui, Add, Text, x5 y%tabtop%, Fire Sequence
-/*
-Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
-ADH.ini_vars.Insert(["FireSequence","Edit",""])
-*/
+
+Gui, Add, Text, x5 y40, Fire Sequence
 ADH.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
-/*
-Gui, Add, Edit, xp+120 yp W120 vFireRate gadh_option_changed,
-ADH.ini_vars.Insert(["FireRate","Edit",100])
-*/
 ADH.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
-/*
-Gui, Add, DropDownList, xp+120 yp-2 W50 vWeaponToggle gadh_mouse_changed, None|1|2|3|4|5|6
-ADH.ini_vars.Insert(["WeaponToggle","DropDownList","None"])
-*/
 ADH.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
 
-Gui, Add, CheckBox, x5 yp+30 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
-ADH.ini_vars.Insert(["LimitFire","CheckBox",0])
+ADH.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
