@@ -1,10 +1,10 @@
-ADHD - AHK-Dynamic-Hotkeys
-=====================
+ADHD - AHK Dynamic Hotkeys for Dummies
+======================================
 
 By Clive Galway - evilc@evilc.com
 http://evilc.com/proj/adh
 
-An AutoHotKey GUI script template that allows authors to easily create AHK macros.
+An AutoHotKey GUI library that allows authors to easily create AHK macros.
 Provides functionality to allow the end-user to configure which button triggers a macro via a GUI.
 Similar to binding a key to a function in a game's options.
 Key bindings and other settings are stored in an INI file and are remembered between runs.
@@ -22,13 +22,17 @@ Features:
 * Easy for someone with even a basic knowledge of AHK to write scripts with these features
 * Built-in system to link to a URL for information on your macro
 
+Installation:
+1) Install Autohotkey
+2) Place the adhdlib.ahk file in your Autohotkey Lib folder
+This is probably one of:
+C:\Program Files\Autohotkey\Lib
+C:\Program Files (x86)\Autohotkey\Lib
+3) Place a client script (eg template.ahk or firectrl.ahk) anywhere on your hard disk
+4) Double click the client script to run it
 
 Demo / Sample Script: "Fire Control"
 Please see http://evilc.com/proj/firectrl 
 
 Writing your own scripts using ADH:
-; Instructions are included, you should only need to look between blocks between vvv and ^^^
-; vvvvvvvvv
-; Like this
-; ^^^^^^^^^
-
+Please examine the sample scripts (template.ahk or firectrl.ahk) for now
