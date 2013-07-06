@@ -5,7 +5,7 @@
 ; Like this
 ; ^^^^^^^^^
 
-; When writing code, as long as none of your function or variable names begin with adh_ then you should not have any conflicts!
+; When writing code, as long as none of your function or variable names begin with adhd_ then you should not have any conflicts!
 
 ADHD := New ADHDLib
 
@@ -91,7 +91,7 @@ return
 
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; AUTHORS - PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
-; When writing code, DO NOT create variables or functions starting adh_
+; When writing code, DO NOT create variables or functions starting adhd_
 ; You can use the existing ones obviously
 
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
@@ -101,7 +101,7 @@ option_changed_hook(){
 	
 	;soundplay, *16
 	; This gets called in Program Mode, so now would be a good time to re-initialize
-	Gosub, adh_init_author_vars
+	Gosub, adhd_init_author_vars
 	StringSplit, tmp, FireSequence, `,
 	Loop, %tmp0%
 	{
@@ -113,7 +113,7 @@ option_changed_hook(){
 }
 
 ; Initialize your variables and stuff here
-adh_init_author_vars:
+adhd_init_author_vars:
 	fire_array := []
 	current_weapon := 1
 	fire_divider := 1
@@ -125,9 +125,9 @@ adh_init_author_vars:
 /*	
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 ; DO NOT delete it entirely or remove it. It can be empty though
-adh_change_event:
+adhd_change_event:
 	; This gets called in Program Mode, so now would be a good time to re-initialize
-	Gosub, adh_init_author_vars
+	Gosub, adhd_init_author_vars
 	StringSplit, tmp, FireSequence, `,
 	Loop, %tmp0%
 	{
@@ -247,7 +247,7 @@ ResetToggle:
 	return
 
 ; Keep this duplicate label here so ADHD can stop any timers you start
-adh_disable_author_timers:
+adhd_disable_author_timers:
 ; Keep all timer disables in here so when we leave app we can stop timers
 DisableTimers:
 	SetTimer, DoFire, Off
@@ -379,7 +379,7 @@ Class ADHDLib
 		; Set up the GUI ====================================================
 		w := this.gui_w
 		h := this.gui_h
-		Gui, Add, Tab2, x0 w%w% h%h% gadh_tab_changed, Main|Bindings|Profiles|About
+		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, Main|Bindings|Profiles|About
 	}
 	
 	; Creates the ADHD gui
@@ -408,27 +408,27 @@ Class ADHDLib
 		{
 			local name := this.hotkey_list[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%current_row%, %name%
-			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
+			Gui, Add, Hotkey, yp-5 xp+100 W70 vadhd_hk_k_%A_Index% gadhd_key_changed
 			local mb := this.mouse_buttons
-			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%mb%
-			Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
-			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
-			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_a_%A_Index% gadh_option_changed
+			Gui, Add, DropDownList, yp xp+80 W90 vadhd_hk_m_%A_Index% gadhd_mouse_changed, None||%mb%
+			Gui, Add, CheckBox, xp+100 yp+5 W25 vadhd_hk_c_%A_Index% gadhd_option_changed
+			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_s_%A_Index% gadhd_option_changed
+			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_a_%A_Index% gadhd_option_changed
 			current_row := current_row + 30
 		}
 		; Limit application toggle
-		Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
+		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
 
 		; Limit application Text box
-		Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+		Gui, Add, Edit, xp+170 yp+2 W120 vadhd_limit_application gadhd_option_changed,
 
 		; Launch window spy
-		Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
-		adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
+		Gui, Add, Button, xp+125 yp-1 W15 gadhd_show_window_spy, ?
+		adhd_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
 
 		; Program mode toggle
-		Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_changed, Program Mode
-		adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
+		Gui, Add, Checkbox, x5 yp+30 vadhd_program_mode gadhd_program_mode_changed, Program Mode
+		adhd_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 
 
 		Gui, Tab, 3
@@ -437,12 +437,12 @@ Class ADHDLib
 		Gui, Add, Text,x5 W40 y%current_row%,Profile
 		local pl := this.profile_list
 		local cp := this.current_profile
-		Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%pl%
-		Gui, Add, Button, xp+152 yp-1 gadh_add_profile, Add
-		Gui, Add, Button, xp+35 yp gadh_delete_profile, Delete
-		Gui, Add, Button, xp+47 yp gadh_duplicate_profile, Copy
-		Gui, Add, Button, xp+40 yp gadh_rename_profile, Rename
-		GuiControl,ChooseString, adh_current_profile, %cp%
+		Gui, Add, DropDownList, xp+35 yp-5 W150 vadhd_current_profile gadhd_profile_changed, Default||%pl%
+		Gui, Add, Button, xp+152 yp-1 gadhd_add_profile, Add
+		Gui, Add, Button, xp+35 yp gadhd_delete_profile, Delete
+		Gui, Add, Button, xp+47 yp gadhd_duplicate_profile, Copy
+		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename
+		GuiControl,ChooseString, adhd_current_profile, %cp%
 
 		Gui, Tab, 4
 		; ABOUT TAB
@@ -475,18 +475,18 @@ Class ADHDLib
 		Gui, Tab
 		local tmp
 		tmp := w - 90
-		Gui, Add, CheckBox, x%tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
+		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_window gadhd_debug_window_change, Show Window
 			
 		tmp := w - 180
-		Gui, Add, CheckBox, x%tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
+		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_mode gadhd_debug_change, Debug Mode
 
 		; Fire GuiSubmit while starting_up is on to set all the variables
 		Gui, Submit, NoHide
 
 		; Create the debug GUI, but do not show yet
 		tmp := w - 30
-		Gui, 2:Add,Edit,w%tmp% h350 vadh_log_contents ReadOnly,
-		Gui, 2:Add, Button, gadh_clear_log, clear
+		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents ReadOnly,
+		Gui, 2:Add, Button, gadhd_clear_log, clear
 	}
 
 	
@@ -495,7 +495,7 @@ Class ADHDLib
 	gui_add(ctype, cname, copts, cparam3, cdef){
 		; Note this function assumes global so it can create gui items
 		Global
-		Gui, Add, %ctype%, %copts% v%cname% gadh_option_changed, %cparam3%
+		Gui, Add, %ctype%, %copts% v%cname% gadhd_option_changed, %cparam3%
 		this.ini_vars.Insert([cname,ctype,cdef])
 	}
 
@@ -566,13 +566,13 @@ Class ADHDLib
 
 	; aka load profile
 	profile_changed(){
-		global adh_debug_mode
+		global adhd_debug_mode
 
-		global adh_limit_application
-		global adh_limit_application_on
-		global adh_debug_window
+		global adhd_limit_application
+		global adhd_limit_application_on
+		global adhd_debug_window
 		
-		GuiControlGet,cp,,adh_current_profile
+		GuiControlGet,cp,,adhd_current_profile
 		this.current_profile := cp
 		
 		this.debug("profile_changed - " this.current_profile)
@@ -591,35 +591,35 @@ Class ADHDLib
 			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["index"] := A_Index
 
 			; Keyboard bindings
-			tmp := this.read_ini("adh_hk_k_" A_Index,this.current_profile,A_Space)
-			GuiControl,,adh_hk_k_%A_Index%, %tmp%
+			tmp := this.read_ini("adhd_hk_k_" A_Index,this.current_profile,A_Space)
+			GuiControl,,adhd_hk_k_%A_Index%, %tmp%
 			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
 			
 			; Mouse bindings
-			tmp := this.read_ini("adh_hk_m_" A_Index,this.current_profile,A_Space)
-			GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
+			tmp := this.read_ini("adhd_hk_m_" A_Index,this.current_profile,A_Space)
+			GuiControl, ChooseString, adhd_hk_m_%A_Index%, %tmp%
 			if (tmp != "None"){
 				this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
 			}
 
 			; Control Modifier
 			modstring := ""
-			tmp := this.read_ini("adh_hk_c_" A_Index,this.current_profile,0)
-			GuiControl,, adh_hk_c_%A_Index%, %tmp%
+			tmp := this.read_ini("adhd_hk_c_" A_Index,this.current_profile,0)
+			GuiControl,, adhd_hk_c_%A_Index%, %tmp%
 			if (tmp == 1){
 				modstring := modstring "^"
 			}
 			
 			; Shift Modifier
-			tmp := this.read_ini("adh_hk_s_" A_Index,this.current_profile,0)
-			GuiControl,, adh_hk_s_%A_Index%, %tmp%
+			tmp := this.read_ini("adhd_hk_s_" A_Index,this.current_profile,0)
+			GuiControl,, adhd_hk_s_%A_Index%, %tmp%
 			if (tmp == 1){
 				modstring := modstring "+"
 			}
 			
 			; Alt Modifier
-			tmp := this.read_ini("adh_hk_a_" A_Index,this.current_profile,0)
-			GuiControl,, adh_hk_a_%A_Index%, %tmp%
+			tmp := this.read_ini("adhd_hk_a_" A_Index,this.current_profile,0)
+			GuiControl,, adhd_hk_a_%A_Index%, %tmp%
 			if (tmp == 1){
 				modstring := modstring "!"
 			}
@@ -627,17 +627,17 @@ Class ADHDLib
 		}
 		
 		; limit application name
-		this.remove_glabel("adh_limit_application")
+		this.remove_glabel("adhd_limit_application")
 		if (this.default_app == "" || this.default_app == null){
 			this.default_app := A_Space
 		}
-		tmp := this.read_ini("adh_limit_app",this.current_profile,this.default_app)
-		GuiControl,, adh_limit_application, %tmp%
-		this.add_glabel("adh_limit_application")
+		tmp := this.read_ini("adhd_limit_app",this.current_profile,this.default_app)
+		GuiControl,, adhd_limit_application, %tmp%
+		this.add_glabel("adhd_limit_application")
 		
 		; limit application status
-		tmp := this.read_ini("adh_limit_app_on",this.current_profile,0)
-		GuiControl,, adh_limit_application_on, %tmp%
+		tmp := this.read_ini("adhd_limit_app_on",this.current_profile,0)
+		GuiControl,, adhd_limit_application_on, %tmp%
 		
 		; Get author vars from ini
 		Loop, % this.ini_vars.MaxIndex()
@@ -656,11 +656,11 @@ Class ADHDLib
 		}
 
 		; Debug settings
-		adh_debug_mode := this.read_ini("adh_debug_mode","Settings",0)
-		GuiControl,, adh_debug_mode, %adh_debug_mode%
+		adhd_debug_mode := this.read_ini("adhd_debug_mode","Settings",0)
+		GuiControl,, adhd_debug_mode, %adhd_debug_mode%
 		
-		adh_debug_window := this.read_ini("adh_debug_window","Settings",0)
-		GuiControl,, adh_debug_window, %adh_debug_window%
+		adhd_debug_window := this.read_ini("adhd_debug_window","Settings",0)
+		GuiControl,, adhd_debug_window, %adhd_debug_window%
 
 		this.program_mode_changed()
 		
@@ -672,11 +672,11 @@ Class ADHDLib
 
 	; aka save profile
 	option_changed(){
-		global adh_debug_mode
+		global adhd_debug_mode
 
-		global adh_limit_application
-		global adh_limit_application_on
-		global adh_debug_window
+		global adhd_limit_application
+		global adhd_limit_application_on
+		global adhd_debug_window
 		
 		if (this.starting_up != 1){
 			this.debug("option_changed - control: " A_guicontrol)
@@ -686,11 +686,11 @@ Class ADHDLib
 			; Hotkey bindings
 			Loop, % this.hotkey_list.MaxIndex()
 			{
-				this.update_ini("adh_hk_k_" A_Index, this.current_profile, adh_hk_k_%A_Index%, "")
-				this.update_ini("adh_hk_m_" A_Index, this.current_profile, adh_hk_m_%A_Index%, "None")
-				this.update_ini("adh_hk_c_" A_Index, this.current_profile, adh_hk_c_%A_Index%, 0)
-				this.update_ini("adh_hk_s_" A_Index, this.current_profile, adh_hk_s_%A_Index%, 0)
-				this.update_ini("adh_hk_a_" A_Index, this.current_profile, adh_hk_a_%A_Index%, 0)
+				this.update_ini("adhd_hk_k_" A_Index, this.current_profile, adhd_hk_k_%A_Index%, "")
+				this.update_ini("adhd_hk_m_" A_Index, this.current_profile, adhd_hk_m_%A_Index%, "None")
+				this.update_ini("adhd_hk_c_" A_Index, this.current_profile, adhd_hk_c_%A_Index%, 0)
+				this.update_ini("adhd_hk_s_" A_Index, this.current_profile, adhd_hk_s_%A_Index%, 0)
+				this.update_ini("adhd_hk_a_" A_Index, this.current_profile, adhd_hk_a_%A_Index%, 0)
 			}
 			this.update_ini("profile_list", "Settings", this.profile_list,"")
 			
@@ -698,11 +698,11 @@ Class ADHDLib
 			if (this.default_app == "" || this.default_app == null){
 				this.default_app := A_Space
 			}
-			this.update_ini("adh_limit_app", this.current_profile, adh_limit_application, this.default_app)
+			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.default_app)
 			SB_SetText("Current profile: " this.current_profile)
 			
 			; Limit app toggle
-			this.update_ini("adh_limit_app_on", this.current_profile, adh_limit_application_on, 0)
+			this.update_ini("adhd_limit_app_on", this.current_profile, adhd_limit_application_on, 0)
 			
 			; Add author vars to ini
 			Loop, % this.ini_vars.MaxIndex()
@@ -715,8 +715,8 @@ Class ADHDLib
 			this.fire_event(this.events.option_changed)
 			
 			; Debug settings
-			this.update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
-			this.update_ini("adh_debug_window", "settings", adh_debug_window, 0)
+			this.update_ini("adhd_debug_mode", "settings", adhd_debug_mode, 0)
+			this.update_ini("adhd_debug_window", "settings", adhd_debug_window, 0)
 			
 		} else {
 			this.debug("ignoring option_changed - " A_Guicontrol)
@@ -729,7 +729,7 @@ Class ADHDLib
 	; .. it's glabel is fired.
 	; So remove glabel, set editbox value, re-add glabel to solve
 	add_glabel(ctrl){
-		GuiControl, +gadh_option_changed, %ctrl%
+		GuiControl, +gadhd_option_changed, %ctrl%
 	}
 
 	remove_glabel(ctrl){
@@ -738,7 +738,7 @@ Class ADHDLib
 
 	; Profile management - functions to manage preserving user settings
 	add_profile(name){
-		global adh_current_profile
+		global adhd_current_profile
 		
 		if (name == ""){
 			InputBox, name, Profile Name, Please enter a profile name
@@ -755,14 +755,14 @@ Class ADHDLib
 		Sort, pl, D|
 		this.profile_list := pl
 		
-		GuiControl,, adh_current_profile, |Default||%pl%
-		GuiControl,ChooseString, adh_current_profile, %name%
+		GuiControl,, adhd_current_profile, |Default||%pl%
+		GuiControl,ChooseString, adhd_current_profile, %name%
 		
 		this.update_ini("profile_list", "Settings", this.profile_list, "")
 	}
 
 	delete_profile(name, gotoprofile = "Default"){
-		Global adh_current_profile
+		Global adhd_current_profile
 		
 		if (name != "Default"){
 			pl := this.profile_list
@@ -783,10 +783,10 @@ Class ADHDLib
 			this.update_ini("profile_list", "Settings", this.profile_list, "")		
 			
 			; Set new contents of list
-			GuiControl,, adh_current_profile, |Default|%pl%
+			GuiControl,, adhd_current_profile, |Default|%pl%
 			
 			; Select the desired new current profile
-			GuiControl, ChooseString, adh_current_profile, %gotoprofile%
+			GuiControl, ChooseString, adhd_current_profile, %gotoprofile%
 			
 			; Trigger save
 			Gui, Submit, NoHide
@@ -797,7 +797,7 @@ Class ADHDLib
 	}
 
 	duplicate_profile(name){
-		global adh_current_profile
+		global adhd_current_profile
 		
 		; Blank name specified - prompt for name
 		if (name == ""){
@@ -819,11 +819,11 @@ Class ADHDLib
 		this.profile_list := pl
 		
 		this.current_profile := name
-		adh_current_profile := name
+		adhd_current_profile := name
 		; Push the new list to the profile select box
-		GuiControl,, adh_current_profile, |Default||%pl%
+		GuiControl,, adhd_current_profile, |Default||%pl%
 		; Set the new profile to the currently selected item
-		GuiControl,ChooseString, adh_current_profile, %name%
+		GuiControl,ChooseString, adhd_current_profile, %name%
 		; Update the profile list in the INI
 		this.update_ini("profile_list", "Settings", this.profile_list, "")
 		
@@ -862,11 +862,11 @@ Class ADHDLib
 	}
 
 	tab_changed(){
-		global adh_program_mode
+		global adhd_program_mode
 		
 		; If in program mode on tab change, disable program mode
-		if (adh_program_mode == 1){
-			GuiControl,,adh_program_mode,0
+		if (adhd_program_mode == 1){
+			GuiControl,,adhd_program_mode,0
 			this.program_mode_changed()
 		}
 		return
@@ -916,9 +916,9 @@ Class ADHDLib
 			this.option_changed()
 		} else {
 			; Detect actual key (Not modified) - clear mouse box
-			tmp := SubStr(ctrl,10)
+			tmp := SubStr(ctrl,11)
 			; Set the mouse field to blank
-			GuiControl,ChooseString, adh_hk_m_%tmp%, None
+			GuiControl,ChooseString, adhd_hk_m_%tmp%, None
 			this.debug("key_changed calling option_changed")
 			this.option_changed()
 		}
@@ -927,9 +927,9 @@ Class ADHDLib
 
 	; Detects mouse selected from list and clears key box
 	mouse_changed(){
-		tmp := SubStr(A_GuiControl,10)
+		tmp := SubStr(A_GuiControl,11)
 		; Set the keyboard field to blank
-		GuiControl,, adh_hk_k_%tmp%, None
+		GuiControl,, adhd_hk_k_%tmp%, None
 		this.debug("mouse_changed calling option_changed")
 		this.option_changed()
 		return
@@ -981,10 +981,10 @@ Class ADHDLib
 
 	; Debug functions
 	debug_window_change(){
-		global adh_debug_window
+		global adhd_debug_window
 		
 		gui, submit, nohide
-		if (adh_debug_window == 1){
+		if (adhd_debug_window == 1){
 			Gui, +Hwndgui_id
 			WinGetPos, x, y,,, ahk_id %gui_id%
 			y := y - 440
@@ -1007,49 +1007,49 @@ Class ADHDLib
 	}
 
 	debug(msg){
-		global adh_log_contents
-		global adh_debug_mode
+		global adhd_log_contents
+		global adhd_debug_mode
 
 		; If in debug mode, or starting up...
-		if (adh_debug_mode || this.starting_up){
-			adh_log_contents := adh_log_contents "* " msg "`n"
+		if (adhd_debug_mode || this.starting_up){
+			adhd_log_contents := adhd_log_contents "* " msg "`n"
 			if (this.debug_ready){
-				guicontrol,2:,adh_log_contents, % adh_log_contents
+				guicontrol,2:,adhd_log_contents, % adhd_log_contents
 				gui, 2:submit, nohide
 			}
 		}
 	}
 	
 	clear_log(){
-		global adh_log_contents
-		adh_log_contents := ""
-		GuiControl,,adh_log_contents,%adh_log_contents%
+		global adhd_log_contents
+		adhd_log_contents := ""
+		GuiControl,,adhd_log_contents,%adhd_log_contents%
 	}
 
 	; Program mode stuff
 	program_mode_changed(){
-		global adh_limit_application
-		global adh_limit_application_on
-		global adh_program_mode
+		global adhd_limit_application
+		global adhd_limit_application_on
+		global adhd_program_mode
 		
 		this.debug("program_mode_changed")
 		Gui, Submit, NoHide
 		
-		if (adh_program_mode == 1){
+		if (adhd_program_mode == 1){
 			this.debug("Entering Program Mode")
 			; Enable controls, stop hotkeys, kill timers
 			this.disable_hotkeys()
-			Gosub, adh_disable_author_timers	; Fire the Author hook
+			Gosub, adhd_disable_author_timers	; Fire the Author hook
 			this.disable_heartbeat()
-			GuiControl, enable, adh_limit_application
-			GuiControl, enable, adh_limit_application_on
+			GuiControl, enable, adhd_limit_application
+			GuiControl, enable, adhd_limit_application_on
 		} else {
 			; Disable controls, start hotkeys, start heartbeat timer
 			this.debug("Exiting Program Mode")
 			this.enable_hotkeys()
 			this.enable_heartbeat()
-			GuiControl, disable, adh_limit_application
-			GuiControl, disable, adh_limit_application_on
+			GuiControl, disable, adhd_limit_application
+			GuiControl, disable, adhd_limit_application_on
 		}
 		return
 	}
@@ -1057,27 +1057,27 @@ Class ADHDLib
 	; App detection stuff
 	enable_heartbeat(){
 		this.debug("Enabling Heartbeat")
-		global adh_limit_application
-		global adh_limit_application_on
+		global adhd_limit_application
+		global adhd_limit_application_on
 		
-		if (adh_limit_application_on == 1 && adh_limit_application != ""){
-			SetTimer, adh_heartbeat, 500
+		if (adhd_limit_application_on == 1 && adhd_limit_application != ""){
+			SetTimer, adhd_heartbeat, 500
 		}
 		return
 	}
 
 	disable_heartbeat(){
 		this.debug("Disabling Heartbeat")
-		SetTimer, adh_heartbeat, Off
+		SetTimer, adhd_heartbeat, Off
 		return
 	}
 
 	heartbeat(){
-		global adh_limit_application
+		global adhd_limit_application
 		
 		; Check current app here.
 		; Not used to enable or disable hotkeys, used to start or stop author macros etc
-		IfWinActive, % "ahk_class " adh_limit_application
+		IfWinActive, % "ahk_class " adhd_limit_application
 		{
 			this.app_active(1)
 		}
@@ -1098,9 +1098,9 @@ Class ADHDLib
 			if (this.app_act_curr != 0){
 				; Changing from active to inactive
 				; Stop Author Timers
-				Gosub, adh_disable_author_timers	; Fire the Author hook
+				Gosub, adhd_disable_author_timers	; Fire the Author hook
 				; Reset author macro
-				Gosub, adh_init_author_vars		; Fire the Author hook
+				Gosub, adhd_init_author_vars		; Fire the Author hook
 				this.app_act_curr := 0
 			}
 		}
@@ -1109,8 +1109,8 @@ Class ADHDLib
 	
 	; Hotkey detection routines
 	enable_hotkeys(){
-		global adh_limit_application
-		global adh_limit_application_on
+		global adhd_limit_application
+		global adhd_limit_application_on
 		
 		; ToDo: Should not submit gui here, triggering save...
 		this.debug("enable_hotkeys")
@@ -1124,10 +1124,10 @@ Class ADHDLib
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-				if (adh_limit_application_on == 1){
-					if (adh_limit_application !=""){
+				if (adhd_limit_application_on == 1){
+					if (adhd_limit_application !=""){
 						; Enable Limit Application for all subsequently declared hotkeys
-						Hotkey, IfWinActive, ahk_class %adh_limit_application%
+						Hotkey, IfWinActive, ahk_class %adhd_limit_application%
 					}
 				} else {
 					; Disable Limit Application for all subsequently declared hotkeys
@@ -1146,18 +1146,18 @@ Class ADHDLib
 			}
 			
 			; ToDo: Disabling of GUI controls should not be in here - put them in program mode
-			GuiControl, Disable, adh_hk_k_%A_Index%
-			GuiControl, Disable, adh_hk_m_%A_Index%
-			GuiControl, Disable, adh_hk_c_%A_Index%
-			GuiControl, Disable, adh_hk_s_%A_Index%
-			GuiControl, Disable, adh_hk_a_%A_Index%
+			GuiControl, Disable, adhd_hk_k_%A_Index%
+			GuiControl, Disable, adhd_hk_m_%A_Index%
+			GuiControl, Disable, adhd_hk_c_%A_Index%
+			GuiControl, Disable, adhd_hk_s_%A_Index%
+			GuiControl, Disable, adhd_hk_a_%A_Index%
 		}
 		return
 	}
 
 	disable_hotkeys(){
-		global adh_limit_application
-		global adh_limit_application_on
+		global adhd_limit_application
+		global adhd_limit_application_on
 		
 		this.debug("disable_hotkeys")
 
@@ -1168,26 +1168,26 @@ Class ADHDLib
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
 				; ToDo: Is there a better way to remove a hotkey?
-				HotKey, ~%hotkey_string%, adh_do_nothing
+				HotKey, ~%hotkey_string%, adhd_do_nothing
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey
-					HotKey, ~%hotkey_string% up, adh_do_nothing
+					HotKey, ~%hotkey_string% up, adhd_do_nothing
 				}
 			}
-			GuiControl, Enable, adh_hk_k_%A_Index%
-			GuiControl, Enable, adh_hk_m_%A_Index%
-			GuiControl, Enable, adh_hk_c_%A_Index%
-			GuiControl, Enable, adh_hk_s_%A_Index%
-			GuiControl, Enable, adh_hk_a_%A_Index%
+			GuiControl, Enable, adhd_hk_k_%A_Index%
+			GuiControl, Enable, adhd_hk_m_%A_Index%
+			GuiControl, Enable, adhd_hk_c_%A_Index%
+			GuiControl, Enable, adhd_hk_s_%A_Index%
+			GuiControl, Enable, adhd_hk_a_%A_Index%
 		}
 		return
 	}
 
 	get_hotkey_string(hk){
 		;Get hotkey string - could be keyboard or mouse
-		tmp := adh_hk_k_%hk%
+		tmp := adhd_hk_k_%hk%
 		if (tmp == ""){
-			tmp := adh_hk_m_%hk%
+			tmp := adhd_hk_m_%hk%
 			if (tmp == "None"){
 				tmp := ""
 			}
@@ -1195,8 +1195,6 @@ Class ADHDLib
 		return tmp
 	}
 
-
-	
 	
 	; 3rd party functions
 	; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
@@ -1251,15 +1249,15 @@ Class ADHDLib
 
 	build_prefix(hk){
 		out := ""
-		tmp = adh_hk_c_%hk%
+		tmp = adhd_hk_c_%hk%
 		GuiControlGet,%tmp%
-		if (adh_hk_c_%hk% == 1){
+		if (adhd_hk_c_%hk% == 1){
 			out := out "^"
 		}
-		if (adh_hk_a_%hk% == 1){
+		if (adhd_hk_a_%hk% == 1){
 			out := out "!"
 		}
-		if (adh_hk_s_%hk% == 1){
+		if (adhd_hk_s_%hk% == 1){
 			out := out "+"
 		}
 		return out
@@ -1269,81 +1267,81 @@ Class ADHDLib
 
 ; Label triggers
 
-adh_profile_changed:
+adhd_profile_changed:
 	ADHD.profile_changed()
 	return
 
-adh_option_changed:
+adhd_option_changed:
 	ADHD.option_changed()
 	return
 
-adh_add_profile:
+adhd_add_profile:
 	ADHD.add_profile("")	; just clicking the button calls with empty param
 	return
 
 ; Delete Profile pressed
-adh_delete_profile:
-	ADHD.delete_profile(adh_current_profile)	; Just clicking the button deletes the current profile
+adhd_delete_profile:
+	ADHD.delete_profile(adhd_current_profile)	; Just clicking the button deletes the current profile
 	return
 
-adh_duplicate_profile:
+adhd_duplicate_profile:
 	ADHD.duplicate_profile("")
 	return
 	
-adh_rename_profile:
+adhd_rename_profile:
 	ADHD.rename_profile()
 	return
 
-adh_tab_changed:
+adhd_tab_changed:
 	ADHD.tab_changed()
 	return
 
-adh_key_changed:
+adhd_key_changed:
 	ADHD.key_changed(A_GuiControl)
 	return
 
-adh_mouse_changed:
+adhd_mouse_changed:
 	ADHD.mouse_changed()
 	return
 
-adh_enable_hotkeys:
+adhd_enable_hotkeys:
 	ADHD.enable_hotkeys()
 	return
 
-adh_disable_hotkeys:
+adhd_disable_hotkeys:
 	ADHD.disable_hotkeys()
 	return
 
-adh_show_window_spy:
+adhd_show_window_spy:
 	ADHD.show_window_spy()
 	return
 
-adh_debug_window_change:
+adhd_debug_window_change:
 	ADHD.debug_window_change()
 	return
 
-adh_debug_change:
+adhd_debug_change:
 	ADHD.debug_change()
 	return
 	
-adh_clear_log:
+adhd_clear_log:
 	ADHD.clear_log()
 	return
 
-adh_program_mode_changed:
+adhd_program_mode_changed:
 	ADHD.program_mode_changed()
 	return
 
-adh_heartbeat:
+adhd_heartbeat:
 	ADHD.heartbeat()
 	return
 
 ; An empty stub to redirect unbound hotkeys to
-adh_do_nothing:
+adhd_do_nothing:
 	return
 
 ; Kill the macro if the GUI is closed
-adh_exit_app:
+adhd_exit_app:
 GuiClose:
 	ADHD.exit_app()
 	return
@@ -1352,7 +1350,7 @@ GuiClose:
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If adh_ctrl := ADHD.hotkey_ctrl_has_focus()
+#If adhd_ctrl := ADHD.hotkey_ctrl_has_focus()
 	*AppsKey::                       ;Add support for these special keys,
 	*BackSpace::                     ;  which the hotkey control does not normally allow.
 	*Delete::
@@ -1365,6 +1363,6 @@ GuiClose:
 	; Can use mouse hotkeys like this - it detects them but does not display them
 	;~*WheelUp::
 	; ToDo: Pass A_ThisHotkey also?
-	ADHD.special_key_pressed(adh_ctrl)
+	ADHD.special_key_pressed(adhd_ctrl)
 	return
 #If
