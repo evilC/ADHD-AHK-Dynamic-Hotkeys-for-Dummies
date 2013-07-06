@@ -104,6 +104,7 @@ return
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 option_changed_hook(){
 	global fire_array
+	global FireSequence
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	Gosub, adh_init_author_vars
@@ -1113,7 +1114,7 @@ Class ADHDLib
 		
 		; ToDo: Should not submit gui here, triggering save...
 		this.debug("enable_hotkeys")
-
+		
 		Gui, Submit, NoHide
 		Loop, % this.hotkey_list.MaxIndex()
 		{
@@ -1133,6 +1134,7 @@ Class ADHDLib
 					Hotkey, IfWinActive
 				}
 				
+				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine)
 				; Bind down action of hotkey
 				Hotkey, ~%hotkey_string% , %hotkey_subroutine%
 				
