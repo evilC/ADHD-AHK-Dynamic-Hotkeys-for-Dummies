@@ -25,7 +25,7 @@ ADH.author_macro_name := "Fire Control"					; Change this to your macro name
 ADH.author_version := 1.0									; The version number of your script
 ADH.author_name := "evilC"								; Your Name
 ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
-
+ADH.set_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ; Set it to blank ("") to disable altogether, DO NOT DELETE!
@@ -517,6 +517,7 @@ Class ADHDLib
 
 	}
 
+	; Setup stuff
 	set_size(w,h){
 		this.gui_w := w
 		this.gui_h := h
@@ -524,6 +525,12 @@ Class ADHDLib
 	
 	set_default_app(app){
 		this.default_app := app
+	}
+	
+	; Configure the About tab
+	set_about(data){
+		msgbox % data.name " * " data.version
+		;this.about
 	}
 	
 	; Fires an event.
