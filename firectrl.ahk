@@ -1,17 +1,12 @@
-﻿; evilC's Macro Template
+﻿; Fire Control - Sample ADHD macro
 
-; Macro authors should only edit blocks between the vvv and ^^^ lines
-; vvvvvvvvv
-; Like this
-; ^^^^^^^^^
-
-; When writing code, as long as none of your function or variable names begin with adhd_ then you should not have any conflicts!
+; Create an instance of the library
 ADHD := New ADHDLib
 
-; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; SETUP SECTION - TO GO IN CONSTRUCTOR? STUFF THAT NEEDS TO BE SET BEFORE ADHD STARTS UP
+; ============================================================================================
+; CONFIG SECTION - Configure ADHD
 
-; Authors - configure this section according to your macro.
+; Authors - Edit this section to configure ADHD according to your macro.
 ; You should not add extra things here (except add more records to hotkey_list etc)
 ; Also you should generally not delete things here - set them to a different value instead
 
@@ -45,17 +40,15 @@ ADHD.config_event("app_active", "app_active_hook")
 ADHD.config_event("app_inactive", "app_inactive_hook")
 ADHD.config_event("disable_timers", "disable_timers_hook")
 
-; End Setup section
-; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 ADHD.init()
 ADHD.create_gui()
 
 ; The "Main" tab is tab 1
 Gui, Tab, 1
-; MAIN TAB
-; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; CREATE YOUR GUI HERE
+; ============================================================================================
+; GUI SECTION
+
+; Create your GUI here
 ; If you want a GUI item's state saved in the ini file, create it like this:
 ; ADHD.gui_add("ControlType", "MyControl", "MyOptions", "Param3", "Default")
 ; eg ADHD.gui_add("DropDownList", "MyDDL", "xp+120 yp W120", "1|2|3|4|5", "3")
@@ -82,131 +75,26 @@ ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified 
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
+
+; Set up the links on the footer of the main page
 h := ADHD.get_gui_h() - 40
 name := ADHD.get_macro_name()
 Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
 
 ; End GUI creation section
-; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+; ============================================================================================
 
 
 ADHD.finish_startup()
 return
 
+; ============================================================================================
+; CODE SECTION
 
-; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
+; Place your hotkey definitions and associated functions here
 ; When writing code, DO NOT create variables or functions starting adhd_
 
-; Hook functions. We declared these in the config phase - so make sure these names match the ones defined above
 
-; This is fired when settings change (including on load). Use it to pre-calculate values etc.
-option_changed_hook(){
-	global FireSequence
-	global fire_array := []
-	global current_weapon := 1
-	global fire_divider := 1
-	global nextfire := 0		; A timer for when we are next allowed to press the fire button
-	global weapon_toggle_mode := false
-	Gosub, ResetToggle
-
-	;soundplay, *16
-	; This gets called in Program Mode, so now would be a good time to re-initialize
-	StringSplit, tmp, FireSequence, `,
-	Loop, %tmp0%
-	{
-		if (tmp%A_Index% != ""){
-			fire_array[A_Index] := tmp%A_Index%
-		}
-	}
-	return
-}
-
-; Gets called when the "Limited" app gets focus
-app_active_hook(){
-	
-	return
-}
-
-; Gets called when the "Limited" app loses focus
-app_inactive_hook(){
-	Gosub, DisableTimers
-}
-
-; Gets called if ADHD wants to stop your timers
-disable_timers_hook(){
-	Gosub, DisableTimers
-}
-
-; Gets called when we enter program mode
-program_mode_on_hook(){
-	Gosub, DisableTimers
-}
-
-; Gets called when we exit program mode
-program_mode_off_hook(){
-	Gosub, DisableTimers
-}
-
-; End Hooks ============================================================================================
-
-; Hotkey block - this is where you define labels that the various bindings trigger
-; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
-
-; Set up HotKey 1
-
-; Fired on key down
-Fire:
-	; Many games do not work properly with autofire unless this is enabled.
-	; You can try leaving it out.
-	; MechWarrior Online for example will not do fast (<~500ms) chain fire with weapons all in one group without this enabled
-	ADHD.send_keyup_on_press("Fire","unmodified")
-
-
-	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
-	; If the user releases the button, the timer will terminate
-	if (A_TickCount < nextfire){
-		soundplay, *16
-		SetFireTimer(1,true)
-		return
-	}
-	
-	; Fire Lazors !!!
-	GoSub, DoFire
-
-	; Start the fire timer
-	SetFireTimer(1,false)
-	return
-
-; Fired on key up
-FireUp:
-	; Kill the timer when the key is released (Stop auto firing)
-	SetFireTimer(0,false)
-	return
-
-; Set up HotKey 2
-
-; Fired on key down
-ChangeFireRate:
-	; More Lazors!! Toggles double speed fire!
-	; Toggle divider between 1 and 2
-	fire_divider := 3 - fire_divider
-	return
-
-; Set up Hotkey 3
-WeaponToggle:
-	weapon_toggle_mode := !weapon_toggle_mode
-	if (weapon_toggle_mode){
-		Gosub, EnableToggle
-	} else {
-		Gosub, DisableToggle
-	}
-	return
-	
-	
-; End Hotkey block ==================================================================================
-
-; Macro functionality
 
 ; Macro is trying to fire - timer label
 DoFire:
@@ -265,8 +153,115 @@ ResetToggle:
 DisableTimers:
 	SetTimer, DoFire, Off
 	return
+
+
+; Hook functions. We declared these in the config phase - so make sure these names match the ones defined above
+
+; This is fired when settings change (including on load). Use it to pre-calculate values etc.
+option_changed_hook(){
+	global FireSequence
+	global fire_array := []
+	global current_weapon := 1
+	global fire_divider := 1
+	global nextfire := 0		; A timer for when we are next allowed to press the fire button
+	global weapon_toggle_mode := false
+	Gosub, ResetToggle
+
+	;soundplay, *16
+	; This gets called in Program Mode, so now would be a good time to re-initialize
+	StringSplit, tmp, FireSequence, `,
+	Loop, %tmp0%
+	{
+		if (tmp%A_Index% != ""){
+			fire_array[A_Index] := tmp%A_Index%
+		}
+	}
+	return
+}
+
+; Gets called when the "Limited" app gets focus
+app_active_hook(){
 	
-;^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	return
+}
+
+; Gets called when the "Limited" app loses focus
+app_inactive_hook(){
+	Gosub, DisableTimers
+}
+
+; Gets called if ADHD wants to stop your timers
+disable_timers_hook(){
+	Gosub, DisableTimers
+}
+
+; Gets called when we enter program mode
+program_mode_on_hook(){
+	Gosub, DisableTimers
+}
+
+; Gets called when we exit program mode
+program_mode_off_hook(){
+	Gosub, DisableTimers
+}
+
+; ==========================================================================================
+; HOTKEYS SECTION
+
+; This is where you define labels that the various bindings trigger Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
+
+; Set up HotKey 1
+
+; Fired on key down
+Fire:
+	; Many games do not work properly with autofire unless this is enabled.
+	; You can try leaving it out.
+	; MechWarrior Online for example will not do fast (<~500ms) chain fire with weapons all in one group without this enabled
+	ADHD.send_keyup_on_press("Fire","unmodified")
+
+
+	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
+	; If the user releases the button, the timer will terminate
+	if (A_TickCount < nextfire){
+		soundplay, *16
+		SetFireTimer(1,true)
+		return
+	}
+	
+	; Fire Lazors !!!
+	GoSub, DoFire
+
+	; Start the fire timer
+	SetFireTimer(1,false)
+	return
+
+; Fired on key up
+FireUp:
+	; Kill the timer when the key is released (Stop auto firing)
+	SetFireTimer(0,false)
+	return
+
+; Set up HotKey 2
+
+; Fired on key down
+ChangeFireRate:
+	; More Lazors!! Toggles double speed fire!
+	; Toggle divider between 1 and 2
+	fire_divider := 3 - fire_divider
+	return
+
+; Set up Hotkey 3
+WeaponToggle:
+	weapon_toggle_mode := !weapon_toggle_mode
+	if (weapon_toggle_mode){
+		Gosub, EnableToggle
+	} else {
+		Gosub, DisableToggle
+	}
+	return
+	
+; ===================================================================================================
+; FOOTER SECTION
 
 ; KEEP THIS AT THE END!!
 #Include ADHDLib.ahk		; If you have the library in the same folder as your macro, use this

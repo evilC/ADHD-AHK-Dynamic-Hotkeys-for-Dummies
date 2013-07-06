@@ -23,8 +23,8 @@ Class ADHDLib
 		this.author_link := ""
 		
 		this.default_app := ""
-		this.gui_w := 300
-		this.gui_h := 200
+		this.gui_w := 375
+		this.gui_h := 175
 		
 		; Hooks
 		this.events := {}
@@ -151,7 +151,7 @@ Class ADHDLib
 		global
 		; Set up the GUI ====================================================
 		local w := this.gui_w
-		local h := this.gui_h - 20
+		local h := this.gui_h - 30
 		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, Main|Bindings|Profiles|About
 
 		local tabtop := 40
@@ -209,7 +209,7 @@ Class ADHDLib
 
 		Gui, Tab, 4
 		; ABOUT TAB
-		current_row := tabtop + 20
+		current_row := tabtop + 5
 		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 		Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
 		local aname := this.author_name
