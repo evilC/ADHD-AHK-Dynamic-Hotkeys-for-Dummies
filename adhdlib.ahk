@@ -117,10 +117,6 @@ Class ADHDLib
 		IniRead, cp, %A_ScriptName%.ini, Settings, current_profile, Default
 		this.current_profile := cp
 
-		; Set up the GUI ====================================================
-		w := this.gui_w
-		h := this.gui_h
-		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, Main|Bindings|Profiles|About
 	}
 	
 	; Creates the ADHD gui
@@ -131,6 +127,10 @@ Class ADHDLib
 		; Also, gui commands do not accept objects
 		; So declare temp vars as local in here
 		global
+		; Set up the GUI ====================================================
+		local w := this.gui_w
+		local h := this.gui_h - 20
+		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, Main|Bindings|Profiles|About
 
 		local tabtop := 40
 		local current_row := tabtop + 20
