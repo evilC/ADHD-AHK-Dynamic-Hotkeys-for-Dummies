@@ -278,7 +278,7 @@ Class ADH
 		this.starting_up := 1
 
 		ADH.debug("Starting up...")
-		adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
+		this.app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 		; Start ADH init vars and settings
 		adh_core_version := 0.3
@@ -972,21 +972,19 @@ Class ADH
 	}
 
 	app_active(act){
-		Global adh_app_act_curr
-		
 		if (act){
-			if (adh_app_act_curr != 1){
+			if (this.app_act_curr != 1){
 				; Changing from inactive to active
-				adh_app_act_curr := 1
+				this.app_act_curr := 1
 			}
 		} else {
-			if (adh_app_act_curr != 0){
+			if (this.app_act_curr != 0){
 				; Changing from active to inactive
 				; Stop Author Timers
 				Gosub, adh_disable_author_timers	; Fire the Author hook
 				; Reset author macro
 				Gosub, adh_init_author_vars		; Fire the Author hook
-				adh_app_act_curr := 0
+				this.app_act_curr := 0
 			}
 		}
 	}
