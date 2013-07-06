@@ -979,8 +979,8 @@ Class ADH
 		Gui, Submit, NoHide
 		Loop, % adh_num_hotkeys
 		{
-			hotkey_prefix := adh_build_prefix(A_Index)
-			hotkey_keys := adh_get_hotkey_string(A_Index)
+			hotkey_prefix := this.build_prefix(A_Index)
+			hotkey_keys := this.get_hotkey_string(A_Index)
 			
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
@@ -1025,8 +1025,8 @@ Class ADH
 
 		Loop, % adh_num_hotkeys
 		{
-			hotkey_prefix := adh_build_prefix(A_Index)
-			hotkey_keys := adh_get_hotkey_string(A_Index)
+			hotkey_prefix := this.build_prefix(A_Index)
+			hotkey_keys := this.get_hotkey_string(A_Index)
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
 				; ToDo: Is there a better way to remove a hotkey?
@@ -1043,6 +1043,18 @@ Class ADH
 			GuiControl, Enable, adh_hk_a_%A_Index%
 		}
 		return
+	}
+
+	get_hotkey_string(hk){
+		;Get hotkey string - could be keyboard or mouse
+		tmp := adh_hk_k_%hk%
+		if (tmp == ""){
+			tmp := adh_hk_m_%hk%
+			if (tmp == "None"){
+				tmp := ""
+			}
+		}
+		return tmp
 	}
 
 
@@ -1098,7 +1110,23 @@ Class ADH
 			Return, ctrl
 		}
 	}
-		
+
+	build_prefix(hk){
+		out := ""
+		tmp = adh_hk_c_%hk%
+		GuiControlGet,%tmp%
+		if (adh_hk_c_%hk% == 1){
+			out := out "^"
+		}
+		if (adh_hk_a_%hk% == 1){
+			out := out "!"
+		}
+		if (adh_hk_s_%hk% == 1){
+			out := out "+"
+		}
+		return out
+	}
+
 }
 
 
@@ -1144,18 +1172,6 @@ adh_mouse_changed:
 	return
 
 
-adh_get_hotkey_string(hk){
-	;Get hotkey string - could be keyboard or mouse
-	tmp := adh_hk_k_%hk%
-	if (tmp == ""){
-		tmp := adh_hk_m_%hk%
-		if (tmp == "None"){
-			tmp := ""
-		}
-	}
-	return tmp
-}
-
 adh_enable_hotkeys:
 	ADH.enable_hotkeys()
 	return
@@ -1168,22 +1184,6 @@ adh_disable_hotkeys:
 adh_do_nothing:
 	return
 
-adh_build_prefix(hk){
-	out := ""
-	tmp = adh_hk_c_%hk%
-	GuiControlGet,%tmp%
-	if (adh_hk_c_%hk% == 1){
-		out := out "^"
-	}
-	if (adh_hk_a_%hk% == 1){
-		out := out "!"
-	}
-	if (adh_hk_s_%hk% == 1){
-		out := out "+"
-	}
-	return out
-}
-	
 
 ; Kill the macro if the GUI is closed
 adh_exit_app:
