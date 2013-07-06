@@ -29,7 +29,7 @@ ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ; Set it to blank ("") to disable altogether, DO NOT DELETE!
-adh_default_app := "CryENGINE"
+ADH.default_app := "CryENGINE"
 
 ; GUI size
 adh_gui_w := 375
@@ -262,6 +262,8 @@ Class ADHDLib
 		this.author_version := 1.0									; The version number of your script
 		this.author_name := "Unknown"							; Your Name
 		this.author_link := ""
+		
+		this.default_app := ""
 	}
 	
 	; EXPOSED METHODS
@@ -492,7 +494,6 @@ Class ADHDLib
 	profile_changed(){
 		global adh_debug_mode
 
-		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
 		global adh_debug_window
@@ -553,10 +554,10 @@ Class ADHDLib
 		
 		; limit application name
 		this.remove_glabel("adh_limit_application")
-		if (adh_default_app == "" || adh_default_app == null){
-			adh_default_app := A_Space
+		if (this.default_app == "" || this.default_app == null){
+			this.default_app := A_Space
 		}
-		tmp := this.read_ini("adh_limit_app",this.current_profile,adh_default_app)
+		tmp := this.read_ini("adh_limit_app",this.current_profile,this.default_app)
 		GuiControl,, adh_limit_application, %tmp%
 		this.add_glabel("adh_limit_application")
 		
@@ -599,7 +600,6 @@ Class ADHDLib
 	option_changed(){
 		global adh_debug_mode
 
-		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
 		global adh_debug_window
@@ -621,10 +621,10 @@ Class ADHDLib
 			this.update_ini("profile_list", "Settings", this.profile_list,"")
 			
 			; Limit app
-			if (adh_default_app == "" || adh_default_app == null){
-				adh_default_app := A_Space
+			if (this.default_app == "" || this.default_app == null){
+				this.default_app := A_Space
 			}
-			this.update_ini("adh_limit_app", this.current_profile, adh_limit_application, adh_default_app)
+			this.update_ini("adh_limit_app", this.current_profile, adh_limit_application, this.default_app)
 			SB_SetText("Current profile: " this.current_profile)
 			
 			; Limit app toggle
