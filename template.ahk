@@ -43,7 +43,7 @@ ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
 ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 
-
+ADH.events.option_changed := "option_hook"
 
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,6 +94,10 @@ return
 ; AUTHORS - PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
 ; When writing code, DO NOT create variables or functions starting adh_
 ; You can use the existing ones obviously
+
+option_hook(){
+	soundplay, *16
+}
 
 ; Initialize your variables and stuff here
 adh_init_author_vars:
@@ -266,6 +270,13 @@ Class ADHDLib
 		this.default_app := ""
 		this.gui_w := 300
 		this.gui_h := 200
+		
+		; Hooks
+		this.events := {}
+		;this.events.profile_load := ""
+		this.events.option_changed := ""
+		this.events.app_active := ""		; When the "Limited" app comes into focus
+		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 	}
 	
 	; EXPOSED METHODS
@@ -487,6 +498,16 @@ Class ADHDLib
 
 	}
 
+	; Fires an event.
+	; Basically executes a string as a function
+	; Checks string is not empty first
+	fire_event(event){
+		if (event && event != ""){
+			%event%()
+		}
+	}
+	
+	; Unused, just here to keep a record of the OnMessage technique
 	gui_move( lParam, wParam, msg )
 	{
 		ToolTip, % "msg: " . msg . " | lParam: " . lParam . " | wParam: " . wParam
@@ -641,6 +662,12 @@ Class ADHDLib
 			}
 			; Fire the Author hook
 			Gosub, adh_change_event
+			
+			Tooltip, % this.events.option_changed
+			this.fire_event(this.events.option_changed)
+			
+			;Func("option_hook")
+			;Func(this.events.option_changed)
 			
 			; Debug settings
 			this.update_ini("adh_debug_mode", "settings", adh_debug_mode, 0)
