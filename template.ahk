@@ -288,7 +288,7 @@ Class ADH
 		; eg ["MyControl","Edit","None"]
 		this.ini_vars := []
 		; Holds a REFERENCE copy of the hotkeys so authors can access the info (eg to quickly send a keyup after the trigger key is pressed)
-		adh_hotkey_mappings := {}
+		this.hotkey_mappings := {}
 
 		#InstallKeybdHook
 		#InstallMouseHook
@@ -444,7 +444,6 @@ Class ADH
 	; aka load profile
 	profile_changed(){
 		global adh_current_profile
-		global adh_hotkey_mappings
 		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
@@ -459,24 +458,24 @@ Class ADH
 		
 		SB_SetText("Current profile: " adh_current_profile) 
 		
-		adh_hotkey_mappings := {}
+		this.hotkey_mappings := {}
 		
 		; Load hotkey bindings
 		Loop, % adh_hotkeys.MaxIndex()
 		{
-			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
-			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
+			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]] := {}
+			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["index"] := A_Index
 
 			; Keyboard bindings
 			tmp := this.read_ini("adh_hk_k_" A_Index,adh_current_profile,A_Space)
 			GuiControl,,adh_hk_k_%A_Index%, %tmp%
-			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
 			
 			; Mouse bindings
 			tmp := this.read_ini("adh_hk_m_" A_Index,adh_current_profile,A_Space)
 			GuiControl, ChooseString, adh_hk_m_%A_Index%, %tmp%
 			if (tmp != "None"){
-				adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
+				this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"] := tmp
 			}
 
 			; Control Modifier
@@ -500,7 +499,7 @@ Class ADH
 			if (tmp == 1){
 				adh_modstring := adh_modstring "!"
 			}
-			adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring adh_hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
+			this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["modified"] := adh_modstring this.hotkey_mappings[adh_hotkeys[A_Index,"subroutine"]]["unmodified"]
 		}
 		
 		; limit application name
@@ -730,11 +729,10 @@ Class ADH
 	; Often a workaround is to send a keyup of the triggering key
 	; Calling send_keyup_on_press() in an action will cause this to happen
 	send_keyup_on_press(sub,mod){
-		global adh_hotkey_mappings
-		; adh_hotkey_mappings contains a handy lookup to hotkey mappings !
+		; hotkey_mappings contains a handy lookup to hotkey mappings !
 		; contains "modified" and "unmodified" keys
 		; Note, it is REFERENCE ONLY. Changing it has no effect.
-		tmp := adh_hotkey_mappings[sub][mod] " up"
+		tmp := this.hotkey_mappings[sub][mod] " up"
 		Send {%tmp%}
 
 	}
