@@ -67,12 +67,6 @@ ADHD.gui_add("Edit", "StringToSend", "xp+120 yp W120", "", "")
 ; Create tooltip by adding _TT to the end of the Variable Name of a control
 StringToSend_TT := "Speed at which to Fire"
 
-
-; Set up the links on the footer of the main page
-h := ADHD.get_gui_h() - 40
-name := ADHD.get_macro_name()
-Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
-
 ; End GUI creation section
 ; ============================================================================================
 

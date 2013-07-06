@@ -225,7 +225,7 @@ Class ADHDLib
 		; ABOUT TAB
 		current_row := tabtop + 5
 		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys for Dummies (ADHD)
-		Gui, Add, Link,x5 yp+25,By Clive "evilC" Galway <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
+		Gui, Add, Link,x5 yp+25,By Clive "evilC" Galway <a href="http://evilc.com/proj/adhd">HomePage</a>    <a href="https://github.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies">GitHub Page</a>
 		local aname := this.author_name
 		local mname := this.author_macro_name
 		Gui, Add, Link,x5 yp+35, This macro ("%mname%") was created by %aname%
@@ -279,6 +279,12 @@ Class ADHDLib
 	finish_startup(){
 		global	; Remove! phase out mass use of globals
 		this.debug_ready := 1
+
+		; Set up the links on the footer of the main page
+		h := this.get_gui_h() - 40
+		name := this.get_macro_name()
+		Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adhd">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
+
 
 		;Hook for Tooltips
 		OnMessage(0x200, "this.mouse_move")

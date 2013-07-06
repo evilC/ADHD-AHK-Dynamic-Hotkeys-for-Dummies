@@ -43,7 +43,6 @@ ADHD.config_event("disable_timers", "disable_timers_hook")
 ADHD.init()
 ADHD.create_gui()
 
-msgbox % A_PtrSize
 ; The "Main" tab is tab 1
 Gui, Tab, 1
 ; ============================================================================================
@@ -75,12 +74,6 @@ ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|
 ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
-
-
-; Set up the links on the footer of the main page
-h := ADHD.get_gui_h() - 40
-name := ADHD.get_macro_name()
-Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
 
 ; End GUI creation section
 ; ============================================================================================

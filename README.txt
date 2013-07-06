@@ -22,6 +22,10 @@ Features:
 * Easy for someone with even a basic knowledge of AHK to write scripts with these features
 * Built-in system to link to a URL for information on your macro
 
+Obatining ADHD:
+If you wish to write macros, you are advised to download the ZIP from my homepage: http://evilc.com/proj/adhd
+The files on GitHub (https://github.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies) are likely to be bleeding-edge and may be broken
+
 Installation:
 1) Install Autohotkey
 Then do one or both of the following:
