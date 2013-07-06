@@ -323,7 +323,8 @@ Class ADH
 		this.gui_y := y
 		
 		; Get list of profiles
-		IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
+		IniRead, pl, %A_ScriptName%.ini, Settings, profile_list, Default
+		this.profile_list := pl
 		; Get current profile
 		IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
 
@@ -385,7 +386,8 @@ Class ADH
 		; PROFILES TAB
 		adh_current_row := adh_tabtop + 20
 		Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
-		Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
+		local pl := this.profile_list
+		Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%pl%
 		Gui, Add, Button, xp+152 yp-1 gadh_add_profile, Add
 		Gui, Add, Button, xp+35 yp gadh_delete_profile, Delete
 		Gui, Add, Button, xp+47 yp gadh_duplicate_profile, Copy
@@ -565,7 +567,6 @@ Class ADH
 		;global adh_starting_up
 		global adh_hotkeys
 		global adh_current_profile
-		global adh_profile_list
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
@@ -586,7 +587,7 @@ Class ADH
 				this.update_ini("adh_hk_s_" A_Index, adh_current_profile, adh_hk_s_%A_Index%, 0)
 				this.update_ini("adh_hk_a_" A_Index, adh_current_profile, adh_hk_a_%A_Index%, 0)
 			}
-			this.update_ini("profile_list", "Settings", adh_profile_list,"")
+			this.update_ini("profile_list", "Settings", this.profile_list,"")
 			
 			; Limit app
 			if (adh_default_app == "" || adh_default_app == null){
@@ -631,33 +632,33 @@ Class ADH
 
 	; Profile management - functions to manage preserving user settings
 	add_profile(name){
-		global adh_profile_list
-		
 		if (name == ""){
 			InputBox, name, Profile Name, Please enter a profile name
 			if (ErrorLevel){
 				return
 			}
 		}
-		if (adh_profile_list == ""){
-			adh_profile_list := name
+		if (this.profile_list == ""){
+			this.profile_list := name
 		} else {
-			adh_profile_list := adh_profile_list "|" name
+			this.profile_list := this.profile_list "|" name
 		}
-		Sort, adh_profile_list, D|
+		pl := this.profile_list
+		Sort, pl, D|
+		this.profile_list := pl
 		
-		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+		GuiControl,, adh_current_profile, |Default||%pl%
 		GuiControl,ChooseString, adh_current_profile, %name%
 		
-		this.update_ini("profile_list", "Settings", adh_profile_list, "")
+		this.update_ini("profile_list", "Settings", this.profile_list, "")
 	}
 
 	delete_profile(name, gotoprofile = "Default"){
-		Global adh_profile_list
 		Global adh_current_profile
 		
 		if (name != "Default"){
-			StringSplit, tmp, adh_profile_list, |
+			pl := this.profile_list
+			StringSplit, tmp, pl, |
 			out := ""
 			Loop, %tmp0%{
 				if (tmp%a_index% != name){
@@ -667,13 +668,14 @@ Class ADH
 					out := out tmp%a_index%
 				}
 			}
-			adh_profile_list := out
+			pl := out
+			this.profile_list := pl
 			
 			IniDelete, %A_ScriptName%.ini, %name%
-			this.update_ini("profile_list", "Settings", adh_profile_list, "")		
+			this.update_ini("profile_list", "Settings", this.profile_list, "")		
 			
 			; Set new contents of list
-			GuiControl,, adh_current_profile, |Default|%adh_profile_list%
+			GuiControl,, adh_current_profile, |Default|%pl%
 			
 			; Select the desired new current profile
 			GuiControl, ChooseString, adh_current_profile, %gotoprofile%
@@ -687,7 +689,6 @@ Class ADH
 	}
 
 	duplicate_profile(name){
-		global adh_profile_list
 		global adh_current_profile
 		
 		; Blank name specified - prompt for name
@@ -700,20 +701,22 @@ Class ADH
 		; ToDo: Duplicate - should just need to be able to change current name and save?
 		
 		; Create the new item in the profile list
-		if (adh_profile_list == ""){
-			adh_profile_list := name
+		if (this.profile_list == ""){
+			this.profile_list := name
 		} else {
-			adh_profile_list := adh_profile_list "|" name
+			this.profile_list := this.profile_list "|" name
 		}
-		Sort, adh_profile_list, D|
+		pl := this.profile_list
+		Sort, pl, D|
+		this.profile_list := pl
 		
 		adh_current_profile := name
 		; Push the new list to the profile select box
-		GuiControl,, adh_current_profile, |Default||%adh_profile_list%
+		GuiControl,, adh_current_profile, |Default||%pl%
 		; Set the new profile to the currently selected item
 		GuiControl,ChooseString, adh_current_profile, %name%
 		; Update the profile list in the INI
-		this.update_ini("profile_list", "Settings", adh_profile_list, "")
+		this.update_ini("profile_list", "Settings", this.profile_list, "")
 		
 		; Firing option_changed saves the current state to the new profile name in the INI
 		this.debug("duplicate_profile calling option_changed")
