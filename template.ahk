@@ -1,4 +1,5 @@
 ﻿; ADHD Bare bones template
+; Simply creates an edit box and binds a hotkey to send the contents of the edit box on press of the hotkey
 
 ; Create an instance of the library
 ADHD := New ADHDLib
