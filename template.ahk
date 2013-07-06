@@ -278,7 +278,6 @@ Class ADH
 		this.starting_up := 1
 
 		ADH.debug("Starting up...")
-		;adh_num_hotkeys := adh_hotkeys.MaxIndex()
 		adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 		; Start ADH init vars and settings
@@ -445,7 +444,6 @@ Class ADH
 	profile_changed(){
 		global adh_current_profile
 		global adh_hotkey_mappings
-		;global adh_num_hotkeys
 		global adh_hotkeys
 		global adh_default_app
 		global adh_limit_application
@@ -917,11 +915,11 @@ Class ADH
 		global adh_limit_application_on
 		global adh_program_mode
 		
-		;adh_debug("program_mode_changed")
+		this.debug("program_mode_changed")
 		Gui, Submit, NoHide
 		
 		if (adh_program_mode == 1){
-			;adh_debug("Entering Program Mode")
+			this.debug("Entering Program Mode")
 			; Enable controls, stop hotkeys, kill timers
 			this.disable_hotkeys()
 			Gosub, adh_disable_author_timers	; Fire the Author hook
@@ -930,7 +928,7 @@ Class ADH
 			GuiControl, enable, adh_limit_application_on
 		} else {
 			; Disable controls, start hotkeys, start heartbeat timer
-			;adh_debug("Exiting Program Mode")
+			this.debug("Exiting Program Mode")
 			this.enable_hotkeys()
 			this.enable_heartbeat()
 			GuiControl, disable, adh_limit_application
@@ -941,7 +939,7 @@ Class ADH
 
 	; App detection stuff
 	enable_heartbeat(){
-		;adh_debug("Enabling Heartbeat")
+		this.debug("Enabling Heartbeat")
 		global adh_limit_application
 		global adh_limit_application_on
 		
@@ -952,7 +950,7 @@ Class ADH
 	}
 
 	disable_heartbeat(){
-		;adh_debug("Disabling Heartbeat")
+		this.debug("Disabling Heartbeat")
 		SetTimer, adh_heartbeat, Off
 		return
 	}
@@ -996,13 +994,12 @@ Class ADH
 	
 	; Hotkey detection routines
 	enable_hotkeys(){
-		;global adh_num_hotkeys
 		global adh_limit_application
 		global adh_limit_application_on
 		global adh_hotkeys
 		
 		; ToDo: Should not submit gui here, triggering save...
-		;adh_debug("enable_hotkeys")
+		this.debug("enable_hotkeys")
 
 		Gui, Submit, NoHide
 		Loop, % adh_hotkeys.MaxIndex()
@@ -1044,12 +1041,11 @@ Class ADH
 	}
 
 	disable_hotkeys(){
-		;global adh_num_hotkeys
 		global adh_limit_application
 		global adh_limit_application_on
 		global adh_hotkeys
 		
-		;adh_debug("disable_hotkeys")
+		this.debug("disable_hotkeys")
 
 		Loop, % adh_hotkeys.MaxIndex()
 		{
