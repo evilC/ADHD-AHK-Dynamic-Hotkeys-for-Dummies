@@ -133,7 +133,7 @@ Class ADHDLib
 		this.gui_y := y
 		
 		; Get list of profiles
-		IniRead, pl, %ini%, Settings, profile_list, Default
+		IniRead, pl, %ini%, Settings, profile_list, %A_Space%
 		this.profile_list := pl
 		; Get current profile
 		IniRead, cp, %ini%, Settings, current_profile, Default
@@ -200,6 +200,7 @@ Class ADHDLib
 		Gui, Add, Text,x5 W40 y%current_row%,Profile
 		local pl := this.profile_list
 		local cp := this.current_profile
+		msgbox, % pl
 		Gui, Add, DropDownList, xp+35 yp-5 W150 vadhd_current_profile gadhd_profile_changed, Default||%pl%
 		Gui, Add, Button, xp+152 yp-1 gadhd_add_profile, Add
 		Gui, Add, Button, xp+35 yp gadhd_delete_profile, Delete
