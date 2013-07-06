@@ -59,83 +59,7 @@ Loop, % adh_hotkeys.MaxIndex()
 ; End Setup section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-; ADH STARTUP AND GUI CREATION
-
-; Debug vars
-adh_debug_mode := 0
-adh_debug_window := 0
-adh_debug_ready := 0
-adh_log_contents := ""
-; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
-adh_starting_up := 1
-
-ADH.debug("Starting up...")
-adh_num_hotkeys := adh_hotkeys.MaxIndex()
-adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
-
-; ToDo:
-; BUGS:
-
-; Before next release:
-
-; Features:
-
-; Long-term:
-; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
-; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
-; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-
-; Start ADH init vars and settings
-adh_core_version := 0.3
-
-; Variables to be stored in the INI file - will be populated by code later
-; [Variable Name, Control Type, Default Value]
-; eg ["MyControl","Edit","None"]
-adh_ini_vars := []
-; Holds a REFERENCE copy of the hotkeys so authors can access the info (to eg send a keyup after the trigger key is pressed)
-adh_hotkey_mappings := {}
-
-#InstallKeybdHook
-#InstallMouseHook
-#MaxHotKeysPerInterval, 200
-
-#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-
-; Make sure closing the GUI using X exits the script
-OnExit, GuiClose
-
-; List of mouse buttons
-adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
-
-IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
-IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
-if (adh_gui_x == "unset"){
-	msgbox, Welcome to this ADH based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
-	adh_gui_x := 0	; initialize
-}
-if (adh_gui_y == "unset"){
-	adh_gui_y := 0
-}
-
-if (adh_gui_x == ""){
-	adh_gui_x := 0	; in case of crash empty values can get written
-}
-if (adh_gui_y == ""){
-	adh_gui_y := 0
-}
-
-; Get list of profiles
-IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
-; Get current profile
-IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
-
-; Set up the GUI ====================================================
-Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
-
-adh_tabtop := 40
-adh_current_row := adh_tabtop + 20
-
+ADH.init()
 ADH.gui_test()
 
 
@@ -170,90 +94,8 @@ adh_tmp := adh_gui_h - 40
 Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%adh_macro_name% Instructions</a>
 
 
-; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-/*
-Gui, Tab, 2
-; BINDINGS TAB
-Gui, Add, Text, x5 y40 W100 Center, Action
-Gui, Add, Text, xp+100 W70 Center, Keyboard
-Gui, Add, Text, xp+90 W70 Center, Mouse
-Gui, Add, Text, xp+82 W30 Center, Ctrl
-Gui, Add, Text, xp+30 W30 Center, Shift
-Gui, Add, Text, xp+30 W30 Center, Alt
-
-; Add hotkeys
-Loop, % adh_hotkeys.MaxIndex()
-{
-	adh_tmpname := adh_hotkeys[A_Index,"uiname"]
-	Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
-	Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
-	Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
-	Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
-	Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
-	Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_a_%A_Index% gadh_option_changed
-	adh_current_row := adh_current_row + 30
-}
-
-; Limit application toggle
-Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
-
-; Limit application Text box
-Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
-
-; Launch window spy
-Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
-adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
-
-; Program mode toggle
-Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_changed, Program Mode
-adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 
 
-Gui, Tab, 3
-; PROFILES TAB
-adh_current_row := adh_tabtop + 20
-Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
-Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
-Gui, Add, Button, xp+152 yp-1 gadh_add_profile, Add
-Gui, Add, Button, xp+35 yp gadh_delete_profile, Delete
-Gui, Add, Button, xp+47 yp gadh_duplicate_profile, Copy
-Gui, Add, Button, xp+40 yp gadh_rename_profile, Rename
-GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
-
-Gui, Tab, 4
-; ABOUT TAB
-adh_current_row := adh_tabtop + 20
-Gui, Add, Link,x5 y%adh_current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
-Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
-Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
-Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
-
-Gui, Tab
-
-; Add a Status Bar for at-a-glance current profile readout
-Gui, Add, StatusBar,,
-
-
-; Show the GUI =====================================
-Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
-
-
-; Add Debug window controls
-Gui, Tab
-adh_tmp := adh_gui_w - 90
-Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
-	
-adh_tmp := adh_gui_w - 180
-Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
-	
-; Fire GuiSubmit while adh_starting_up is on to set all the variables
-Gui, Submit, NoHide
-
-; Create the debug GUI, but do not show yet
-adh_tmp := adh_gui_w - 30
-Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
-Gui, 2:Add, Button, gadh_clear_log, clear
-*/
 adh_debug_ready := 1
 
 ;Hook for Tooltips
@@ -425,6 +267,86 @@ DisableTimers:
 
 Class ADH
 {
+	; ToDo:
+	; BUGS:
+
+	; Before next release:
+
+	; Features:
+
+	; Long-term:
+	; Can you use "% myvar" notation in guicontrols? Objects of guicontrols would be better
+	; Perform checking on adh_hotkeys to ensure sane values (No dupes, labels do not already exist etc)
+	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
+		
+	init(){
+		global		; global for now, phase out!
+		; ADH STARTUP AND GUI CREATION
+
+		; Debug vars
+		adh_debug_mode := 0
+		adh_debug_window := 0
+		adh_debug_ready := 0
+		adh_log_contents := ""
+		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
+		adh_starting_up := 1
+
+		ADH.debug("Starting up...")
+		adh_num_hotkeys := adh_hotkeys.MaxIndex()
+		adh_app_act_curr := 0						; Whether the current app is the "Limit To" app or not
+
+		; Start ADH init vars and settings
+		adh_core_version := 0.3
+
+		; Variables to be stored in the INI file - will be populated by code later
+		; [Variable Name, Control Type, Default Value]
+		; eg ["MyControl","Edit","None"]
+		adh_ini_vars := []
+		; Holds a REFERENCE copy of the hotkeys so authors can access the info (to eg send a keyup after the trigger key is pressed)
+		adh_hotkey_mappings := {}
+
+		#InstallKeybdHook
+		#InstallMouseHook
+		#MaxHotKeysPerInterval, 200
+
+		#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+		SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
+		; Make sure closing the GUI using X exits the script
+		OnExit, GuiClose
+
+		; List of mouse buttons
+		adh_mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
+
+		IniRead, adh_gui_x, %A_ScriptName%.ini, Settings, gui_x, unset
+		IniRead, adh_gui_y, %A_ScriptName%.ini, Settings, gui_y, unset
+		if (adh_gui_x == "unset"){
+			msgbox, Welcome to this ADH based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
+			adh_gui_x := 0	; initialize
+		}
+		if (adh_gui_y == "unset"){
+			adh_gui_y := 0
+		}
+
+		if (adh_gui_x == ""){
+			adh_gui_x := 0	; in case of crash empty values can get written
+		}
+		if (adh_gui_y == ""){
+			adh_gui_y := 0
+		}
+
+		; Get list of profiles
+		IniRead, adh_profile_list, %A_ScriptName%.ini, Settings, profile_list, Default
+		; Get current profile
+		IniRead, adh_current_profile, %A_ScriptName%.ini, Settings, current_profile, Default
+
+		; Set up the GUI ====================================================
+		Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
+
+		adh_tabtop := 40
+		adh_current_row := adh_tabtop + 20
+
+	}
 	
 	; ADH Library
 	gui_test(){
