@@ -136,7 +136,7 @@ Class ADHDLib
 		IniRead, pl, %ini%, Settings, profile_list, %A_Space%
 		this.profile_list := pl
 		; Get current profile
-		IniRead, cp, %ini%, Settings, current_profile, Default
+		IniRead, cp, %ini%, Settings, adhd_current_profile, Default
 		this.current_profile := cp
 
 	}
@@ -200,7 +200,6 @@ Class ADHDLib
 		Gui, Add, Text,x5 W40 y%current_row%,Profile
 		local pl := this.profile_list
 		local cp := this.current_profile
-		msgbox, % pl
 		Gui, Add, DropDownList, xp+35 yp-5 W150 vadhd_current_profile gadhd_profile_changed, Default||%pl%
 		Gui, Add, Button, xp+152 yp-1 gadhd_add_profile, Add
 		Gui, Add, Button, xp+35 yp gadhd_delete_profile, Delete
@@ -308,8 +307,6 @@ Class ADHDLib
 		this.author_version := data.version									; The version number of your script
 		this.author_name := data.author							; Your Name
 		this.author_link := data.link
-		;msgbox % data.name " * " data.version
-		;this.about
 	}
 	
 	; Fires an event.
@@ -338,11 +335,11 @@ Class ADHDLib
 		
 		GuiControlGet,cp,,adhd_current_profile
 		this.current_profile := cp
-		
+		;msgbox % this.current_profile
 		this.debug("profile_changed - " this.current_profile)
 		Gui, Submit, NoHide
 
-		this.update_ini("current_profile", "Settings", this.current_profile,"")
+		this.update_ini("adhd_current_profile", "Settings", this.current_profile,"")
 		
 		SB_SetText("Current profile: " this.current_profile) 
 		
