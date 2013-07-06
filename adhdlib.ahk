@@ -69,7 +69,7 @@ Class ADHDLib
 		this.app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 		; Start ADHD init vars and settings
-		this.core_version := 0.3
+		this.core_version := 1.0
 
 		; Variables to be stored in the INI file - will be populated by code later
 		; [Variable Name, Control Type, Default Value]
@@ -477,6 +477,18 @@ Class ADHDLib
 		GuiControl, -g, %ctrl%
 	}
 
+	get_macro_name(){
+		return this.author_macro_name
+	}
+	
+	get_gui_h(){
+		return this.gui_h
+	}
+	
+	get_gui_w(){
+		return this.gui_w
+	}
+	
 	; Profile management - functions to manage preserving user settings
 	add_profile(name){
 		global adhd_current_profile
@@ -780,10 +792,10 @@ Class ADHDLib
 			this.debug("Entering Program Mode")
 			; Enable controls, stop hotkeys, kill timers
 			this.disable_hotkeys()
-			Gosub, adhd_disable_author_timers	; Fire the Author hook
 			this.disable_heartbeat()
 			GuiControl, enable, adhd_limit_application
 			GuiControl, enable, adhd_limit_application_on
+			this.fire_event(this.events.program_mode_on)
 		} else {
 			; Disable controls, start hotkeys, start heartbeat timer
 			this.debug("Exiting Program Mode")
@@ -791,6 +803,7 @@ Class ADHDLib
 			this.enable_heartbeat()
 			GuiControl, disable, adhd_limit_application
 			GuiControl, disable, adhd_limit_application_on
+			this.fire_event(this.events.program_mode_off)
 		}
 		return
 	}
@@ -834,7 +847,7 @@ Class ADHDLib
 			if (this.app_act_curr != 1){
 				; Changing from inactive to active
 				this.app_act_curr := 1
-				this.fire_event(this.events.app_inactive)
+				this.fire_event(this.events.app_active)
 			}
 		} else {
 			if (this.app_act_curr != 0){
@@ -844,7 +857,7 @@ Class ADHDLib
 				
 				; Fire event hooks
 				this.fire_event(this.events.disable_timers)
-				this.fire_event(this.events.app_inactive)
+				this.fire_event(this.events.app_active)
 				;Gosub, adhd_disable_author_timers	; Fire the Author hook
 			}
 		}

@@ -21,7 +21,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -39,8 +39,8 @@ ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
 ADHD.config_event("option_changed", "option_changed_hook")
-ADHD.config_event("program_mode_on", "")
-ADHD.config_event("program_mode_off", "")
+ADHD.config_event("program_mode_on", "program_mode_on_hook")
+ADHD.config_event("program_mode_off", "program_mode_off_hook")
 ADHD.config_event("app_active", "app_active_hook")
 ADHD.config_event("app_inactive", "app_inactive_hook")
 ADHD.config_event("disable_timers", "disable_timers_hook")
@@ -82,8 +82,8 @@ ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified 
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
-h := ADHD.gui_h - 40
-name := ADHD.author_macro_name
+h := ADHD.get_gui_h() - 40
+name := ADHD.get_macro_name()
 Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
 
 ; End GUI creation section
@@ -97,6 +97,8 @@ return
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; PLACE YOUR HOTKEY DEFINITIONS AND ASSOCIATED FUNCTIONS HERE
 ; When writing code, DO NOT create variables or functions starting adhd_
+
+; Hook functions. We declared these in the config phase - so make sure these names match the ones defined above
 
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 option_changed_hook(){
@@ -136,6 +138,17 @@ disable_timers_hook(){
 	Gosub, DisableTimers
 }
 
+; Gets called when we enter program mode
+program_mode_on_hook(){
+	Gosub, DisableTimers
+}
+
+; Gets called when we exit program mode
+program_mode_off_hook(){
+	Gosub, DisableTimers
+}
+
+; End Hooks ============================================================================================
 
 ; Hotkey block - this is where you define labels that the various bindings trigger
 ; Make sure you call them the same names as you set in the settings at the top of the file (eg Fire, FireRate)
@@ -191,9 +204,11 @@ WeaponToggle:
 	return
 	
 	
-; End Hotkey block ====================
+; End Hotkey block ==================================================================================
 
-; Timers need a label to go to, so handle firing in here...
+; Macro functionality
+
+; Macro is trying to fire - timer label
 DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
 	Gosub, DisableTimers
@@ -228,12 +243,13 @@ SetFireTimer(mode,delay){
 	}
 }
 
+; Turn the weapon toggle on
 EnableToggle:
 	SetScrollLockState, On
 	Send {%WeaponToggle% down}
 	return
 
-; Put disable toggle code in here so when we leave app we can call it
+; Turn the weapon toggle off
 DisableToggle:
 	SetScrollLockState, Off
 	Send {%WeaponToggle% up}
@@ -245,9 +261,7 @@ ResetToggle:
 	SetScrollLockState, Off
 	return
 
-; Keep this duplicate label here so ADHD can stop any timers you start
-adhd_disable_author_timers:
-; Keep all timer disables in here so when we leave app we can stop timers
+; Keep all timer disables in here so various hooks and stuff can stop all your timers easily.
 DisableTimers:
 	SetTimer, DoFire, Off
 	return
