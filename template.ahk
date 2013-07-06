@@ -33,7 +33,7 @@ ADH.default_app := "CryENGINE"
 
 ; GUI size
 ADH.gui_w := 375
-adh_gui_h := 220
+ADH.gui_h := 220
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
@@ -76,9 +76,9 @@ ADH.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified r
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
-tmp := adh_gui_h - 40
+h := ADH.gui_h - 40
 name := ADH.author_macro_name
-Gui, Add, Link, x5 y%tmp%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
+Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adh">ADH Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
 
 ; End GUI creation section
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -265,15 +265,13 @@ Class ADHDLib
 		
 		this.default_app := ""
 		this.gui_w := 300
-		this.gui_y := 200
+		this.gui_h := 200
 	}
 	
 	; EXPOSED METHODS
 	
 	; Load settings etc
 	init(){
-		global adh_gui_h
-		
 		if (this.instantiated != 1){
 			msgbox You must use an instance of this class, not the class itself.`nPut something like ADH := New ADH at the start of your script
 			ExitApp
@@ -351,7 +349,8 @@ Class ADHDLib
 
 		; Set up the GUI ====================================================
 		w := this.gui_w
-		Gui, Add, Tab2, x0 w%w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
+		h := this.gui_h
+		Gui, Add, Tab2, x0 w%w% h%h% gadh_tab_changed, Main|Bindings|Profiles|About
 	}
 	
 	; Creates the ADHD gui
@@ -438,7 +437,8 @@ Class ADHDLib
 		local x := this.gui_x
 		local y := this.gui_y
 		local w := this.gui_w
-		Gui, Show, x%x% y%y% w%w% h%adh_gui_h%, %name% v%aver% (ADHD v%ver%)
+		local h := this.gui_h
+		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
 
 		; Add Debug window controls
 		Gui, Tab
@@ -910,7 +910,6 @@ Class ADHDLib
 	; Debug functions
 	debug_window_change(){
 		global adh_debug_window
-		global adh_gui_h
 		
 		gui, submit, nohide
 		if (adh_debug_window == 1){
