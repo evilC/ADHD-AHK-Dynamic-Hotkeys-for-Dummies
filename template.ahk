@@ -90,8 +90,11 @@ ADH.ini_vars.Insert(["FireRate","Edit",100])
 ADH.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
+/*
 Gui, Add, DropDownList, xp+120 yp-2 W50 vWeaponToggle gadh_mouse_changed, None|1|2|3|4|5|6
 ADH.ini_vars.Insert(["WeaponToggle","DropDownList","None"])
+*/
+ADH.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
 
 Gui, Add, CheckBox, x5 yp+30 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
 ADH.ini_vars.Insert(["LimitFire","CheckBox",0])
@@ -455,7 +458,7 @@ Class ADH
 	gui_add(ctype, cname, copts, cparam3, cdef){
 		; Note this function assumes global so it can create gui items
 		Global
-		Gui, Add, %ctype%, %copts% v%cname% gadh_option_changed, cparam3
+		Gui, Add, %ctype%, %copts% v%cname% gadh_option_changed, %cparam3%
 		this.ini_vars.Insert([cname,ctype,cdef])
 	}
 
