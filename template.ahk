@@ -29,7 +29,7 @@ ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ; Set it to blank ("") to disable altogether, DO NOT DELETE!
-ADH.default_app := "CryENGINE"
+ADH.set_default_app("CryENGINE")
 
 ; GUI size
 ADH.set_size(375,220)
@@ -520,6 +520,10 @@ Class ADHDLib
 	set_size(w,h){
 		this.gui_w := w
 		this.gui_h := h
+	}
+	
+	set_default_app(app){
+		this.default_app := app
 	}
 	
 	; Fires an event.
