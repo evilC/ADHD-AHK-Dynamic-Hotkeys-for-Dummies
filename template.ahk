@@ -635,7 +635,7 @@ Class ADHDLib
 		this.program_mode_changed()
 		
 		; Fire the Author hook
-		Gosub, adh_change_event
+		this.fire_event(this.events.option_changed)
 
 		return
 	}
@@ -681,7 +681,7 @@ Class ADHDLib
 				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
 			}
 			; Fire the Author hook
-			Gosub, adh_change_event
+			this.fire_event(this.events.option_changed)
 			
 			Tooltip, % this.events.option_changed
 			this.fire_event(this.events.option_changed)
