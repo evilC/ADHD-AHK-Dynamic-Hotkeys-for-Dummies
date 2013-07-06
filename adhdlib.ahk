@@ -210,8 +210,8 @@ Class ADHDLib
 		Gui, Tab, 4
 		; ABOUT TAB
 		current_row := tabtop + 5
-		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
-		Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
+		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys for Dummies (ADHD)
+		Gui, Add, Link,x5 yp+25,By Clive "evilC" Galway <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
 		local aname := this.author_name
 		local mname := this.author_macro_name
 		Gui, Add, Link,x5 yp+35, This macro ("%mname%") was created by %aname%
