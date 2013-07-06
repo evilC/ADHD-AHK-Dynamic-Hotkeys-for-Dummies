@@ -68,25 +68,25 @@ Gui, Tab, 1
 ; vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 ; AUTHORS - PLACE CUSTOM GUI ITEMS IN HERE
 ; If you want their state saved in the ini file, add a line like this after you add the control:
-; adh_ini_vars.Insert(["MyControl","DropDownList",1])
+; ADH.ini_vars.Insert(["MyControl","DropDownList",1])
 ; The format is Name, Control Type, Default Value
 ; DO NOT give a control the same name as one of your hotkeys (eg Fire, ChangeFireRate)
 
 Gui, Add, Text, x5 y%adh_tabtop%, Fire Sequence
 Gui, Add, Edit, xp+120 yp W120 vFireSequence gadh_option_changed,
-adh_ini_vars.Insert(["FireSequence","Edit",""])
+ADH.ini_vars.Insert(["FireSequence","Edit",""])
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 Gui, Add, Edit, xp+120 yp W120 vFireRate gadh_option_changed,
-adh_ini_vars.Insert(["FireRate","Edit",100])
+ADH.ini_vars.Insert(["FireRate","Edit",100])
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
 Gui, Add, DropDownList, xp+120 yp-2 W50 vWeaponToggle gadh_mouse_changed, None|1|2|3|4|5|6
-adh_ini_vars.Insert(["WeaponToggle","DropDownList","None"])
+ADH.ini_vars.Insert(["WeaponToggle","DropDownList","None"])
 
 Gui, Add, CheckBox, x5 yp+30 vLimitFire gadh_option_changed, Limit fire rate to specified rate (Stop "Over-Clicking")
-adh_ini_vars.Insert(["LimitFire","CheckBox",0])
+ADH.ini_vars.Insert(["LimitFire","CheckBox",0])
 
 Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
@@ -286,8 +286,8 @@ Class ADH
 		; Variables to be stored in the INI file - will be populated by code later
 		; [Variable Name, Control Type, Default Value]
 		; eg ["MyControl","Edit","None"]
-		adh_ini_vars := []
-		; Holds a REFERENCE copy of the hotkeys so authors can access the info (to eg send a keyup after the trigger key is pressed)
+		this.ini_vars := []
+		; Holds a REFERENCE copy of the hotkeys so authors can access the info (eg to quickly send a keyup after the trigger key is pressed)
 		adh_hotkey_mappings := {}
 
 		#InstallKeybdHook
@@ -449,7 +449,6 @@ Class ADH
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
-		global adh_ini_vars
 		global adh_debug_mode
 		global adh_debug_window
 		
@@ -518,14 +517,14 @@ Class ADH
 		GuiControl,, adh_limit_application_on, %tmp%
 		
 		; Get author vars from ini
-		Loop, % adh_ini_vars.MaxIndex()
+		Loop, % this.ini_vars.MaxIndex()
 		{
-			adh_def := adh_ini_vars[A_Index,3]
+			adh_def := this.ini_vars[A_Index,3]
 			if (adh_def == ""){
 				adh_def := A_Space
 			}
-			adh_key := adh_ini_vars[A_Index,1]
-			adh_sm := this.control_name_to_set_method(adh_ini_vars[A_Index,2])
+			adh_key := this.ini_vars[A_Index,1]
+			adh_sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
 			
 			this.remove_glabel(adh_key)
 			tmp := this.read_ini(adh_key,adh_current_profile,adh_def)
@@ -557,7 +556,6 @@ Class ADH
 		global adh_default_app
 		global adh_limit_application
 		global adh_limit_application_on
-		global adh_ini_vars
 		global adh_debug_mode
 		global adh_debug_window
 		
@@ -588,10 +586,10 @@ Class ADH
 			this.update_ini("adh_limit_app_on", adh_current_profile, adh_limit_application_on, 0)
 			
 			; Add author vars to ini
-			Loop, % adh_ini_vars.MaxIndex()
+			Loop, % this.ini_vars.MaxIndex()
 			{
-				tmp := adh_ini_vars[A_Index,1]
-				this.update_ini(tmp, adh_current_profile, %tmp%, adh_ini_vars[A_Index,3])
+				tmp := this.ini_vars[A_Index,1]
+				this.update_ini(tmp, adh_current_profile, %tmp%, this.ini_vars[A_Index,3])
 			}
 			; Fire the Author hook
 			Gosub, adh_change_event
