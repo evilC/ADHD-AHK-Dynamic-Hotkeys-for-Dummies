@@ -21,11 +21,9 @@ SendMode, Event
 SetKeyDelay, 0, 50
 
 ; Stuff for the About box
-ADH.author_macro_name := "Fire Control"					; Change this to your macro name
-ADH.author_version := 1.0									; The version number of your script
-ADH.author_name := "evilC"								; Your Name
-ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
-ADH.set_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+
+ADH.config_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+;ADH.config.test()
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ; Set it to blank ("") to disable altogether, DO NOT DELETE!
@@ -297,8 +295,9 @@ Class ADHDLib
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 	}
-	
+
 	; EXPOSED METHODS
+	
 	
 	; Load settings etc
 	init(){
@@ -450,8 +449,9 @@ Class ADHDLib
 		current_row := tabtop + 20
 		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
 		Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
-		local name := this.author_macro_name
-		Gui, Add, Link,x5 yp+35, This macro ("%name%") was created by %name%
+		local aname := this.author_name
+		local mname := this.author_macro_name
+		Gui, Add, Link,x5 yp+35, This macro ("%mname%") was created by %aname%
 		local link := this.author_link
 		Gui, Add, Link,x5 yp+25, %link%
 
@@ -464,6 +464,7 @@ Class ADHDLib
 		; Show the GUI =====================================
 		local ver := this.core_version
 		local aver := this.author_version
+		local name := this.author_macro_name
 		local x := this.gui_x
 		local y := this.gui_y
 		local w := this.gui_w
@@ -528,8 +529,12 @@ Class ADHDLib
 	}
 	
 	; Configure the About tab
-	set_about(data){
-		msgbox % data.name " * " data.version
+	config_about(data){
+		this.author_macro_name := data.name					; Change this to your macro name
+		this.author_version := data.version									; The version number of your script
+		this.author_name := data.author							; Your Name
+		this.author_link := data.link
+		;msgbox % data.name " * " data.version
 		;this.about
 	}
 	
