@@ -876,6 +876,12 @@ Class ADH
 			}
 		}
 	}
+	
+	clear_log(){
+		global adh_log_contents
+		adh_log_contents := ""
+		GuiControl,,adh_log_contents,%adh_log_contents%
+	}
 
 	; Program mode stuff
 	program_mode_changed(){
@@ -983,6 +989,7 @@ Class ADH
 		return
 	}
 
+	; Special key detection routines
 	special_key_pressed(ctrl){
 		adh_modifier := ""
 		If GetKeyState("Shift","P")
@@ -996,13 +1003,20 @@ Class ADH
 			GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
 		Else                                                     	;Otherwise,
 			GuiControl,,%ctrl%, % adh_modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
-		;validateHK(ctrl)
 		this.debug("special key detect calling key_changed")
-		;Gosub, adh_option_changed
-		; ToDo: this is passing
 		this.key_changed(ctrl)
 		return
 	}
+
+	hotkey_ctrl_has_focus() {
+		GuiControlGet, ctrl, Focus       ;ClassNN
+		If InStr(ctrl,"hotkey") {
+			GuiControlGet, ctrl, FocusV     ;Associated variable
+			Return, ctrl
+		}
+	}
+		
+
 }
 
 
@@ -1186,8 +1200,7 @@ adh_debug_change:
 	return
 	
 adh_clear_log:
-	adh_log_contents := ""
-	GuiControl,,adh_log_contents,%adh_log_contents%
+	ADH.clear_log()
 	return
 
 adh_program_mode_changed:
@@ -1203,7 +1216,7 @@ adh_heartbeat:
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
 #MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If adh_ctrl := adh_hotkey_ctrl_has_focus()
+#If adh_ctrl := ADH.hotkey_ctrl_has_focus()
 	*AppsKey::                       ;Add support for these special keys,
 	*BackSpace::                     ;  which the hotkey control does not normally allow.
 	*Delete::
@@ -1219,12 +1232,3 @@ adh_heartbeat:
 	ADH.special_key_pressed(adh_ctrl)
 	return
 #If
-
-adh_hotkey_ctrl_has_focus() {
-	GuiControlGet, ctrl, Focus       ;ClassNN
-	If InStr(ctrl,"hotkey") {
-		GuiControlGet, ctrl, FocusV     ;Associated variable
-		Return, ctrl
-	}
-}
-	
