@@ -191,7 +191,7 @@ Loop, % adh_hotkeys.MaxIndex()
 }
 
 ; Limit application toggle
-Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
+;Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
 
 ; Limit application Text box
 ;Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
@@ -422,8 +422,12 @@ Class ADH
 	
 	; ADH Library
 	gui_test(){
-		static adh_limit_application
+		; Limit application toggle
+		Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
+
+		; Limit application Text box
 		Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+
 	}
 	
 	; aka load profile
