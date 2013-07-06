@@ -875,13 +875,11 @@ Class ADH
 		global adh_gui_w
 		global adh_gui_h
 		
-		; 
-		
 		gui, submit, nohide
 		if (adh_debug_window == 1){
-			x := this.gui_x
-			y := this.gui_y - 440
-			; Bug: This is the GUI position at START, now now
+			Gui, +Hwndgui_id
+			WinGetPos, x, y,,, ahk_id %gui_id%
+			y := y - 440
 			Gui, 2:Show, x%x% y%y% w%adh_gui_w% h400, ADH Debug Window
 		} else {
 			gui, 2:hide
