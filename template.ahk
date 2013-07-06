@@ -27,15 +27,14 @@ ADH.config_about({name: "Fire Control", version: 1.0, author: "evilC", link: "<a
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ; Set it to blank ("") to disable altogether, DO NOT DELETE!
-ADH.set_default_app("CryENGINE")
+ADH.config_default_app("CryENGINE")
 
 ; GUI size
-ADH.set_size(375,220)
+ADH.config_size(375,220)
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
 ; uiname is what to refer to it as in the UI (ie Human readable, with spaces)
-;ADH.hotkey_list := []
 ADH.hotkey_list.Insert({uiname: "Fire", subroutine: "Fire"})
 ADH.hotkey_list.Insert({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADH.hotkey_list.Insert({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
@@ -519,12 +518,12 @@ Class ADHDLib
 	}
 
 	; Setup stuff
-	set_size(w,h){
+	config_size(w,h){
 		this.gui_w := w
 		this.gui_h := h
 	}
 	
-	set_default_app(app){
+	config_default_app(app){
 		this.default_app := app
 	}
 	
@@ -700,10 +699,8 @@ Class ADHDLib
 				tmp := this.ini_vars[A_Index,1]
 				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
 			}
-			; Fire the Author hook
-			this.fire_event(this.events.option_changed)
 			
-			Tooltip, % this.events.option_changed
+			; Fire the Author hook
 			this.fire_event(this.events.option_changed)
 			
 			; Debug settings
