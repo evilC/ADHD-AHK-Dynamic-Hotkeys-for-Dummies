@@ -1015,6 +1015,36 @@ Class ADH
 		return
 	}
 
+	disable_hotkeys(){
+		global adh_num_hotkeys
+		global adh_limit_application
+		global adh_limit_application_on
+		global adh_hotkeys
+		
+		;adh_debug("disable_hotkeys")
+
+		Loop, % adh_num_hotkeys
+		{
+			hotkey_prefix := adh_build_prefix(A_Index)
+			hotkey_keys :=  := adh_get_hotkey_string(A_Index)
+			if (hotkey_keys != ""){
+				hotkey_string := hotkey_prefix hotkey_keys
+				; ToDo: Is there a better way to remove a hotkey?
+				HotKey, ~%hotkey_string%, adh_do_nothing
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					HotKey, ~%hotkey_string% up, adh_do_nothing
+				}
+			}
+			GuiControl, Enable, adh_hk_k_%A_Index%
+			GuiControl, Enable, adh_hk_m_%A_Index%
+			GuiControl, Enable, adh_hk_c_%A_Index%
+			GuiControl, Enable, adh_hk_s_%A_Index%
+			GuiControl, Enable, adh_hk_a_%A_Index%
+		}
+		return
+	}
+
 
 	
 	
@@ -1131,38 +1161,8 @@ adh_enable_hotkeys:
 	return
 
 adh_disable_hotkeys:
-	adh_disable_hotkeys()
+	ADH.disable_hotkeys()
 	return
-
-adh_disable_hotkeys(){
-	global adh_num_hotkeys
-	global adh_limit_application
-	global adh_limit_application_on
-	global adh_hotkeys
-	
-	;adh_debug("disable_hotkeys")
-
-	Loop, % adh_num_hotkeys
-	{
-		hotkey_prefix := adh_build_prefix(A_Index)
-		hotkey_keys :=  := adh_get_hotkey_string(A_Index)
-		if (hotkey_keys != ""){
-			hotkey_string := hotkey_prefix hotkey_keys
-			; ToDo: Is there a better way to remove a hotkey?
-			HotKey, ~%hotkey_string%, adh_do_nothing
-			if (IsLabel(hotkey_subroutine "Up")){
-				; Bind up action of hotkey
-				HotKey, ~%hotkey_string% up, adh_do_nothing
-			}
-		}
-		GuiControl, Enable, adh_hk_k_%A_Index%
-		GuiControl, Enable, adh_hk_m_%A_Index%
-		GuiControl, Enable, adh_hk_c_%A_Index%
-		GuiControl, Enable, adh_hk_s_%A_Index%
-		GuiControl, Enable, adh_hk_a_%A_Index%
-	}
-	return
-}
 
 ; An empty stub to redirect unbound hotkeys to
 adh_do_nothing:
