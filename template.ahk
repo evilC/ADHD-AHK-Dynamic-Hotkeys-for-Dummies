@@ -168,6 +168,8 @@ Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructi
 
 
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ADH.gui_test()
+/*
 Gui, Tab, 2
 ; BINDINGS TAB
 Gui, Add, Text, x5 y40 W100 Center, Action
@@ -191,11 +193,10 @@ Loop, % adh_hotkeys.MaxIndex()
 }
 
 ; Limit application toggle
-;Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
+Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
 
 ; Limit application Text box
-;Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
-ADH.gui_test()
+Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
 
 ; Launch window spy
 Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
@@ -233,7 +234,7 @@ Gui, Add, StatusBar,,
 
 ; Show the GUI =====================================
 Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
-
+*/
 ;Hook for Tooltips
 OnMessage(0x200, "ADH.mouse_move")
 
@@ -422,11 +423,74 @@ Class ADH
 	
 	; ADH Library
 	gui_test(){
+		; IMPORTANT !!
+		; Declare global for gui creation routine.
+		; Limitation of AHK - no dynamic creation of vars, and guicontrols need a global or static var
+		global
+		
+		Gui, Tab, 2
+		; BINDINGS TAB
+		Gui, Add, Text, x5 y40 W100 Center, Action
+		Gui, Add, Text, xp+100 W70 Center, Keyboard
+		Gui, Add, Text, xp+90 W70 Center, Mouse
+		Gui, Add, Text, xp+82 W30 Center, Ctrl
+		Gui, Add, Text, xp+30 W30 Center, Shift
+		Gui, Add, Text, xp+30 W30 Center, Alt
+
+		; Add hotkeys
+		Loop, % adh_hotkeys.MaxIndex()
+		{
+			adh_tmpname := adh_hotkeys[A_Index,"uiname"]
+			Gui, Add, Text,x5 W100 y%adh_current_row%, %adh_tmpname%
+			Gui, Add, Hotkey, yp-5 xp+100 W70 vadh_hk_k_%A_Index% gadh_key_changed
+			Gui, Add, DropDownList, yp xp+80 W90 vadh_hk_m_%A_Index% gadh_mouse_changed, None||%adh_mouse_buttons%
+			Gui, Add, CheckBox, xp+100 yp+5 W25 vadh_hk_c_%A_Index% gadh_option_changed
+			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_s_%A_Index% gadh_option_changed
+			Gui, Add, CheckBox, xp+30 yp W25 vadh_hk_a_%A_Index% gadh_option_changed
+			adh_current_row := adh_current_row + 30
+		}
 		; Limit application toggle
 		Gui, Add, CheckBox, x5 yp+25 W160 vadh_limit_application_on gadh_option_changed, Limit to Application: ahk_class
 
 		; Limit application Text box
 		Gui, Add, Edit, xp+170 yp+2 W120 vadh_limit_application gadh_option_changed,
+
+		; Launch window spy
+		Gui, Add, Button, xp+125 yp-1 W15 gadh_show_window_spy, ?
+		adh_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
+
+		; Program mode toggle
+		Gui, Add, Checkbox, x5 yp+30 vadh_program_mode gadh_program_mode_changed, Program Mode
+		adh_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
+
+
+		Gui, Tab, 3
+		; PROFILES TAB
+		adh_current_row := adh_tabtop + 20
+		Gui, Add, Text,x5 W40 y%adh_current_row%,Profile
+		Gui, Add, DropDownList, xp+35 yp-5 W150 vadh_current_profile gadh_profile_changed, Default||%adh_profile_list%
+		Gui, Add, Button, xp+152 yp-1 gadh_add_profile, Add
+		Gui, Add, Button, xp+35 yp gadh_delete_profile, Delete
+		Gui, Add, Button, xp+47 yp gadh_duplicate_profile, Copy
+		Gui, Add, Button, xp+40 yp gadh_rename_profile, Rename
+		GuiControl,ChooseString, adh_current_profile, %adh_current_profile%
+
+		Gui, Tab, 4
+		; ABOUT TAB
+		adh_current_row := adh_tabtop + 20
+		Gui, Add, Link,x5 y%adh_current_row%, This macro was created using AHK Dynamic Hotkeys by Clive "evilC" Galway
+		Gui, Add, Link,x5 yp+25, <a href="http://evilc.com/proj/adh">HomePage</a>    <a href="https://github.com/evilC/AHK-Dynamic-Hotkeys">GitHub Page</a>
+		Gui, Add, Link,x5 yp+35, This macro ("%adh_macro_name%") was created by %adh_author%
+		Gui, Add, Link,x5 yp+25, <a href="%adh_link_url%">%adh_link_text%</a>
+
+		Gui, Tab
+
+		; Add a Status Bar for at-a-glance current profile readout
+		Gui, Add, StatusBar,,
+
+
+		; Show the GUI =====================================
+		Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
 
 	}
 	
