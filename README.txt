@@ -45,7 +45,7 @@ Make sure the end of the client script reads like this:
 	#Include ADHDLib.ahk		; If you have the library in the same folder as your macro, use this
 	;#Include <ADHDLib>			; If you have the library in the Lib folder (C:\Program Files\Autohotkey\Lib), use this
 
-4) Double click the client script to run it
+3) Double click the client script to run it
 
 Demo / Sample Script: "Fire Control"
 A stand-alone executable for this script can be found at:
