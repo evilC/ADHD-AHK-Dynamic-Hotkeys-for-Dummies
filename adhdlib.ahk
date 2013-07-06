@@ -112,8 +112,9 @@ Class ADHDLib
 		; List of mouse buttons
 		this.mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
 
-		IniRead, x, %A_ScriptName%.ini, Settings, gui_x, unset
-		IniRead, y, %A_ScriptName%.ini, Settings, gui_y, unset
+		ini := this.ini_name
+		IniRead, x, %ini%, Settings, gui_x, unset
+		IniRead, y, %ini%, Settings, gui_y, unset
 		if (x == "unset"){
 			msgbox, Welcome to this ADHD based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
 			x := 0	; initialize
@@ -132,10 +133,10 @@ Class ADHDLib
 		this.gui_y := y
 		
 		; Get list of profiles
-		IniRead, pl, %A_ScriptName%.ini, Settings, profile_list, Default
+		IniRead, pl, %ini%, Settings, profile_list, Default
 		this.profile_list := pl
 		; Get current profile
-		IniRead, cp, %A_ScriptName%.ini, Settings, current_profile, Default
+		IniRead, cp, %ini%, Settings, current_profile, Default
 		this.current_profile := cp
 
 	}
@@ -553,7 +554,8 @@ Class ADHDLib
 			pl := out
 			this.profile_list := pl
 			
-			IniDelete, %A_ScriptName%.ini, %name%
+			ini := this.ini_name
+			IniDelete, %ini%, %name%
 			this.update_ini("profile_list", "Settings", this.profile_list, "")		
 			
 			; Set new contents of list
@@ -713,7 +715,7 @@ Class ADHDLib
 	
 	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 	update_ini(key, section, value, default){
-		tmp := A_ScriptName ".ini"
+		tmp := this.ini_name
 		if (value != default){
 			; Only write the value if it differs from what is already written
 			if (this.read_ini(key,section,-1) != value){
@@ -728,7 +730,8 @@ Class ADHDLib
 	}
 
 	read_ini(key,section,default){
-		IniRead, out, %A_ScriptName%.ini, %section%, %key%, %default%
+		ini := this.ini_name
+		IniRead, out, %ini%, %section%, %key%, %default%
 		return out
 	}
 
@@ -736,11 +739,12 @@ Class ADHDLib
 	exit_app(){	
 		Gui, +Hwndgui_id
 		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
+		ini := this.ini_name
 		if (this.read_ini("gui_x","Settings", -1) != gui_x){
-			IniWrite, %gui_x%, %A_ScriptName%.ini, Settings, gui_x
+			IniWrite, %gui_x%, %ini%, Settings, gui_x
 		}
 		if (this.read_ini("gui_y","Settings", -1) != gui_y){
-			IniWrite, %gui_y%, %A_ScriptName%.ini, Settings, gui_y
+			IniWrite, %gui_y%, %ini%, Settings, gui_y
 		}
 		ExitApp
 		return
