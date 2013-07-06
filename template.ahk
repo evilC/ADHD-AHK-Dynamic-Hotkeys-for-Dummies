@@ -32,8 +32,7 @@ ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
 ADH.default_app := "CryENGINE"
 
 ; GUI size
-ADH.gui_w := 375
-ADH.gui_h := 220
+ADH.set_size(375,220)
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
@@ -518,6 +517,11 @@ Class ADHDLib
 
 	}
 
+	set_size(w,h){
+		this.gui_w := w
+		this.gui_h := h
+	}
+	
 	; Fires an event.
 	; Basically executes a string as a function
 	; Checks string is not empty first
