@@ -430,7 +430,8 @@ Class ADH
 		adh_debug_ready := 1
 
 		;Hook for Tooltips
-		OnMessage(0x200, "ADH.mouse_move")
+		OnMessage(0x200, "this.mouse_move")
+		;OnMessage(0x47, "ADH.gui_move")
 
 
 		; Finish setup =====================================
@@ -443,7 +444,13 @@ Class ADH
 		this.starting_up := 0
 
 	}
+
+	gui_move( lParam, wParam, msg )
+	{
+		ToolTip, % "msg: " . msg . " | lParam: " . lParam . " | wParam: " . wParam
+	}
 	
+
 	; aka load profile
 	profile_changed(){
 		global adh_current_profile
@@ -865,7 +872,8 @@ Class ADH
 		global adh_gui_y
 		global adh_gui_w
 		global adh_gui_h
-		;global adh_starting_up
+		
+		; 
 		
 		gui, submit, nohide
 		if (adh_debug_window == 1){
