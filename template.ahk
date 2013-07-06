@@ -60,7 +60,7 @@ Loop, % adh_hotkeys.MaxIndex()
 ; ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ADH.init()
-ADH.gui_test()
+ADH.create_gui()
 
 
 Gui, Tab, 1
@@ -96,21 +96,7 @@ Gui, Add, Link, x5 y%adh_tmp%, <a href="http://evilc.com/proj/adh">ADH Instructi
 
 
 
-adh_debug_ready := 1
-
-;Hook for Tooltips
-OnMessage(0x200, "ADH.mouse_move")
-
-
-; Finish setup =====================================
-ADH.profile_changed()
-ADH.debug_window_change()
-
-ADH.debug("Finished startup")
-
-; Finished startup, allow change of controls to fire events
-adh_starting_up := 0
-
+ADH.finish_startup()
 return
 
 ; END OF ADH STARTUP
@@ -349,7 +335,7 @@ Class ADH
 	}
 	
 	; ADH Library
-	gui_test(){
+	create_gui(){
 		; IMPORTANT !!
 		; Declare global for gui creation routine.
 		; Limitation of AHK - no dynamic creation of vars, and guicontrols need a global or static var
@@ -434,6 +420,25 @@ Class ADH
 		adh_tmp := adh_gui_w - 30
 		Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
 		Gui, 2:Add, Button, gadh_clear_log, clear
+	}
+	
+	finish_startup(){
+		global	; Remove! phase out mass use of globals
+		adh_debug_ready := 1
+
+		;Hook for Tooltips
+		OnMessage(0x200, "ADH.mouse_move")
+
+
+		; Finish setup =====================================
+		ADH.profile_changed()
+		ADH.debug_window_change()
+
+		ADH.debug("Finished startup")
+
+		; Finished startup, allow change of controls to fire events
+		adh_starting_up := 0
+
 	}
 	
 	; aka load profile
