@@ -32,7 +32,7 @@ ADH.author_link := "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"
 ADH.default_app := "CryENGINE"
 
 ; GUI size
-adh_gui_w := 375
+ADH.gui_w := 375
 adh_gui_h := 220
 
 ; Defines your hotkeys 
@@ -264,13 +264,14 @@ Class ADHDLib
 		this.author_link := ""
 		
 		this.default_app := ""
+		this.gui_w := 300
+		this.gui_y := 200
 	}
 	
 	; EXPOSED METHODS
 	
 	; Load settings etc
 	init(){
-		global adh_gui_w
 		global adh_gui_h
 		
 		if (this.instantiated != 1){
@@ -349,7 +350,8 @@ Class ADHDLib
 		this.current_profile := cp
 
 		; Set up the GUI ====================================================
-		Gui, Add, Tab2, x0 w%adh_gui_w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
+		w := this.gui_w
+		Gui, Add, Tab2, x0 w%w% h%adh_gui_h% gadh_tab_changed, Main|Bindings|Profiles|About
 	}
 	
 	; Creates the ADHD gui
@@ -435,21 +437,22 @@ Class ADHDLib
 		local aver := this.author_version
 		local x := this.gui_x
 		local y := this.gui_y
-		Gui, Show, x%x% y%y% w%adh_gui_w% h%adh_gui_h%, %name% v%aver% (ADHD v%ver%)
+		local w := this.gui_w
+		Gui, Show, x%x% y%y% w%w% h%adh_gui_h%, %name% v%aver% (ADHD v%ver%)
 
 		; Add Debug window controls
 		Gui, Tab
-		adh_tmp := adh_gui_w - 90
+		adh_tmp := w - 90
 		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_window gadh_debug_window_change, Show Window
 			
-		adh_tmp := adh_gui_w - 180
+		adh_tmp := w - 180
 		Gui, Add, CheckBox, x%adh_tmp% y10 vadh_debug_mode gadh_debug_change, Debug Mode
 
 		; Fire GuiSubmit while starting_up is on to set all the variables
 		Gui, Submit, NoHide
 
 		; Create the debug GUI, but do not show yet
-		adh_tmp := adh_gui_w - 30
+		adh_tmp := w - 30
 		Gui, 2:Add,Edit,w%adh_tmp% h350 vadh_log_contents ReadOnly,
 		Gui, 2:Add, Button, gadh_clear_log, clear
 	}
@@ -907,7 +910,6 @@ Class ADHDLib
 	; Debug functions
 	debug_window_change(){
 		global adh_debug_window
-		global adh_gui_w
 		global adh_gui_h
 		
 		gui, submit, nohide
@@ -915,7 +917,8 @@ Class ADHDLib
 			Gui, +Hwndgui_id
 			WinGetPos, x, y,,, ahk_id %gui_id%
 			y := y - 440
-			Gui, 2:Show, x%x% y%y% w%adh_gui_w% h400, ADH Debug Window
+			w := this.gui_w
+			Gui, 2:Show, x%x% y%y% w%w% h400, ADH Debug Window
 		} else {
 			gui, 2:hide
 		}
