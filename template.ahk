@@ -281,7 +281,7 @@ Class ADH
 		this.app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 		; Start ADH init vars and settings
-		adh_core_version := 0.3
+		this.core_version := 0.3
 
 		; Variables to be stored in the INI file - will be populated by code later
 		; [Variable Name, Control Type, Default Value]
@@ -402,7 +402,8 @@ Class ADH
 
 
 		; Show the GUI =====================================
-		Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%adh_core_version%)
+		local ver := this.core_version
+		Gui, Show, x%adh_gui_x% y%adh_gui_y% w%adh_gui_w% h%adh_gui_h%, %adh_macro_name% v%adh_version% (ADH v%ver%)
 
 		; Add Debug window controls
 		Gui, Tab
