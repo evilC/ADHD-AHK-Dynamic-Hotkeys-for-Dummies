@@ -134,13 +134,9 @@ EnableToggle:
 ; Turn the weapon toggle off
 DisableToggle:
 	SetScrollLockState, Off
-	Send {%WeaponToggle% up}
-	return
-
-; ResetToggle is used to just unset the light
-; Using the normal disable while editing an editbox moves the cursor to the start
-ResetToggle:
-	SetScrollLockState, Off
+	if (weapon_toggle_mode == 1){
+		Send {%WeaponToggle% up}
+	}
 	return
 
 ; Keep all timer disables in here so various hooks and stuff can stop all your timers easily.
@@ -153,16 +149,22 @@ DisableTimers:
 
 ; This is fired when settings change (including on load). Use it to pre-calculate values etc.
 option_changed_hook(){
+	firectrl_init()
+	return
+}
+
+firectrl_init(){
 	global FireSequence
 	global fire_array := []
 	global current_weapon := 1
 	global fire_divider := 1
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
 	global weapon_toggle_mode := false
-	Gosub, ResetToggle
-
-	;soundplay, *16
+	Gosub, DisableToggle
+	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
+	
+	; Split FireSequence box from comma separated list to array
 	StringSplit, tmp, FireSequence, `,
 	Loop, %tmp0%
 	{
@@ -170,7 +172,6 @@ option_changed_hook(){
 			fire_array[A_Index] := tmp%A_Index%
 		}
 	}
-	return
 }
 
 ; Gets called when the "Limited" app gets focus
@@ -181,7 +182,7 @@ app_active_hook(){
 
 ; Gets called when the "Limited" app loses focus
 app_inactive_hook(){
-	
+	firectrl_init()
 	Gosub, DisableTimers
 }
 
@@ -197,6 +198,7 @@ program_mode_on_hook(){
 
 ; Gets called when we exit program mode
 program_mode_off_hook(){
+	firectrl_init()
 	Gosub, DisableTimers
 }
 
