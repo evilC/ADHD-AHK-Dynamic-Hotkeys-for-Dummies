@@ -43,27 +43,9 @@ Class ADHDLib
 
 	; EXPOSED METHODS
 	
-	build_ini_name(){
-		tmp := A_Scriptname
-		Stringsplit, tmp, tmp,.
-		ini_name := ""
-		last := ""
-		Loop, % tmp0
-		{
-			if (last != ""){
-				if (ini_name != ""){
-					ini_name := ini_name "."
-				}
-				ini_name := ini_name last
-			}
-			last := tmp%A_Index%
-		}
-		this.ini_name := ini_name ".ini"
-		return
-	}
-	
 	; Load settings etc
 	init(){
+		this.core_version := 1.1
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -104,7 +86,6 @@ Class ADHDLib
 		this.app_act_curr := 0						; Whether the current app is the "Limit To" app or not
 
 		; Start ADHD init vars and settings
-		this.core_version := 1.0
 
 		; Variables to be stored in the INI file - will be populated by code later
 		; [Variable Name, Control Type, Default Value]
@@ -274,6 +255,25 @@ Class ADHDLib
 		Global
 		Gui, Add, %ctype%, %copts% v%cname% gadhd_option_changed, %cparam3%
 		this.ini_vars.Insert([cname,ctype,cdef])
+	}
+
+	build_ini_name(){
+		tmp := A_Scriptname
+		Stringsplit, tmp, tmp,.
+		ini_name := ""
+		last := ""
+		Loop, % tmp0
+		{
+			if (last != ""){
+				if (ini_name != ""){
+					ini_name := ini_name "."
+				}
+				ini_name := ini_name last
+			}
+			last := tmp%A_Index%
+		}
+		this.ini_name := ini_name ".ini"
+		return
 	}
 
 	finish_startup(){
