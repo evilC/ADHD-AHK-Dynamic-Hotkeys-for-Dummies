@@ -1,0 +1,19 @@
+Key:
+! : Warning
+* : Comment
+= : Change / Fix
++ : Added feature
+
+2.2 7th Jul 2013
++ Now detects change of resolution and when it gets smaller, resets and shuts off all timers.
+In games that have a windowed mode lobby and a full-screen game - this should shut stuff off when you go back to the lobby.
+
+2.1 7th Jul 2013
+= Fixed app detection.
+Will now disable timers and Weapon Toggle when the Limit App loses focus
+
+2.0 6th Jul 2013
+* Initial Class Library version
+
+1.x
+* Initial dev versions, not recorded

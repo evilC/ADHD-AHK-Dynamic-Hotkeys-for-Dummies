@@ -135,9 +135,7 @@ EnableToggle:
 ; Turn the weapon toggle off
 DisableToggle:
 	SetScrollLockState, Off
-	if (weapon_toggle_mode == 1){
-		Send {%WeaponToggle% up}
-	}
+	Send {%WeaponToggle% up}
 	return
 
 ; Keep all timer disables in here so various hooks and stuff can stop all your timers easily.

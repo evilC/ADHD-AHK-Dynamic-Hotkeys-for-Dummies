@@ -1,0 +1,17 @@
+Key:
+! : Warning
+* : Comment
+= : Change / Fix
++ : Added feature
+
+1.2 7th Jul 2013
++ Added a new hook - resolution_change. Fires when the resolution of the "Limit app" window changes.
+
+1.1 7th Jul 2013
+= Fixed bug where app_active was being fired instead of app_inactive. 
+
+1.0 6th Jul 2013
+* Initial Class Library version
+
+0.x
+* Initial dev versions, not recorded
