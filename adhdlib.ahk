@@ -904,7 +904,7 @@ Class ADHDLib
 				
 				; Fire event hooks
 				this.fire_event(this.events.disable_timers)
-				this.fire_event(this.events.app_active)
+				this.fire_event(this.events.app_inactive)
 				;Gosub, adhd_disable_author_timers	; Fire the Author hook
 			}
 		}
