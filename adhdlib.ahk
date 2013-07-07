@@ -35,6 +35,11 @@ Class ADHDLib
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 		
+		this.limit_app_w := -1				; Used for resolution change detection
+		this.limit_app_h := -1
+		this.limit_app_last_w := -1
+		this.limit_app_last_h := -1
+		
 		this.x64_warning := 1
 		; strip extension from end of script name for basis of INI name
 		;this.ini_name := this.build_ini_name()
@@ -880,6 +885,25 @@ Class ADHDLib
 		; Not used to enable or disable hotkeys, used to start or stop author macros etc
 		IfWinActive, % "ahk_class " adhd_limit_application
 		{
+			WinGetPos,,,limit_w,limit_h, % "ahk_class " adhd_limit_application
+			; If the size has changed since the last heartbeat
+			if ( (this.limit_app_w != limit_w) || (this.limit_app_h != limit_h)){
+				if ((this.limit_app_w == -1) && (this.limit_app_h == -1)){
+					fire_change := 0
+				} else {
+					fire_change := 1
+				}
+				this.limit_app_last_w := this.limit_app_w
+				this.limit_app_last_h := this.limit_app_h
+				this.limit_app_w := limit_w
+				this.limit_app_h := limit_h
+				if (fire_change){
+					this.fire_event(this.events.resolution_changed)
+					this.debug("Resolution change detected - firing change")
+				} else {
+					this.debug("First detection of resolution - not firing change")
+				}
+			}
 			this.app_active(1)
 		}
 		else
@@ -889,6 +913,14 @@ Class ADHDLib
 		return
 	}
 
+	limit_app_get_size(){
+		return {w: this.limit_app_w, h:this.limit_app_h}
+	}
+	
+	limit_app_get_last_size(){
+		return {w: this.limit_app_last_w, h:this.limit_app_last_h}	
+	}
+	
 	app_active(act){
 		if (act){
 			if (this.app_act_curr != 1){

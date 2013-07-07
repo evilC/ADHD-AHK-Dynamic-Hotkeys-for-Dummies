@@ -39,6 +39,7 @@ ADHD.config_event("program_mode_off", "program_mode_off_hook")
 ADHD.config_event("app_active", "app_active_hook")
 ADHD.config_event("app_inactive", "app_inactive_hook")
 ADHD.config_event("disable_timers", "disable_timers_hook")
+ADHD.config_event("resolution_changed", "resolution_changed_hook")
 
 ADHD.init()
 ADHD.create_gui()
@@ -200,6 +201,25 @@ program_mode_on_hook(){
 program_mode_off_hook(){
 	firectrl_init()
 	Gosub, DisableTimers
+}
+
+; Fired when the limited app changes resolution. Useful for some games that have a windowed matchmaker and fullscreen game
+resolution_changed_hook(){
+	global ADHD
+	
+	curr_size := ADHD.limit_app_get_size()
+	last_size := ADHD.limit_app_get_last_size()
+	ADHD.debug("Res change: " curr_size.w "x" curr_size.h " --> " last_size.w "x" last_size.h)
+	if (curr_size.w > last_size.w || curr_size.h > last_size.h){
+		; Got larger - lobby to game
+		ADHD.debug("FC: Res got bigger")
+	} else {
+		; Got smaller game to lobby
+		ADHD.debug("FC: Res got smaller")
+		firectrl_init()
+		Gosub, DisableTimers		
+	}
+	return
 }
 
 ; ==========================================================================================

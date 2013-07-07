@@ -38,6 +38,8 @@ ADHD.config_event("program_mode_off", "program_mode_off_hook")
 ADHD.config_event("app_active", "app_active_hook")
 ADHD.config_event("app_inactive", "app_inactive_hook")
 ADHD.config_event("disable_timers", "disable_timers_hook")
+ADHD.config_event("resolution_changed", "resolution_changed_hook")
+
 
 ; End Setup section
 ; ============================================================================================
@@ -111,6 +113,11 @@ program_mode_on_hook(){
 ; Gets called when we exit program mode
 program_mode_off_hook(){
 	Gosub, DisableTimers
+}
+
+; Fired when the limited app changes resolution. Useful for some games that have a windowed matchmaker and fullscreen game
+resolution_changed_hook(){
+
 }
 
 ; Keep all timer disables in here so various hooks and stuff can stop all your timers easily.
