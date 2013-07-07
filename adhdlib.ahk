@@ -50,7 +50,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.1
+		this.core_version := 1.2
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
