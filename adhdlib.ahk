@@ -942,6 +942,13 @@ Class ADHDLib
 		}
 	}
 
+	limit_app_is_active(){
+		if (this.app_act_curr){
+			return true
+		} else {
+			return false
+		}
+	}
 	
 	; Hotkey detection routines
 	enable_hotkeys(){
