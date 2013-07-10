@@ -1,8 +1,14 @@
-Key:
+ey:
 ! : Warning
 * : Comment
 = : Change / Fix
 + : Added feature
+
+2.4 9th Mar 2013
+= Limit fire rate option now actually works - previously it was always on.
+
+2.3 7th Jul 2013
+= Weapon Toggle now disables correctly again
 
 2.2 7th Jul 2013
 + Now detects change of resolution and when it gets smaller, resets and shuts off all timers.

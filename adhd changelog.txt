@@ -4,6 +4,11 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.3 10th Jul 2013
+= Fixed bug where changing profiles would not change the setting of a binding if the new setting was "None".
+Thus, settings could duplicate from one profile to another.
+= Add mode now adds a blank profile, instead of just copying the current one.
+
 1.2 7th Jul 2013
 + Added a new hook - resolution_change. Fires when the resolution of the "Limit app" window changes.
 

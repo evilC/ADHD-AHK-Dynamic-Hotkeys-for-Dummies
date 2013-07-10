@@ -16,7 +16,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.2, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.4, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -237,7 +237,7 @@ Fire:
 
 	; If we clicked the button too early, play a sound and schedule a click when it is OK to fire
 	; If the user releases the button, the timer will terminate
-	if (A_TickCount < nextfire){
+	if (LimitFire && A_TickCount < nextfire){
 		soundplay, *16
 		SetFireTimer(1,true)
 		return

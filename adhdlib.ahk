@@ -50,7 +50,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.2
+		this.core_version := 1.3
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -381,12 +381,12 @@ Class ADHDLib
 			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["index"] := A_Index
 
 			; Keyboard bindings
-			tmp := this.read_ini("adhd_hk_k_" A_Index,this.current_profile,A_Space)
+			tmp := this.read_ini("adhd_hk_k_" A_Index,this.current_profile,"None")
 			GuiControl,,adhd_hk_k_%A_Index%, %tmp%
 			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
 			
 			; Mouse bindings
-			tmp := this.read_ini("adhd_hk_m_" A_Index,this.current_profile,A_Space)
+			tmp := this.read_ini("adhd_hk_m_" A_Index,this.current_profile,"None")
 			GuiControl, ChooseString, adhd_hk_m_%A_Index%, %tmp%
 			if (tmp != "None"){
 				this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
@@ -559,8 +559,11 @@ Class ADHDLib
 		
 		GuiControl,, adhd_current_profile, |Default||%pl%
 		GuiControl,ChooseString, adhd_current_profile, %name%
-		
+		adhd_current_profile := name
 		this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")
+		; Call profile load on a nonexistant profile to force settings to defaults and reset UI
+		this.profile_changed()
+		; No need to save - profile is default options
 	}
 
 	delete_profile(name, gotoprofile = "Default"){
