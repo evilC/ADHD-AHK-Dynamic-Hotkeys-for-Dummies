@@ -97,7 +97,7 @@ DoFire:
 	Gosub, DisableTimers
 		
 	out := fire_array[current_weapon]
-	Send {%out%}
+	Send % out
 	tmp := FireRate / fire_divider
 	SetTimer, DoFire, % tmp
 	nextfire := A_TickCount + (tmp)
