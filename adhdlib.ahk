@@ -337,7 +337,8 @@ Class ADHDLib
 		this.default_app := app
 	}
 	
-	config_get_default_app_on(app){
+	config_get_default_app_on(){
+		global adhd_limit_application_on
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application_on
 	}
