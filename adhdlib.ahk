@@ -50,7 +50,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.3
+		this.core_version := 1.4
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -970,11 +970,9 @@ Class ADHDLib
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-				if (adhd_limit_application_on == 1){
-					if (adhd_limit_application !=""){
-						; Enable Limit Application for all subsequently declared hotkeys
-						Hotkey, IfWinActive, ahk_class %adhd_limit_application%
-					}
+				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
+					; Enable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive, ahk_class %adhd_limit_application%
 				} else {
 					; Disable Limit Application for all subsequently declared hotkeys
 					Hotkey, IfWinActive
@@ -983,10 +981,12 @@ Class ADHDLib
 				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine)
 				; Bind down action of hotkey
 				Hotkey, ~%hotkey_string% , %hotkey_subroutine%
+				Hotkey, ~%hotkey_string% , %hotkey_subroutine%, On
 				
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey
 					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
+					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up, On
 				}
 				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 			}
@@ -1014,10 +1014,11 @@ Class ADHDLib
 			if (hotkey_keys != ""){
 				hotkey_string := hotkey_prefix hotkey_keys
 				; ToDo: Is there a better way to remove a hotkey?
-				HotKey, ~%hotkey_string%, adhd_do_nothing
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+				HotKey, ~%hotkey_string%, %hotkey_subroutine%, Off
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey
-					HotKey, ~%hotkey_string% up, adhd_do_nothing
+					HotKey, ~%hotkey_string% up, %hotkey_subroutine%, Off
 				}
 			}
 			GuiControl, Enable, adhd_hk_k_%A_Index%
@@ -1182,11 +1183,6 @@ adhd_heartbeat:
 	ADHD.heartbeat()
 	return
 
-; An empty stub to redirect unbound hotkeys to
-adhd_do_nothing:
-	return
-
-	
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
 

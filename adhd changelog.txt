@@ -4,6 +4,11 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.4 14th Jul 2013
+= Fixed bug: If you disabled "Limit Application", the hotkey bindings would not work until you restarted the macro.
+Also, hotkeys are now disabled in the "proper" way.
+
+
 1.3 10th Jul 2013
 = Fixed bug where changing profiles would not change the setting of a binding if the new setting was "None".
 Thus, settings could duplicate from one profile to another.
