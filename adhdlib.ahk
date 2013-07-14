@@ -51,7 +51,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.5
+		this.core_version := 1.6
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -91,7 +91,7 @@ Class ADHDLib
 		this.starting_up := 1
 
 		this.debug("Starting up...")
-		this.app_act_curr := 0						; Whether the current app is the "Limit To" app or not
+		this.app_act_curr := -1						; Whether the current app is the "Limit To" app or not. Start on -1 so we can init first state of app active or inactive
 
 		; Start ADHD init vars and settings
 
@@ -933,20 +933,22 @@ Class ADHDLib
 	
 	app_active(act){
 		if (act){
-			if (this.app_act_curr != 1){
+			if (this.app_act_curr == 0){
 				; Changing from inactive to active
 				this.app_act_curr := 1
 				this.fire_event(this.events.app_active)
+				this.debug("Firing app_active")
 			}
 		} else {
-			if (this.app_act_curr != 0){
-				; Changing from active to inactive
+			if (this.app_act_curr == 1 || this.app_act_curr == -1){
+				; Changing from active to inactive or on startup
 				; Stop Author Timers
 				this.app_act_curr := 0
 				
 				; Fire event hooks
 				this.fire_event(this.events.disable_timers)
 				this.fire_event(this.events.app_inactive)
+				this.debug("Firing app_inactive")
 				;Gosub, adhd_disable_author_timers	; Fire the Author hook
 			}
 		}
