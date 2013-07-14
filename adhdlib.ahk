@@ -41,6 +41,7 @@ Class ADHDLib
 		this.limit_app_last_h := -1
 		
 		this.x64_warning := 1
+		this.noaction_warning := 1
 		; strip extension from end of script name for basis of INI name
 		;this.ini_name := this.build_ini_name()
 		this.build_ini_name()
@@ -50,7 +51,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.4
+		this.core_version := 1.5
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -69,8 +70,10 @@ Class ADHDLib
 		
 		; Check the user defined a hotkey
 		if (this.hotkey_list.MaxIndex() < 1){
-			msgbox, No Actions defined, Exiting...
-			ExitApp
+			if (this.noaction_warning){
+				msgbox, No Actions defined, Exiting...
+				ExitApp
+			}
 		}
 
 		; Check that labels specified as targets for hotkeys actually exist
@@ -309,6 +312,10 @@ Class ADHDLib
 
 	config_ignore_x64_warning(){
 		this.x64_warning := 0
+	}
+	
+	config_ignore_noaction_warning(){
+		this.noaction_warning := 0
 	}
 	
 	; Setup stuff
