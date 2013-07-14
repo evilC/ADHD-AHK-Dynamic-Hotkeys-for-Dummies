@@ -337,6 +337,11 @@ Class ADHDLib
 		this.default_app := app
 	}
 	
+	config_get_default_app_on(app){
+		;Gets the state of the Limit App checkbox
+		return adhd_limit_application_on
+	}
+	
 	; Configure the About tab
 	config_about(data){
 		this.author_macro_name := data.name					; Change this to your macro name
