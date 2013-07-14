@@ -1,10 +1,16 @@
-ey:
+Key:
 ! : Warning
 * : Comment
 = : Change / Fix
 + : Added feature
 
-2.4 9th Mar 2013
+2.5 14th Jul 2013
+= Now supports a string in Fire Sequence
+So you could eg set fire sequence to hello,goodbye
+Please note that all keys in string will not be sent together. They will be sent with delay specified by SetKeyDelay
+Altering SetKeyDelay can affect whether the macro works in a game or not (eg less than 50ms wait before keyup does not work in MWO)
+
+2.4 9th Jul 2013
 = Limit fire rate option now actually works - previously it was always on.
 
 2.3 7th Jul 2013
