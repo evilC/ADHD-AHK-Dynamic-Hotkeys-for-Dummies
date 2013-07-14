@@ -619,7 +619,7 @@ Class ADHDLib
 		
 		; Blank name specified - prompt for name
 		if (name == ""){
-			InputBox, name, Profile Name, Please enter a profile name
+			InputBox, name, Profile Name, Please enter a profile name,,,,,,,,,%adhd_current_profile%
 			if (ErrorLevel){
 				return
 			}
@@ -655,7 +655,7 @@ Class ADHDLib
 	rename_profile(){
 		if (this.current_profile != "Default"){
 			old_prof := this.current_profile
-			InputBox, new_prof, Profile Name, Please enter a new name
+			InputBox, new_prof, Profile Name, Please enter a new name,,,,,,,,%old_prof%
 			if (!ErrorLevel){
 				this.duplicate_profile(new_prof)
 				this.delete_profile(old_prof,new_prof)
