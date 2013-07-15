@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.8 15th Jul 2013
+= The tooltip system now works again
+
 1.7 15th Jul 2013
 = The help link is no longer hard wired to fire control
 + There is now a help parameter in config_about to allow you to configure seperate homepage and help pages

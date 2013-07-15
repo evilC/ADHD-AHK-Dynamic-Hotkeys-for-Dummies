@@ -1,3 +1,5 @@
+; 3rd party functions
+; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
 Class ADHDLib
 	; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
 {
@@ -51,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.7
+		this.core_version := 1.8
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -296,7 +298,8 @@ Class ADHDLib
 
 
 		;Hook for Tooltips
-		OnMessage(0x200, "this.mouse_move")
+		;OnMessage(0x200, "this.mouse_move")
+		OnMessage(0x200, "adhd_mouse_move")
 		;OnMessage(0x47, "ADHD.gui_move")
 
 
@@ -310,6 +313,9 @@ Class ADHDLib
 		this.starting_up := 0
 
 	}
+test(){
+	soundbeep
+}
 
 	config_ignore_x64_warning(){
 		this.x64_warning := 0
@@ -1063,31 +1069,6 @@ Class ADHDLib
 		return tmp
 	}
 
-	
-	; 3rd party functions
-	; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
-	mouse_move(){
-		static CurrControl, PrevControl, _TT
-		CurrControl := A_GuiControl
-		If (CurrControl <> PrevControl){
-				SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
-				PrevControl := CurrControl
-		}
-		return
-		
-		DisplayToolTip:
-		try
-				ToolTip % %CurrControl%_TT
-		catch
-				ToolTip
-		SetTimer, RemoveToolTip, -10000
-		return
-		
-		RemoveToolTip:
-		ToolTip
-		return
-	}
-
 	; Special key detection routines
 	special_key_pressed(ctrl){
 		modifier := ""
@@ -1132,6 +1113,53 @@ Class ADHDLib
 	}
 
 }
+adhd_mouse_move(){
+	soundbeep
+	static CurrControl, PrevControl, _TT
+	CurrControl := A_GuiControl
+	If (CurrControl <> PrevControl){
+			SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
+			PrevControl := CurrControl
+	}
+	return
+	
+	DisplayToolTip:
+	try
+			ToolTip % %CurrControl%_TT
+	catch
+			ToolTip
+	SetTimer, RemoveToolTip, -10000
+	return
+	
+	RemoveToolTip:
+	ToolTip
+	return
+}
+
+; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
+; ToDo: Has to be here as when handling an OnMessage callback, it has no concept of "this"
+adhd_mouse_move(){
+	static CurrControl, PrevControl, _TT
+	CurrControl := A_GuiControl
+	If (CurrControl <> PrevControl){
+			SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
+			PrevControl := CurrControl
+	}
+	return
+	
+	DisplayToolTip:
+	try
+			ToolTip % %CurrControl%_TT
+	catch
+			ToolTip
+	SetTimer, RemoveToolTip, -10000
+	return
+	
+	RemoveToolTip:
+	ToolTip
+	return
+}
+
 
 ; Label triggers
 
@@ -1233,3 +1261,4 @@ GuiClose:
 	ADHD.special_key_pressed(adhd_ctrl)
 	return
 #If
+
