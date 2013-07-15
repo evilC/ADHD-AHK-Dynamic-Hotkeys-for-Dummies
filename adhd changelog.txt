@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.7 15th Jul 2013
+= The help link is no longer hard wired to fire control
++ There is now a help parameter in config_about to allow you to configure seperate homepage and help pages
+
 1.6 15th Jul 2013
 + There is now a method ADHD.config_get_default_app_on() that can detect whether the "Limit App" feature is on
 + Copy and Rename profile input boxes now start populated with an appropriate value

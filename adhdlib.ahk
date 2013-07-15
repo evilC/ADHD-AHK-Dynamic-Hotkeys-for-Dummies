@@ -51,7 +51,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.6
+		this.core_version := 1.7
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -291,7 +291,8 @@ Class ADHDLib
 		; Set up the links on the footer of the main page
 		h := this.get_gui_h() - 40
 		name := this.get_macro_name()
-		Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adhd">ADHD Instructions</a>    <a href="http://evilc.com/proj/firectrl">%name% Instructions</a>
+		alink := this.author_help
+		Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adhd">ADHD Instructions</a>    %name% %alink%
 
 
 		;Hook for Tooltips
@@ -349,6 +350,11 @@ Class ADHDLib
 		this.author_version := data.version									; The version number of your script
 		this.author_name := data.author							; Your Name
 		this.author_link := data.link
+		if (data.help == "" || data.help == null){
+			this.author_help := this.author_link
+		} else {
+			this.author_help := data.help
+		}
 	}
 	
 	; Fires an event.
