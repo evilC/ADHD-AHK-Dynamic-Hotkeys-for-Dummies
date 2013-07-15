@@ -203,8 +203,8 @@ Class ADHDLib
 		Gui, Add, Text,x5 W40 y%current_row%,Profile
 		local pl := this.profile_list
 		local cp := this.current_profile
-		Gui, Add, DropDownList, xp+35 yp-5 W150 vadhd_current_profile gadhd_profile_changed, Default||%pl%
-		Gui, Add, Button, xp+152 yp-1 gadhd_add_profile, Add
+		Gui, Add, DropDownList, xp+35 yp-5 W300 vadhd_current_profile gadhd_profile_changed, Default||%pl%
+		Gui, Add, Button, x40 yp+25 gadhd_add_profile, Add
 		Gui, Add, Button, xp+35 yp gadhd_delete_profile, Delete
 		Gui, Add, Button, xp+47 yp gadhd_duplicate_profile, Copy
 		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename

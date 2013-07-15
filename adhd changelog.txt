@@ -7,6 +7,7 @@ Key:
 1.6 15th Jul 2013
 + There is now a method ADHD.config_get_default_app_on() that can detect whether the "Limit App" feature is on
 + Copy and Rename profile input boxes now start populated with an appropriate value
++ The profile select box is now wider to accomodate longer profile names
 
 1.5 14th Jul 2013
 + There is now a config option ADHD.config_ignore_noaction_warning() that allows you to make macros with no hotkeys
