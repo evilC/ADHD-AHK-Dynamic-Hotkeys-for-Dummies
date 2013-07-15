@@ -620,7 +620,7 @@ Class ADHDLib
 		
 		; Blank name specified - prompt for name
 		if (name == ""){
-			InputBox, name, Profile Name, Please enter a profile name,,,,,,,,,%adhd_current_profile%
+			InputBox, name, Profile Name, Please enter a profile name,,,,,,,,%adhd_current_profile%
 			if (ErrorLevel){
 				return
 			}
