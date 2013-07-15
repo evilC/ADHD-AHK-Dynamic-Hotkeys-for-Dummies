@@ -300,7 +300,6 @@ Class ADHDLib
 		;Hook for Tooltips
 		;OnMessage(0x200, "this.mouse_move")
 		OnMessage(0x200, "adhd_mouse_move")
-		;OnMessage(0x47, "ADHD.gui_move")
 
 
 		; Finish setup =====================================
@@ -1112,28 +1111,6 @@ test(){
 		return out
 	}
 
-}
-adhd_mouse_move(){
-	soundbeep
-	static CurrControl, PrevControl, _TT
-	CurrControl := A_GuiControl
-	If (CurrControl <> PrevControl){
-			SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
-			PrevControl := CurrControl
-	}
-	return
-	
-	DisplayToolTip:
-	try
-			ToolTip % %CurrControl%_TT
-	catch
-			ToolTip
-	SetTimer, RemoveToolTip, -10000
-	return
-	
-	RemoveToolTip:
-	ToolTip
-	return
 }
 
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
