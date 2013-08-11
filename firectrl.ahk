@@ -159,6 +159,8 @@ firectrl_init(){
 	global fire_divider := 1
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
 	global weapon_toggle_mode := false
+	global fire_on := 0
+	
 	Gosub, DisableToggle
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
@@ -229,6 +231,14 @@ resolution_changed_hook(){
 
 ; Fired on key down
 Fire:
+	; This is a key that may be held down, so we need to handle keyboard repeat.
+	; If a keyboard key is held down - windows will repeat that character.
+	if (fire_on == 0){
+		fire_on := 1
+	} else {
+		return
+	}
+	
 	; Many games do not work properly with autofire unless this is enabled.
 	; You can try leaving it out.
 	; MechWarrior Online for example will not do fast (<~500ms) chain fire with weapons all in one group without this enabled
@@ -252,6 +262,7 @@ Fire:
 
 ; Fired on key up
 FireUp:
+	fire_on := 0
 	; Kill the timer when the key is released (Stop auto firing)
 	SetFireTimer(0,false)
 	return
