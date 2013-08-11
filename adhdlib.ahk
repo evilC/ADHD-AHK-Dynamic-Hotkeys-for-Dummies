@@ -53,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.8
+		this.core_version := 1.9
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -1095,6 +1095,7 @@ test(){
 		}
 	}
 
+	; Builds the prefix that sets how Modifier Keys (Ctrl, Shift, Alt) work with the hotkey
 	build_prefix(hk){
 		out := ""
 		tmp = adhd_hk_c_%hk%
@@ -1108,6 +1109,12 @@ test(){
 		if (adhd_hk_s_%hk% == 1){
 			out := out "+"
 		}
+		
+		; If Ctrl, Shift or Alt are not selected, make key work when any combination of modifiers held
+		if (out == ""){
+			out := "*"
+		}
+
 		return out
 	}
 

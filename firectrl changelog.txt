@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.6 11th Aug 2013
+! The AHK version now defaults to including from the Autohotkey Lib folder (C:\Program Files\Autohokey\Lib by default)
+
 2.5 14th Jul 2013
 = Now supports a string in Fire Sequence
 So you could eg set fire sequence to hello,goodbye
