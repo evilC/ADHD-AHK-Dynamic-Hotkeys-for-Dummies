@@ -5,8 +5,13 @@ Key:
 + : Added feature
 
 2.6 11th Aug 2013
+= If you bind fire to a keyboard button, it will no longer repeat if you hold the button down.
+  If you had unexpected behaviour when firing with a keyboard key, this version may well fix things for you.
 ! The AHK version now defaults to including from the Autohotkey Lib folder (C:\Program Files\Autohokey\Lib by default)
-
+! ADHD change:
+  If none of the CTRL, Shift or Alt options in the Bindings tab are ticked for a binding,
+  then it will work even if CTRL, Shift or Alt are held down
+ 
 2.5 14th Jul 2013
 = Now supports a string in Fire Sequence
 So you could eg set fire sequence to hello,goodbye
