@@ -53,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.9
+		this.core_version := 1.10
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -794,10 +794,10 @@ test(){
 		Gui, +Hwndgui_id
 		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
 		ini := this.ini_name
-		if (this.read_ini("adhd_gui_x","Settings", -1) != gui_x){
+		if (this.read_ini("adhd_gui_x","Settings", -1) != gui_x && gui_x >= 0){
 			IniWrite, %gui_x%, %ini%, Settings, adhd_gui_x
 		}
-		if (this.read_ini("gui_y","Settings", -1) != gui_y){
+		if (this.read_ini("gui_y","Settings", -1) != gui_y && gui_x >= 0){
 			IniWrite, %gui_y%, %ini%, Settings, adhd_gui_y
 		}
 		ExitApp
