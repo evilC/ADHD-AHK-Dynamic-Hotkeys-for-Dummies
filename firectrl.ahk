@@ -16,7 +16,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.6, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.7, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -72,9 +72,12 @@ ADHD.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
 ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
 
-ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
+ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+25", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
-Gui, Add, Link, x5 yp+35, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
+Gui, Add, Text, x5 yp+20, Scroll Lock indicates status of
+ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Fire Rate", "None")
+
+Gui, Add, Link, x5 yp+25, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
 ; End GUI creation section
 ; ============================================================================================
@@ -128,13 +131,17 @@ SetFireTimer(mode,delay){
 
 ; Turn the weapon toggle on
 EnableToggle:
-	SetScrollLockState, On
+	if (ScrollLockSetting == "Weapon Toggle"){
+		SetScrollLockState, On
+	}
 	Send {%WeaponToggle% down}
 	return
 
 ; Turn the weapon toggle off
 DisableToggle:
-	SetScrollLockState, Off
+	if (ScrollLockSetting == "Weapon Toggle"){
+		SetScrollLockState, Off
+	}
 	Send {%WeaponToggle% up}
 	return
 
@@ -274,6 +281,13 @@ ChangeFireRate:
 	; More Lazors!! Toggles double speed fire!
 	; Toggle divider between 1 and 2
 	fire_divider := 3 - fire_divider
+	if (ScrollLockSetting == "Fire Rate"){
+		if (fire_divider == 1){
+			SetScrollLockState, Off
+		} else {
+			SetScrollLockState, On
+		}
+	}
 	return
 
 ; Set up Hotkey 3

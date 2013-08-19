@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.7 15th Aug 2013
++ You can now select what the Scroll Lock light is used for (Weapon Toggle, Fire Rate, or None)
+  Setting to None should alleviate compatibility issues with SweetFX
+
 2.6 11th Aug 2013
 = If you bind fire to a keyboard button, it will no longer repeat if you hold the button down.
   If you had unexpected behaviour when firing with a keyboard key, this version may well fix things for you.
