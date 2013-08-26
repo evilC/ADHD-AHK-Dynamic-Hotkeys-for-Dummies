@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.11 27th Aug 2013
++ New function: run_as_admin
+  Ensures script is running as admin
+
 1.10 20th Aug 2013
 = Fixed bug - if you close an ADHD app while it is minimized,
   the window no longer disappears off-screen next time you load

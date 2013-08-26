@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.8 27th Aug 2013
++ Uses new ADHD "Run as Admin" feature to ensure script is always running as admin
+
 2.7 15th Aug 2013
 + You can now select what the Scroll Lock light is used for (Weapon Toggle, Fire Rate, or None)
   Setting to None should alleviate compatibility issues with SweetFX

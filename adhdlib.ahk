@@ -53,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.10
+		this.core_version := 1.11
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -1118,6 +1118,17 @@ test(){
 		return out
 	}
 
+	; Run as admin code from http://www.autohotkey.com/board/topic/46526-
+	run_as_admin() {
+		Global 0
+		IfEqual, A_IsAdmin, 1, Return 0
+		Loop, %0% {
+			params .= A_Space . %A_Index%
+		}
+		DllCall("shell32\ShellExecute" (A_IsUnicode ? "":"A"),uint,0,str,"RunAs",str,(A_IsCompiled ? A_ScriptFullPath
+			: A_AhkPath),str,(A_IsCompiled ? "": """" . A_ScriptFullPath . """" . A_Space) params,str,A_WorkingDir,int,1)
+		ExitApp
+	}
 }
 
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
