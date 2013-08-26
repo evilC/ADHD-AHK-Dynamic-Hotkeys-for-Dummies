@@ -3,6 +3,9 @@
 ; Create an instance of the library
 ADHD := New ADHDLib
 
+; Ensure running as admin
+ADHD.run_as_admin()
+
 ; ============================================================================================
 ; CONFIG SECTION - Configure ADHD
 
@@ -16,7 +19,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.7, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.8, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
