@@ -85,8 +85,13 @@ Gui, Add, Link, x5 yp+25, Works with many games, perfect for <a href="http://mwo
 ; End GUI creation section
 ; ============================================================================================
 
-
 ADHD.finish_startup()
+fire_divider := 1
+; Turn off scroll lock if it is used to indicate a status
+if (ScrollLockSetting != "None"){
+	SetScrollLockState, Off
+}
+
 return
 
 ; ============================================================================================
@@ -166,7 +171,7 @@ firectrl_init(){
 	global FireSequence
 	global fire_array := []
 	global current_weapon := 1
-	global fire_divider := 1
+	global fire_divider
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
 	global weapon_toggle_mode := false
 	global fire_on := 0
