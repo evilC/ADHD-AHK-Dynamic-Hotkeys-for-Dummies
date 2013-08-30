@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.9 30th Aug 2013
+= Fire Rate (And scroll lock state if that is enabled) is now reset on exit to mechlab like Weapon Toggle is
+
 2.8 27th Aug 2013
 + Uses new ADHD "Run as Admin" feature to ensure script is always running as admin
 

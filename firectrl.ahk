@@ -19,7 +19,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.8, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.9, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -175,6 +175,11 @@ firectrl_init(){
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	
+	; Reset fire rate if on double rate
+	if (fire_divider != 1){
+		Gosub, ChangeFireRate
+	}
+	
 	; Split FireSequence box from comma separated list to array
 	StringSplit, tmp, FireSequence, `,
 	Loop, %tmp0%
@@ -183,6 +188,7 @@ firectrl_init(){
 			fire_array[A_Index] := tmp%A_Index%
 		}
 	}
+	
 }
 
 ; Gets called when the "Limited" app gets focus
