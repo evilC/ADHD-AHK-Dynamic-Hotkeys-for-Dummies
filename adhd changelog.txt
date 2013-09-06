@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.12 6th Sep 2013
++ Added ability to bind Left Control, Alt or Shift by only ticking the modifier boxes
+
 1.11 27th Aug 2013
 + New function: run_as_admin
   Ensures script is running as admin

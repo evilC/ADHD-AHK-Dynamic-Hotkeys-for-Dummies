@@ -1,5 +1,7 @@
 ﻿; Fire Control - Sample ADHD macro
 
+#SingleInstance Off
+
 ; Create an instance of the library
 ADHD := New ADHDLib
 
@@ -19,7 +21,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.9, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.10, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -73,7 +75,7 @@ Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 ADHD.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
-ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
+ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6|7|8|9|0", "None")
 
 ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+25", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 

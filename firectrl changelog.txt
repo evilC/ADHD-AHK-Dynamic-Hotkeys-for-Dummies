@@ -4,6 +4,17 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.10 6th Sep 2013
++ Added options 7-0 to Weapon Toggle group
+  You can use this to allow "Weapon Toggle" to function as an "Arm Lock Toggle".
+  eg program "Toggle Arm Lock" in MWO to 0 (Zero), replacing the shift binding.
+  Then run a second copy of FC, and create a profile thus:
+  Bindings - Weapon Toggle: Just tick the Shift box on the right - leave everything else on that row blank!
+  Main - Set "Weapon Toggle Group" to 0, set "Scroll Lock Indicates..." option to NONE so it wont interfere with scroll lock light (Controlled by the 1st copy of FC).
+  With that done, when you hit Shift in MWO, it will toggle arm lock status.
++ You can now run multiple copies of Fire Control by double clicking the icon twice.
+! Do not try to have the same profile selected for both copies (The second copy will always start with the same profile selected, you need to change it)
+
 2.9 30th Aug 2013
 = Fire Rate (And scroll lock state if that is enabled) is now reset on exit to mechlab like Weapon Toggle is
 

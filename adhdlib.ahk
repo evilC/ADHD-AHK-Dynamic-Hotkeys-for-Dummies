@@ -53,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.11
+		this.core_version := 1.12
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -993,7 +993,7 @@ test(){
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
 			
-			if (hotkey_keys != ""){
+			if (hotkey_keys != "" || hotkey_prefix != "*"){
 				hotkey_string := hotkey_prefix hotkey_keys
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
@@ -1113,6 +1113,14 @@ test(){
 		; If Ctrl, Shift or Alt are not selected, make key work when any combination of modifiers held
 		if (out == ""){
 			out := "*"
+		}
+		
+		if (out == "^"){
+			out := "LCtrl"
+		} else if (out == "!"){
+			out := "LAlt"
+		} else if (out == "+"){
+			out := "LShift"
 		}
 
 		return out
