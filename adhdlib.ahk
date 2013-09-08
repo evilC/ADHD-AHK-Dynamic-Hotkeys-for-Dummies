@@ -53,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.12
+		this.core_version := 1.13
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -992,6 +992,15 @@ test(){
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
+			if (hotkey_keys == "" && (hotkey_prefix == "^" || hotkey_prefix == "!" || hotkey_prefix == "+" || )){
+				if (hotkey_prefix == "^"){
+					hotkey_prefix := "LCtrl"
+				} else if (hotkey_prefix == "!"){
+					hotkey_prefix := "LAlt"
+				} else if (hotkey_prefix == "+"){
+					hotkey_prefix := "LShift"
+				}
+			}
 			
 			if (hotkey_keys != "" || hotkey_prefix != "*"){
 				hotkey_string := hotkey_prefix hotkey_keys
@@ -1115,14 +1124,6 @@ test(){
 			out := "*"
 		}
 		
-		if (out == "^"){
-			out := "LCtrl"
-		} else if (out == "!"){
-			out := "LAlt"
-		} else if (out == "+"){
-			out := "LShift"
-		}
-
 		return out
 	}
 

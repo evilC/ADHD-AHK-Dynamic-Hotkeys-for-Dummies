@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.13 8th Sep 2013
+= Fixed bug with binding modified (Ctrl, Alt, Shift) controls - eg trying to bind Ctrl+LMB would give an error.
+
 1.12 6th Sep 2013
 + Added ability to bind Left Control, Alt or Shift by only ticking the modifier boxes
 
