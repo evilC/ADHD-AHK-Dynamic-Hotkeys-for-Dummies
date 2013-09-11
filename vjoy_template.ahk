@@ -133,18 +133,22 @@ conform_axis(){
 	global JoyID
 	global JoyAxis
 	global InvertAxis
-	global HalfAxis
-	global DeadZone
 	
+	; Assemble string to describe which axis the user selected (eg 2JoyX)
 	tmp := JoyID "Joy" axis_list_ahk[JoyAxis]
+	
+	; Detect the state of the input axis
 	GetKeyState, axis, % tmp
 	
+	; Update the contents of the "Current" debugging text box
 	GuiControl,,AxisValueIn, % round(axis,1)
 	
+	; Invert the axis if the user selected the option
 	if (InvertAxis){
 		axis := 100 - axis
 	}
 
+	; Update the contents of the "Adjusted" text box
 	GuiControl,,AxisValueOut, % round(axis,1)
 	
 	return axis
