@@ -106,14 +106,21 @@ VJoy_Init(vjoy_id)
 
 ADHD.finish_startup()
 
-
+; Loop runs endlessly...
 Loop, {
+	; Get the value of the axis the user has selected as input
 	axis := conform_axis()
+	
+	; Assemble the string which sets which virtual axis will be manipulated
 	vjaxis := axis_list_vjoy[2]
 	
+	; input is in range 0->100, but vjoy operates in 0->32767, so convert to correct output format
 	axis := axis * 327.67
+	
+	; Set the vjoy axis
 	VJoy_SetAxis(axis, vjoy_id, HID_USAGE_%vjaxis%)
 	
+	; Sleep a bit to chew up less CPU time
 	Sleep, 10
 	
 }
