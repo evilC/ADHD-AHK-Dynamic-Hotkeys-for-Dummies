@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.11 13th Sep 2013
++ Arm Lock now has it's own toggle.
+  You no longer need to run two copies of Fire Control to have Arm Lock Toggle and Weapon Toggle at the same time.
+
 2.10 6th Sep 2013
 + Added options 7-0 to Weapon Toggle group
   You can use this to allow "Weapon Toggle" to function as an "Arm Lock Toggle".

@@ -21,13 +21,13 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.10, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.11, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADHD.config_size(375,220)
+ADHD.config_size(375,250)
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
@@ -35,6 +35,7 @@ ADHD.config_size(375,220)
 ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
+ADHD.config_hotkey_add({uiname: "Arm Lock Toggle", subroutine: "ArmLockToggle"})
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -75,12 +76,15 @@ Gui, Add, Text, x5 yp+25, Fire Rate (ms)
 ADHD.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
 
 Gui, Add, Text, x5 yp+25, Weapon Toggle group
-ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6|7|8|9|0", "None")
+ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6", "None")
+
+Gui, Add, Text, x5 yp+25, Arm Lock Toggle key
+ADHD.gui_add("DropDownList", "ArmLockToggle", "xp+120 yp-2 W50", "None|7|8|9|0|L", "None")
 
 ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+25", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
 Gui, Add, Text, x5 yp+20, Scroll Lock indicates status of
-ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Fire Rate", "None")
+ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Arm Lock Toggle|Fire Rate", "None")
 
 Gui, Add, Link, x5 yp+25, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
@@ -155,6 +159,22 @@ DisableToggle:
 	Send {%WeaponToggle% up}
 	return
 
+; Turn the arm lock toggle on
+EnableArmLockToggle:
+	if (ScrollLockSetting == "Arm Lock Toggle"){
+		SetScrollLockState, On
+	}
+	Send {%ArmLockToggle% down}
+	return
+
+; Turn the arm lock off
+DisableArmLockToggle:
+	if (ScrollLockSetting == "Arm Lock Toggle"){
+		SetScrollLockState, Off
+	}
+	Send {%ArmLockToggle% up}
+	return
+
 ; Keep all timer disables in here so various hooks and stuff can stop all your timers easily.
 DisableTimers:
 	SetTimer, DoFire, Off
@@ -176,9 +196,11 @@ firectrl_init(){
 	global fire_divider
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
 	global weapon_toggle_mode := false
+	global arm_lock_toggle_mode := false
 	global fire_on := 0
 	
 	Gosub, DisableToggle
+	Gosub, DisableArmLockToggle
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	
@@ -313,6 +335,15 @@ WeaponToggle:
 		Gosub, EnableToggle
 	} else {
 		Gosub, DisableToggle
+	}
+	return
+
+ArmLockToggle:
+	arm_lock_toggle_mode := !arm_lock_toggle_mode
+	if (arm_lock_toggle_mode){
+		Gosub, EnableArmLockToggle
+	} else {
+		Gosub, DisableArmLockToggle
 	}
 	return
 	
