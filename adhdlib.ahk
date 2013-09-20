@@ -47,6 +47,8 @@ Class ADHDLib
 		; strip extension from end of script name for basis of INI name
 		;this.ini_name := this.build_ini_name()
 		this.build_ini_name()
+		
+		this.functionality_enabled := 1
 	}
 
 	; EXPOSED METHODS
@@ -172,18 +174,23 @@ Class ADHDLib
 		Gui, Add, Text, xp+30 W30 Center, Alt
 
 		; Add hotkeys
+		local mb := this.mouse_buttons
+		
+		; Add functionality toggle as last item in list
+		this.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
+
 		Loop, % this.hotkey_list.MaxIndex()
 		{
 			local name := this.hotkey_list[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%current_row%, %name%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadhd_hk_k_%A_Index% gadhd_key_changed
-			local mb := this.mouse_buttons
 			Gui, Add, DropDownList, yp xp+80 W90 vadhd_hk_m_%A_Index% gadhd_mouse_changed, None||%mb%
 			Gui, Add, CheckBox, xp+100 yp+5 W25 vadhd_hk_c_%A_Index% gadhd_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_s_%A_Index% gadhd_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_a_%A_Index% gadhd_option_changed
 			current_row := current_row + 30
 		}
+		
 		; Limit application toggle
 		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
 
@@ -506,6 +513,7 @@ test(){
 				this.update_ini("adhd_hk_s_" A_Index, this.current_profile, adhd_hk_s_%A_Index%, 0)
 				this.update_ini("adhd_hk_a_" A_Index, this.current_profile, adhd_hk_a_%A_Index%, 0)
 			}
+			
 			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
 			
 			; Limit app
@@ -881,7 +889,7 @@ test(){
 		if (adhd_program_mode == 1){
 			this.debug("Entering Program Mode")
 			; Enable controls, stop hotkeys, kill timers
-			this.disable_hotkeys()
+			this.disable_hotkeys(0)
 			this.disable_heartbeat()
 			GuiControl, enable, adhd_limit_application
 			GuiControl, enable, adhd_limit_application_on
@@ -1047,13 +1055,18 @@ test(){
 		return
 	}
 
-	disable_hotkeys(){
+	disable_hotkeys(mode){
 		global adhd_limit_application
 		global adhd_limit_application_on
 		
 		this.debug("disable_hotkeys")
 
-		Loop, % this.hotkey_list.MaxIndex()
+		max := this.hotkey_list.MaxIndex()
+		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
+		if (mode){
+			max -= 1
+		}
+		Loop, % max
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
 			hotkey_keys := this.get_hotkey_string(A_Index)
@@ -1138,6 +1151,19 @@ test(){
 		return out
 	}
 
+	functionality_toggle(){
+		if (this.functionality_enabled){
+			this.functionality_enabled := 0
+			soundbeep, 400, 200
+			; pass 1 as a parameter to disable_hotkeys to tell it to not disable functionality toggle
+			this.disable_hotkeys(1)
+		} else {
+			this.functionality_enabled := 1
+			soundbeep, 800, 200
+			this.enable_hotkeys()
+		}
+	}
+	
 	; Run as admin code from http://www.autohotkey.com/board/topic/46526-
 	run_as_admin() {
 		Global 0
@@ -1220,7 +1246,7 @@ adhd_enable_hotkeys:
 	return
 
 adhd_disable_hotkeys:
-	ADHD.disable_hotkeys()
+	ADHD.disable_hotkeys(0)
 	return
 
 adhd_show_window_spy:
@@ -1247,6 +1273,10 @@ adhd_heartbeat:
 	ADHD.heartbeat()
 	return
 
+adhd_functionality_toggle:
+	ADHD.functionality_toggle()
+	return
+	
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
 

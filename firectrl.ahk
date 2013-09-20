@@ -94,7 +94,6 @@ Gui, Add, Link, x5 yp+40, Works with many games, perfect for <a href="http://mwo
 
 ADHD.finish_startup()
 fire_divider := 1
-;functionality_enabled := 1
 
 ; Turn off scroll lock if it is used to indicate a status
 if (ScrollLockSetting != "None"){
@@ -182,20 +181,6 @@ DisableArmLockToggle:
 DisableTimers:
 	SetTimer, DoFire, Off
 	return
-
-/*
-FunctionalityToggle:
-	if (functionality_enabled){
-		functionality_enabled := 0
-		soundbeep, 400, 200
-		ADHD.disable_hotkeys()
-	} else {
-		functionality_enabled := 1
-		soundbeep, 800, 200
-		ADHD.enable_hotkeys()
-	}
-	return
-*/
 
 ; Hook functions. We declared these in the config phase - so make sure these names match the ones defined above
 
