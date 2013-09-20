@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.12 20th Sep 2013
+* No real changes, just made UI bigger to accomodate "Functionality Toggle" which is now added to all macros by ADHD.
+
 2.11 13th Sep 2013
 + Arm Lock now has it's own toggle.
   You no longer need to run two copies of Fire Control to have Arm Lock Toggle and Weapon Toggle at the same time.

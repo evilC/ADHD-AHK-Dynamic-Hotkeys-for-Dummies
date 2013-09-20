@@ -5,6 +5,7 @@ Key:
 + : Added feature
 
 1.14 20th Sep 2013
++ Added "Functionality Toggle" binding to all macros. This highly requested feature will enable / disable all hotkeys.
 = Fixed bug with binding keys - typing a letter into the keyboard box could cause the app to go nuts.
 
 1.13 8th Sep 2013
