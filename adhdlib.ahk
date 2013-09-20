@@ -702,6 +702,12 @@ test(){
 		return
 	}
 
+	get_program_mode(){
+		global adhd_program_mode
+		
+		return adhd_program_mode
+	}
+	
 	; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
 	control_name_to_set_method(name){
 		if (name == "DropDownList"){
@@ -747,15 +753,15 @@ test(){
 		if (ctr < max){
 			; Modifier keys used - set keyboard box to "None"
 			GuiControl,, %ctrl%, None
-			;this.debug("key_changed calling option_changed")
-			;this.option_changed()
+			this.debug("key_changed calling option_changed")
+			this.option_changed()
 		} else {
 			; Modifiers not used - clear mouse box
 			tmp := SubStr(ctrl,11)
 			; Set the mouse field to blank
 			GuiControl,ChooseString, adhd_hk_m_%tmp%, None
-			;this.debug("key_changed calling option_changed")
-			;this.option_changed()
+			this.debug("key_changed calling option_changed")
+			this.option_changed()
 		}
 		return
 	}

@@ -21,13 +21,13 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.11, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.12, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADHD.config_size(375,250)
+ADHD.config_size(375,280)
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
@@ -36,6 +36,7 @@ ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 ADHD.config_hotkey_add({uiname: "Arm Lock Toggle", subroutine: "ArmLockToggle"})
+;ADHD.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "FunctionalityToggle"})
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -86,13 +87,15 @@ ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+25", "Limit fire rate to specified 
 Gui, Add, Text, x5 yp+20, Scroll Lock indicates status of
 ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Arm Lock Toggle|Fire Rate", "None")
 
-Gui, Add, Link, x5 yp+25, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
+Gui, Add, Link, x5 yp+40, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
 ; End GUI creation section
 ; ============================================================================================
 
 ADHD.finish_startup()
 fire_divider := 1
+;functionality_enabled := 1
+
 ; Turn off scroll lock if it is used to indicate a status
 if (ScrollLockSetting != "None"){
 	SetScrollLockState, Off
@@ -180,6 +183,19 @@ DisableTimers:
 	SetTimer, DoFire, Off
 	return
 
+/*
+FunctionalityToggle:
+	if (functionality_enabled){
+		functionality_enabled := 0
+		soundbeep, 400, 200
+		ADHD.disable_hotkeys()
+	} else {
+		functionality_enabled := 1
+		soundbeep, 800, 200
+		ADHD.enable_hotkeys()
+	}
+	return
+*/
 
 ; Hook functions. We declared these in the config phase - so make sure these names match the ones defined above
 
@@ -190,6 +206,7 @@ option_changed_hook(){
 }
 
 firectrl_init(){
+	global ADHD
 	global FireSequence
 	global fire_array := []
 	global current_weapon := 1
@@ -199,8 +216,11 @@ firectrl_init(){
 	global arm_lock_toggle_mode := false
 	global fire_on := 0
 	
-	Gosub, DisableToggle
-	Gosub, DisableArmLockToggle
+	; Only release toggle keys if we are not in program mode
+	if (!ADHD.get_program_mode()){
+		Gosub, DisableToggle
+		Gosub, DisableArmLockToggle
+	}
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	
@@ -217,7 +237,7 @@ firectrl_init(){
 			fire_array[A_Index] := tmp%A_Index%
 		}
 	}
-	
+	return
 }
 
 ; Gets called when the "Limited" app gets focus
