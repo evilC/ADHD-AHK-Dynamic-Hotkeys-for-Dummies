@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.14 20th Sep 2013
+= Fixed bug with binding keys - typing a letter into the keyboard box could cause the app to go nuts.
+
 1.13 8th Sep 2013
 = Fixed bug with binding modified (Ctrl, Alt, Shift) controls - eg trying to bind Ctrl+LMB would give an error.
 

@@ -53,7 +53,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.13
+		this.core_version := 1.14
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -714,43 +714,48 @@ test(){
 	; Detects a key pressed and clears the mouse box
 	key_changed(ctrl){
 		; Special keys will have a value of ""
-		if (%ctrl% == ""){
-			ctr := 1
+		text := %ctrl%
+		this.debug("key_changed: received string: " text)
+		if (text == ""){
+			ctr := 0
 			max := 1
 		} else {
 			; Check to see if just modifiers selected IN THE HOTKEY BOX
 			; We ignore modifiers in the hotkey box because we may want to bind ctrl+lbutton
 			ctr := 0
-			max := StrLen(ctrl)
+			max := StrLen(text)
 			Loop, %max%
 			{
-				chr := substr(ctrl,ctr,1)
+				chr := substr(text,ctr,1)
 				if (chr != "^" && chr != "!" && chr != "+"){
 					ctr := ctr + 1
 				}
 			}
+			/*
 			; Only modifier keys pressed?
 			if (ctr == 0){
 				; When you hold just modifiers in a hotkey box, they appear only so long as they are held
 				; On key up, if no other keys are held, they will disappear
 				; We are not interested in them, so ignore contents of hotkey box while it is just modifiers
+				this.debug("key_changed: exiting as only modifier keys")
 				return
 			}
+			*/
 		}
 		
-		; ToDo: We returned above - can I delete this block?
 		; key pressed
 		if (ctr < max){
+			; Modifier keys used - set keyboard box to "None"
 			GuiControl,, %ctrl%, None
-			this.debug("key_changed calling option_changed")
-			this.option_changed()
+			;this.debug("key_changed calling option_changed")
+			;this.option_changed()
 		} else {
-			; Detect actual key (Not modified) - clear mouse box
+			; Modifiers not used - clear mouse box
 			tmp := SubStr(ctrl,11)
 			; Set the mouse field to blank
 			GuiControl,ChooseString, adhd_hk_m_%tmp%, None
-			this.debug("key_changed calling option_changed")
-			this.option_changed()
+			;this.debug("key_changed calling option_changed")
+			;this.option_changed()
 		}
 		return
 	}
