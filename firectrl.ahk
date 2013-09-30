@@ -21,7 +21,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.12, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.13, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -94,6 +94,8 @@ Gui, Add, Link, x5 yp+40, Works with many games, perfect for <a href="http://mwo
 
 ADHD.finish_startup()
 fire_divider := 1
+arm_lock_toggle_mode := false
+weapon_toggle_mode := false
 
 ; Turn off scroll lock if it is used to indicate a status
 if (ScrollLockSetting != "None"){
@@ -150,6 +152,7 @@ EnableToggle:
 	if (ScrollLockSetting == "Weapon Toggle"){
 		SetScrollLockState, On
 	}
+	weapon_toggle_mode := true
 	Send {%WeaponToggle% down}
 	return
 
@@ -158,6 +161,7 @@ DisableToggle:
 	if (ScrollLockSetting == "Weapon Toggle"){
 		SetScrollLockState, Off
 	}
+	weapon_toggle_mode := false
 	Send {%WeaponToggle% up}
 	return
 
@@ -166,6 +170,7 @@ EnableArmLockToggle:
 	if (ScrollLockSetting == "Arm Lock Toggle"){
 		SetScrollLockState, On
 	}
+	arm_lock_toggle_mode := true
 	Send {%ArmLockToggle% down}
 	return
 
@@ -174,6 +179,7 @@ DisableArmLockToggle:
 	if (ScrollLockSetting == "Arm Lock Toggle"){
 		SetScrollLockState, Off
 	}
+	arm_lock_toggle_mode := false
 	Send {%ArmLockToggle% up}
 	return
 
@@ -197,14 +203,18 @@ firectrl_init(){
 	global current_weapon := 1
 	global fire_divider
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
-	global weapon_toggle_mode := false
-	global arm_lock_toggle_mode := false
+	global weapon_toggle_mode
+	global arm_lock_toggle_mode
 	global fire_on := 0
 	
 	; Only release toggle keys if we are not in program mode
 	if (!ADHD.get_program_mode()){
-		Gosub, DisableToggle
-		Gosub, DisableArmLockToggle
+		if (arm_lock_toggle_mode){
+			Gosub, DisableArmLockToggle
+		}
+		if (weapon_toggle_mode){
+			Gosub, DisableToggle
+		}
 	}
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
@@ -335,20 +345,18 @@ ChangeFireRate:
 
 ; Set up Hotkey 3
 WeaponToggle:
-	weapon_toggle_mode := !weapon_toggle_mode
 	if (weapon_toggle_mode){
-		Gosub, EnableToggle
-	} else {
 		Gosub, DisableToggle
+	} else {
+		Gosub, EnableToggle
 	}
 	return
 
 ArmLockToggle:
-	arm_lock_toggle_mode := !arm_lock_toggle_mode
 	if (arm_lock_toggle_mode){
-		Gosub, EnableArmLockToggle
-	} else {
 		Gosub, DisableArmLockToggle
+	} else {
+		Gosub, EnableArmLockToggle
 	}
 	return
 	

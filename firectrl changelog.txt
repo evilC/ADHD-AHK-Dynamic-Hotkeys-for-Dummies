@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.13 30th Sep 2013
+= Sorted a problem with toggles (Arm Lock and Weapon) - when you exited or tabbed out of MWO, the key you bound to this function would be "held".
+
 2.12 20th Sep 2013
 * No real changes, just made UI bigger to accomodate "Functionality Toggle" which is now added to all macros by ADHD.
 
