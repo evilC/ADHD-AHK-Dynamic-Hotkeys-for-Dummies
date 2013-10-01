@@ -55,7 +55,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.14
+		this.core_version := 1.15
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -392,6 +392,9 @@ test(){
 		global adhd_limit_application
 		global adhd_limit_application_on
 		global adhd_debug_window
+		
+		; Remove old bindings before changing profile
+		this.disable_hotkeys(1)
 		
 		GuiControlGet,cp,,adhd_current_profile
 		this.current_profile := cp
@@ -1074,6 +1077,7 @@ test(){
 				hotkey_string := hotkey_prefix hotkey_keys
 				; ToDo: Is there a better way to remove a hotkey?
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine)
 				HotKey, ~%hotkey_string%, %hotkey_subroutine%, Off
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey

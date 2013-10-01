@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.15 1st Oct 2013
+= Fixed bug with profiles. When you changed profile, the old bindings were not being removed properly.
+  This could cause some very odd behaviour, especially if running two copies of an ADHD macro
+
 1.14 20th Sep 2013
 + Added "Functionality Toggle" binding to all macros. This highly requested feature will enable / disable all hotkeys.
 = Fixed bug with binding keys - typing a letter into the keyboard box could cause the app to go nuts.
