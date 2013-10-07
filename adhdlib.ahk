@@ -55,7 +55,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.15
+		this.core_version := 1.16
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -935,6 +935,13 @@ test(){
 		IfWinActive, % "ahk_class " adhd_limit_application
 		{
 			WinGetPos,,,limit_w,limit_h, % "ahk_class " adhd_limit_application
+			; ToDo: Bodged
+			;WinGet, tmp, MinMax, % "ahk_class " adhd_limit_application
+			;if (tmp == -1 || limit_h <= 30)
+			if (limit_h <= 30){
+				this.debug("Minimized app - not firing change")
+				return
+			}
 			; If the size has changed since the last heartbeat
 			if ( (this.limit_app_w != limit_w) || (this.limit_app_h != limit_h)){
 				if ((this.limit_app_w == -1) && (this.limit_app_h == -1)){
@@ -947,8 +954,9 @@ test(){
 				this.limit_app_w := limit_w
 				this.limit_app_h := limit_h
 				if (fire_change){
+					this.debug("Resolution change detected (" this.limit_app_last_w "x" this.limit_app_last_h " --> " this.limit_app_w "x" this.limit_app_h ")- firing change")
 					this.fire_event(this.events.resolution_changed)
-					this.debug("Resolution change detected - firing change")
+					  
 				} else {
 					this.debug("First detection of resolution - not firing change")
 				}
@@ -975,8 +983,8 @@ test(){
 			if (this.app_act_curr == 0){
 				; Changing from inactive to active
 				this.app_act_curr := 1
-				this.fire_event(this.events.app_active)
 				this.debug("Firing app_active")
+				this.fire_event(this.events.app_active)
 			}
 		} else {
 			if (this.app_act_curr == 1 || this.app_act_curr == -1){
@@ -986,8 +994,8 @@ test(){
 				
 				; Fire event hooks
 				this.fire_event(this.events.disable_timers)
-				this.fire_event(this.events.app_inactive)
 				this.debug("Firing app_inactive")
+				this.fire_event(this.events.app_inactive)
 				;Gosub, adhd_disable_author_timers	; Fire the Author hook
 			}
 		}

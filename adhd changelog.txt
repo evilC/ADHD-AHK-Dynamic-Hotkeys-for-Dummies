@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+1.16 7th Oct 2013
+= Fixes resolution_changed event to not fire on minimize / maximize event
+  A bit of a bodgy fix for now (height <= 30px is considered minimized) as AHK not detecting state properly.
+
 1.15 1st Oct 2013
 = Fixed bug with profiles. When you changed profile, the old bindings were not being removed properly.
   This could cause some very odd behaviour, especially if running two copies of an ADHD macro
