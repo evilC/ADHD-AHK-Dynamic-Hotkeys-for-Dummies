@@ -117,12 +117,13 @@ DoFire:
 	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
 	Gosub, DisableTimers
 		
-	out := fire_array[current_weapon]
-	Send % out
 	tmp := FireRate / fire_divider
 	SetTimer, DoFire, % tmp
 	nextfire := A_TickCount + (tmp)
 
+	out := fire_array[current_weapon]
+	Send % out
+	
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
 		current_weapon := 1
