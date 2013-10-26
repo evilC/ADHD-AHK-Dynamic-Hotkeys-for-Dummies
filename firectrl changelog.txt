@@ -4,6 +4,13 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.14 25th Oct 2013
+= Made timings much more accurate. Previously in excess of 50ms was being lost per shot
+! Due to the above change, you may need to increase all your Fire Rates by at least 50
+  For example, with older versions of FC, you would use a Fire Rate of ~440 to get an AC2 to fire at max rate.
+  The true figure (For Testing Grounds) is 500. As the new Fire Control works more accurately, old settings of 440 would no longer work properly.
+  If you were previously using the correct value, you will now be firing faster - so watch that heat!
+
 2.13 30th Sep 2013
 = Sorted a problem with toggles (Arm Lock and Weapon) - when you exited or tabbed out of MWO, the key you bound to this function would be "held".
 

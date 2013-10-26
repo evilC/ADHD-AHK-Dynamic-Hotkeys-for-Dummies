@@ -21,7 +21,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.13, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.14, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -94,6 +94,7 @@ Gui, Add, Link, x5 yp+40, Works with many games, perfect for <a href="http://mwo
 
 ADHD.finish_startup()
 fire_divider := 1
+last_divider := 1
 arm_lock_toggle_mode := false
 weapon_toggle_mode := false
 
@@ -114,14 +115,15 @@ return
 
 ; Macro is trying to fire - timer label
 DoFire:
-	; Turn the timer off and on again so that if we change fire rate it takes effect after the next fire
-	Gosub, DisableTimers
-		
+	now := A_TickCount
 	out := fire_array[current_weapon]
 	Send % out
 	tmp := FireRate / fire_divider
-	SetTimer, DoFire, % tmp
-	nextfire := A_TickCount + (tmp)
+	nextfire := now + (tmp)
+	; If fire rate changes mid-fire, stop the timer and re-start it at new rate
+	if (last_divider != fire_divider){
+		SetFireTimer(1,false)
+	}
 
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
@@ -134,6 +136,10 @@ SetFireTimer(mode,delay){
 	global FireRate
 	global nextfire
 	global fire_divider
+	global last_divider
+	
+	; Set last_divider, so we tell when the fire_divider changes
+	last_divider := fire_divider
 	
 	if(mode == 0){
 		Gosub, DisableTimers
