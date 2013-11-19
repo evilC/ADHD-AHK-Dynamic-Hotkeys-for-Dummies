@@ -41,6 +41,7 @@ Class ADHDLib
 		this.limit_app_h := -1
 		this.limit_app_last_w := -1
 		this.limit_app_last_h := -1
+		this.tab_list := Array("Main")
 		
 		this.x64_warning := 1
 		this.noaction_warning := 1
@@ -55,7 +56,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.16
+		this.core_version := 1.17
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -159,12 +160,19 @@ Class ADHDLib
 		; Set up the GUI ====================================================
 		local w := this.gui_w
 		local h := this.gui_h - 30
-		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, Main|Bindings|Profiles|About
+		
+		local tabs := ""
+		Loop, % this.tab_list.MaxIndex()
+		{
+			tabs := tabs this.tab_list[A_Index] "|"
+		}
+		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, %tabs%Bindings|Profiles|About
 
 		local tabtop := 40
 		local current_row := tabtop + 20
 		
-		Gui, Tab, 2
+		local nexttab := this.tab_list.MaxIndex() + 1
+		Gui, Tab, %nexttab%
 		; BINDINGS TAB
 		Gui, Add, Text, x5 y40 W100 Center, Action
 		Gui, Add, Text, xp+100 W70 Center, Keyboard
@@ -205,8 +213,8 @@ Class ADHDLib
 		Gui, Add, Checkbox, x5 yp+30 vadhd_program_mode gadhd_program_mode_changed, Program Mode
 		adhd_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 
-
-		Gui, Tab, 3
+		local nexttab := this.tab_list.MaxIndex() + 2
+		Gui, Tab, %nexttab%
 		; PROFILES TAB
 		current_row := tabtop + 20
 		Gui, Add, Text,x5 W40 y%current_row%,Profile
@@ -219,7 +227,8 @@ Class ADHDLib
 		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename
 		GuiControl,ChooseString, adhd_current_profile, %cp%
 
-		Gui, Tab, 4
+		local nexttab := this.tab_list.MaxIndex() + 3
+		Gui, Tab, %nexttab%
 		; ABOUT TAB
 		current_row := tabtop + 5
 		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys for Dummies (ADHD)
