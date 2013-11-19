@@ -7,6 +7,7 @@ Key:
 1.17
 + Can now add more than just a main tab.
   Set ADHD.tab_list to an array of strings to add more tabs.
++ Added tab_change event hook
 
 1.16 7th Oct 2013
 = Fixes resolution_changed event to not fire on minimize / maximize event

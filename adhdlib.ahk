@@ -31,6 +31,7 @@ Class ADHDLib
 		this.events := {}
 		;this.events.profile_load := ""
 		this.events.option_changed := ""
+		this.events.tab_changed := ""
 		this.events.program_mode_on := ""
 		this.events.program_mode_off := ""
 		this.events.disable_timers := ""
@@ -166,7 +167,7 @@ Class ADHDLib
 		{
 			tabs := tabs this.tab_list[A_Index] "|"
 		}
-		Gui, Add, Tab2, x0 w%w% h%h% gadhd_tab_changed, %tabs%Bindings|Profiles|About
+		Gui, Add, Tab2, x0 w%w% h%h% vadhd_current_tab gadhd_tab_changed, %tabs%Bindings|Profiles|About
 
 		local tabtop := 40
 		local current_row := tabtop + 20
@@ -719,6 +720,8 @@ test(){
 			GuiControl,,adhd_program_mode,0
 			this.program_mode_changed()
 		}
+		Gui, Submit, NoHide
+		this.fire_event(this.events.tab_changed)
 		return
 	}
 
