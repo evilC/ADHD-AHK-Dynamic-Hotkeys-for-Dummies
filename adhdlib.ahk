@@ -58,7 +58,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 1.17
+		this.core_version := 2.0
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -245,31 +245,52 @@ Class ADHDLib
 
 		; Add a Status Bar for at-a-glance current profile readout and update status
 		local ypos := this.gui_h - 17
-		Gui, Add, Text, x5 y%ypos%, Updates:
-		Gui, Add, Text, x50 y%ypos% w60 vUpdateStatus,
-		
-		tmp := this.gui_w - 200
-		Gui, Add, Text, x120 y%ypos%,Current Profile:
-		Gui, Add, Text, x200 y%ypos% w%tmp% vCurrentProfile,
+		local tmp := this.gui_w - 200
+		Gui, Add, Text, x5 y%ypos%,Current Profile:
+		Gui, Add, Text, x80 y%ypos% w%tmp% vCurrentProfile,
+
+		local tmp := this.gui_w - 120
+		Gui, Add, Text, x%tmp% y%ypos%, Updates:
+		;local tmp := this.gui_w - 200
+		Gui, Add, Text, xp+50 y%ypos% w60 vUpdateStatus
+		;Gui, Add, Button, xp+48 yp-6 w20 gadhd_update_status_info, ?
+		Gui, Add, Button, xp+48 yp-6 w20 vUpdateStatusInfo, ?
+		UpdateStatusInfo_TT := ""
 
 		; Build version info
 		local avail := 0
 		local bad := 0
 		
+		local tt := "Versions found on the internet:`n`nADHD library:`n"
+
+		; Check ADHD version
+		ver := this.get_ver("http://evilc.com/files/ahk/adhd/adhd.au.txt")
+		if (ver == 0){
+			tt .= "Unknown"
+			bad++
+		} else if (this.core_version != ver){
+			tt .= "Different (" ver ", you have " this.core_version ")"
+			avail++
+		} else {
+			tt .= "Same"
+		}
+		
+		tt .= "`n`n" this.author_macro_name ":`n"
+		
+		; Check Author Script version
 		ver := this.get_ver(this.author_url_prefix)
 		if (ver == 0){
+			tt .= "Unknown"
 			bad++
 		} else if (this.author_version != ver){
+			tt .= "Different (" ver ", you have " this.author_version ")"
 			avail++
+		} else {
+			tt .= "Same"
 		}
 		
-		ver := this.get_ver("http://evilc.com/files/ahk/adhd/adhd")
-		
-		if (ver == 0){
-			bad++
-		} else if (this.author_version != ver){
-			avail++
-		}
+		tt .= "`n`nTo download new versions,`nuse the links in the About tab"
+		UpdateStatusInfo_TT := tt
 		
 		if (avail){
 			GuiControl,+Cred,UpdateStatus
@@ -417,15 +438,44 @@ Class ADHDLib
 		}
 	}
 	
+	; Attempts to read a version from a text file at a specified URL
 	get_ver(url){
 		if (url == ""){
 			return 0
 		}
-		pwhr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-		pwhr.Open("GET",url ".ver.txt") 
-		pwhr.Send()
 		
-		return pwhr.ResponseText
+		pwhr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		pwhr.Open("GET",url) 
+		pwhr.Send()
+		ret := pwhr.ResponseText
+		
+		; Cater for 404s etc
+		if (InStr(ret, "<html>")){
+			return 0
+		}		
+		
+		out := {}
+		
+		Loop, Parse, ret, `n`r, %A_Space%%A_Tab%
+		{
+			c := SubStr(A_LoopField, 1, 1)
+			if (c="[")
+				;key := SubStr(A_LoopField, 2, -1)
+				continue
+			else if (c=";")
+				continue
+			else {
+				p := InStr(A_LoopField, "=")
+				if p {
+					k := SubStr(A_LoopField, 1, p-1)
+					out[%k%] := SubStr(A_LoopField, p+1)
+				}
+			}
+		}
+		if (out[version] == ""){
+			return 0
+		}
+		return out[version]
 	}
 	
 	; Fires an event.
