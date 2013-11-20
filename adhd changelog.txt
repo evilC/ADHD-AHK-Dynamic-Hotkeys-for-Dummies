@@ -4,11 +4,15 @@ Key:
 = : Change / Fix
 + : Added feature
 
-1.17
+2.0 20th Nov 2013
 + Can now add more than just a main tab.
   Set ADHD.tab_list to an array of strings to add more tabs.
 + Added tab_change event hook
 + Added on_exit event hook that runs when the script closes
++ Added Update Notification system.
+  You can specify ADHD.config_updates("<url>") to designate a URL where the script will look for a text file.
+  The script then checks its version number against the contents of the text file (Looking for a "version=xxx" line)
+= Gui is now not shown until ADHD.finish_startup() is called.
 
 1.16 7th Oct 2013
 = Fixes resolution_changed event to not fire on minimize / maximize event
