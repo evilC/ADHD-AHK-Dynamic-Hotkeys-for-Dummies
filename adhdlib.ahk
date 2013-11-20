@@ -330,9 +330,6 @@ Class ADHDLib
 		this.starting_up := 0
 
 	}
-test(){
-	soundbeep
-}
 
 	config_ignore_x64_warning(){
 		this.x64_warning := 0
