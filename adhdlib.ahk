@@ -32,6 +32,7 @@ Class ADHDLib
 		;this.events.profile_load := ""
 		this.events.option_changed := ""
 		this.events.tab_changed := ""
+		this.events.on_exit := ""
 		this.events.program_mode_on := ""
 		this.events.program_mode_off := ""
 		this.events.disable_timers := ""
@@ -834,6 +835,7 @@ test(){
 		if (this.read_ini("gui_y","Settings", -1) != gui_y && gui_x >= 0){
 			IniWrite, %gui_y%, %ini%, Settings, adhd_gui_y
 		}
+		this.fire_event(this.events.on_exit)
 		ExitApp
 		return
 	}
