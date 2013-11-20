@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.16 20th Nov 2013
+= Now uses ADHD 2. No real changes, but now notifies of updates.
+
 2.15 30th Oct 2013
 + Added 7-0 to list of options to Weapon Toggle.
   This is so that you can use weapon toggle as a generic toggle,
