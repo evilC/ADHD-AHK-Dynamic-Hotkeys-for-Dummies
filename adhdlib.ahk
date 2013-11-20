@@ -243,19 +243,44 @@ Class ADHDLib
 
 		Gui, Tab
 
-		; Add a Status Bar for at-a-glance current profile readout
-		Gui, Add, StatusBar,,
+		; Add a Status Bar for at-a-glance current profile readout and update status
+		local ypos := this.gui_h - 17
+		Gui, Add, Text, x5 y%ypos%, Updates:
+		Gui, Add, Text, x50 y%ypos% w60 vUpdateStatus,
+		
+		tmp := this.gui_w - 200
+		Gui, Add, Text, x120 y%ypos%,Current Profile:
+		Gui, Add, Text, x200 y%ypos% w%tmp% vCurrentProfile,
 
-
-		; Show the GUI =====================================
-		local ver := this.core_version
-		local aver := this.author_version
-		local name := this.author_macro_name
-		local x := this.gui_x
-		local y := this.gui_y
-		local w := this.gui_w
-		local h := this.gui_h
-		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
+		; Build version info
+		local avail := 0
+		local bad := 0
+		
+		ver := this.get_ver(this.author_url_prefix)
+		if (ver == 0){
+			bad++
+		} else if (this.author_version != ver){
+			avail++
+		}
+		
+		ver := this.get_ver("http://evilc.com/files/ahk/adhd/adhd")
+		
+		if (ver == 0){
+			bad++
+		} else if (this.author_version != ver){
+			avail++
+		}
+		
+		if (avail){
+			GuiControl,+Cred,UpdateStatus
+			GuiControl,,UpdateStatus, Available
+		} else if (bad == 0) {
+			GuiControl,+Cgreen,UpdateStatus
+			GuiControl,,UpdateStatus, Latest
+		} else {
+			GuiControl,+Cblack,UpdateStatus
+			GuiControl,,UpdateStatus, Unknown
+		}
 
 		; Add Debug window controls
 		Gui, Tab
@@ -306,6 +331,17 @@ Class ADHDLib
 
 	finish_startup(){
 		global	; Remove! phase out mass use of globals
+		
+		; Show the GUI =====================================
+		local ver := this.core_version
+		local aver := this.author_version
+		local name := this.author_macro_name
+		local x := this.gui_x
+		local y := this.gui_y
+		local w := this.gui_w
+		local h := this.gui_h
+		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
+
 		this.debug_ready := 1
 
 		; Set up the links on the footer of the main page
@@ -364,6 +400,10 @@ Class ADHDLib
 		return adhd_limit_application_on
 	}
 	
+	config_updates(url){
+		this.author_url_prefix := url
+	}
+	
 	; Configure the About tab
 	config_about(data){
 		this.author_macro_name := data.name					; Change this to your macro name
@@ -375,6 +415,17 @@ Class ADHDLib
 		} else {
 			this.author_help := data.help
 		}
+	}
+	
+	get_ver(url){
+		if (url == ""){
+			return 0
+		}
+		pwhr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+		pwhr.Open("GET",url ".ver.txt") 
+		pwhr.Send()
+		
+		return pwhr.ResponseText
 	}
 	
 	; Fires an event.
@@ -392,6 +443,10 @@ Class ADHDLib
 		ToolTip, % "msg: " . msg . " | lParam: " . lParam . " | wParam: " . wParam
 	}
 	
+	set_profile_statusbar(){
+		cp := this.current_profile
+		GuiControl,,CurrentProfile,%cp%
+	}
 
 	; aka load profile
 	profile_changed(){
@@ -412,7 +467,8 @@ Class ADHDLib
 
 		this.update_ini("adhd_current_profile", "Settings", this.current_profile,"")
 		
-		SB_SetText("Current profile: " this.current_profile) 
+		;SB_SetText("Current profile: " this.current_profile,2) 
+		this.set_profile_statusbar() 
 		
 		this.hotkey_mappings := {}
 		
@@ -532,7 +588,8 @@ Class ADHDLib
 				this.default_app := A_Space
 			}
 			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.default_app)
-			SB_SetText("Current profile: " this.current_profile)
+			;SB_SetText("Current profile: " this.current_profile, 2)
+			this.set_profile_statusbar()
 			
 			; Limit app toggle
 			this.update_ini("adhd_limit_app_on", this.current_profile, adhd_limit_application_on, 0)
