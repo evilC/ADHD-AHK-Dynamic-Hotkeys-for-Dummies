@@ -21,13 +21,16 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.15, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.16, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
 ADHD.config_size(375,280)
+
+; Configure update notifications:
+ADHD.config_updates("http://evilc.com/files/ahk/mwo/firectrl/firectrl.au.txt")
 
 ; Defines your hotkeys 
 ; subroutine is the label (subroutine name - like MySub: ) to be called on press of bound key
