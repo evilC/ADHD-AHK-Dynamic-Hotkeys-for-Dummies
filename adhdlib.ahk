@@ -58,7 +58,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 2.0
+		this.core_version := 2.1
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -786,6 +786,9 @@ Class ADHDLib
 		; Firing option_changed saves the current state to the new profile name in the INI
 		this.debug("duplicate_profile calling option_changed")
 		this.option_changed()
+		
+		; Fire profile changed to update current profile in ini
+		this.profile_changed()
 
 		return
 	}
