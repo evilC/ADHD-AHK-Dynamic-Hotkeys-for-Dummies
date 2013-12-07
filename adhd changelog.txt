@@ -4,6 +4,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.1 7th Dec 2013
++ Added mechanism to detect INI version
+  Used if you change format of INI file, and wish to warn users not to try to load an invalid profile
+= Fixed bug:
+  When copying a profile, then exiting would cause the original (not the copied) profile being loaded on next run
+
 2.0 20th Nov 2013
 + Can now add more than just a main tab.
   Set ADHD.tab_list to an array of strings to add more tabs.

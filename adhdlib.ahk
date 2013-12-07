@@ -27,6 +27,9 @@ Class ADHDLib
 		this.gui_w := 375
 		this.gui_h := 175
 		
+		this.ini_version := 1
+		this.write_version := 1				; set to 0 to stop writing of version to INI file on exit
+		
 		; Hooks
 		this.events := {}
 		;this.events.profile_load := ""
@@ -125,12 +128,15 @@ Class ADHDLib
 		ini := this.ini_name
 		IniRead, x, %ini%, Settings, adhd_gui_x, unset
 		IniRead, y, %ini%, Settings, adhd_gui_y, unset
+		this.first_run := 0
 		if (x == "unset"){
 			msgbox, Welcome to this ADHD based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
 			x := 0	; initialize
+			this.first_run := 1
 		}
 		if (y == "unset"){
 			y := 0
+			this.first_run := 1
 		}
 
 		if (x == ""){
@@ -148,6 +154,10 @@ Class ADHDLib
 		; Get current profile
 		IniRead, cp, %ini%, Settings, adhd_current_profile, Default
 		this.current_profile := cp
+
+		; Get version of INI file
+		IniRead, iv, %ini%, Settings, adhd_ini_version, 1
+		this.loaded_ini_version := iv
 
 	}
 	
@@ -388,6 +398,10 @@ Class ADHDLib
 
 	}
 
+	config_ini_version(ver){
+		this.ini_version := ver
+	}
+	
 	config_ignore_x64_warning(){
 		this.x64_warning := 0
 	}
@@ -942,6 +956,12 @@ Class ADHDLib
 		if (this.read_ini("gui_y","Settings", -1) != gui_y && gui_x >= 0){
 			IniWrite, %gui_y%, %ini%, Settings, adhd_gui_y
 		}
+
+		if (this.write_version){
+			tmp := this.ini_version
+			IniWrite, %tmp%, %ini%, Settings, adhd_ini_version
+		}
+		
 		this.fire_event(this.events.on_exit)
 		ExitApp
 		return
