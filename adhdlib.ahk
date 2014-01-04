@@ -61,7 +61,7 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 2.1
+		this.core_version := 2.2
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -895,7 +895,7 @@ Class ADHDLib
 		}
 		
 		; key pressed
-		if (ctr < max){
+		if (ctr < max && text != ""){
 			; Modifier keys used - set keyboard box to "None"
 			GuiControl,, %ctrl%, None
 			this.debug("key_changed calling option_changed")

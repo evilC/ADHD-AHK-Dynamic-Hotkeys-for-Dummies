@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.2
+= Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.
+
 2.1 7th Dec 2013
 + Added mechanism to detect INI version
   Used if you change format of INI file, and wish to warn users not to try to load an invalid profile
