@@ -4,6 +4,11 @@ Key:
 = : Change / Fix
 + : Added feature
 
+2.17 5th Jan 2014
++ Added "Jump Jet Spam" feature.
+  This allows you to set a key that will spam the jump jets at a rate set by the user.
+  Used when climbing hills or hugging terrain - avoids RSI through trying to spam key quickly.
+
 2.16 20th Nov 2013
 = Now uses ADHD 2. No real changes, but now notifies of updates.
 

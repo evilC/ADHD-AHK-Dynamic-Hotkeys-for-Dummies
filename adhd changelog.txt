@@ -4,7 +4,7 @@ Key:
 = : Change / Fix
 + : Added feature
 
-2.2
+2.2 5th Jan 2014
 = Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.
 
 2.1 7th Dec 2013

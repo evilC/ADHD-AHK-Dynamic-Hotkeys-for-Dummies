@@ -21,13 +21,13 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.16, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.17, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADHD.config_size(375,280)
+ADHD.config_size(375,310)
 
 ; Configure update notifications:
 ADHD.config_updates("http://evilc.com/files/ahk/mwo/firectrl/firectrl.au.txt")
@@ -39,6 +39,8 @@ ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 ADHD.config_hotkey_add({uiname: "Arm Lock Toggle", subroutine: "ArmLockToggle"})
+ADHD.config_hotkey_add({uiname: "Jump Jet Spam", subroutine: "JumpJetSpam"})
+adhd_hk_k_5_TT := "Jump Jet spam will hit the Jump Jet key (Specified on the Main tab) quickly.`nThis helps prevent RSI when climbing hills etc."
 ;ADHD.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "FunctionalityToggle"})
 
 ; Hook into ADHD events
@@ -72,23 +74,31 @@ Gui, Tab, 1
 ; Create normal label
 Gui, Add, Text, x5 y40, Fire Sequence
 ; Create Edit box that has state saved in INI
-ADHD.gui_add("Edit", "FireSequence", "xp+120 yp W120", "", "")
+ADHD.gui_add("Edit", "FireSequence", "xp+120 yp-2 W120", "", "")
 ; Create tooltip by adding _TT to the end of the Variable Name of a control
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
-Gui, Add, Text, x5 yp+25, Fire Rate (ms)
-ADHD.gui_add("Edit", "FireRate", "xp+120 yp W120", "", 100)
+Gui, Add, Text, x5 yp+30, Fire Rate (ms)
+ADHD.gui_add("Edit", "FireRate", "xp+120 yp-2 W120", "", 100)
 
-Gui, Add, Text, x5 yp+25, Weapon Toggle group
+Gui, Add, Text, x5 yp+30, Weapon Toggle group
 ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6|7|8|9|0", "None")
 
-Gui, Add, Text, x5 yp+25, Arm Lock Toggle key
+Gui, Add, Text, x5 yp+30, Arm Lock Toggle key
 ADHD.gui_add("DropDownList", "ArmLockToggle", "xp+120 yp-2 W50", "None|7|8|9|0|L", "None")
 
-ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+25", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
+ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
-Gui, Add, Text, x5 yp+20, Scroll Lock indicates status of
+Gui, Add, Text, x5 yp+30, Scroll Lock indicates status of
 ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Arm Lock Toggle|Fire Rate", "None")
+
+Gui, Add, Text, x5 yp+35, MWO Jump Jet key
+ADHD.gui_add("Edit", "JumpJetKey", "xp+100 yp-2 W50", "", "Space")
+JumpJetKey_TT := "The key bound to Jump Jets in MWO.`nOnly needed if you use the 'Jump Jet Spam' feature."
+
+Gui, Add, Text, xp+80 yp+2, Jump Jet Spam Rate (ms)
+ADHD.gui_add("Edit", "JumpJetRate", "xp+130 yp-2 W50", "", "150")
+JumpJetKey_TT := "The rate at which Jump Jet Spam hits the Jump Jet key (in ms).`nOnly needed if you use the 'Jump Jet Spam' feature."
 
 Gui, Add, Link, x5 yp+40, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
 
@@ -100,6 +110,7 @@ fire_divider := 1
 last_divider := 1
 arm_lock_toggle_mode := false
 weapon_toggle_mode := false
+jj_active := 0
 
 ; Turn off scroll lock if it is used to indicate a status
 if (ScrollLockSetting != "None"){
@@ -368,7 +379,24 @@ ArmLockToggle:
 		Gosub, EnableArmLockToggle
 	}
 	return
-	
+
+JumpJetSpam:
+	if (!jj_active){
+		jj_active := 1
+		SetTimer, do_jj, %JumpJetRate%
+		Gosub, do_jj
+	}
+	return
+
+JumpJetSpamUp:
+	jj_active := 0
+	SetTimer, do_jj, Off
+	return
+
+do_jj:
+	Send {Space}
+	return
+
 ; ===================================================================================================
 ; FOOTER SECTION
 
