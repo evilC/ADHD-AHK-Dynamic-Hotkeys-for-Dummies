@@ -21,7 +21,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.17, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 2.18, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -97,7 +97,7 @@ ADHD.gui_add("Edit", "JumpJetKey", "xp+100 yp-2 W50", "", "Space")
 JumpJetKey_TT := "The key bound to Jump Jets in MWO.`nOnly needed if you use the 'Jump Jet Spam' feature."
 
 Gui, Add, Text, xp+80 yp+2, Jump Jet Spam Rate (ms)
-ADHD.gui_add("Edit", "JumpJetRate", "xp+130 yp-2 W50", "", "150")
+ADHD.gui_add("Edit", "JumpJetRate", "xp+130 yp-2 W50", "", "250")
 JumpJetKey_TT := "The rate at which Jump Jet Spam hits the Jump Jet key (in ms).`nOnly needed if you use the 'Jump Jet Spam' feature."
 
 Gui, Add, Link, x5 yp+40, Works with many games, perfect for <a href="http://mwomercs.com">MechWarrior Online</a> (FREE GAME!)
@@ -394,7 +394,9 @@ JumpJetSpamUp:
 	return
 
 do_jj:
-	Send {Space}
+	Send {Space down}
+	Sleep, 100
+	Send {Space up}
 	return
 
 ; ===================================================================================================
