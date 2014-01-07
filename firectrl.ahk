@@ -21,7 +21,7 @@ SetKeyDelay, 0, 50
 
 ; Stuff for the About box
 
-ADHD.config_about({name: "Fire Control", version: 2.18, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
+ADHD.config_about({name: "Fire Control", version: 3.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
 ADHD.config_default_app("CryENGINE")
@@ -74,12 +74,12 @@ Gui, Tab, 1
 ; Create normal label
 Gui, Add, Text, x5 y40, Fire Sequence
 ; Create Edit box that has state saved in INI
-ADHD.gui_add("Edit", "FireSequence", "xp+120 yp-2 W120", "", "")
+ADHD.gui_add("Edit", "FireSequence", "xp+120 yp-2 W240", "", "")
 ; Create tooltip by adding _TT to the end of the Variable Name of a control
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 
 Gui, Add, Text, x5 yp+30, Fire Rate (ms)
-ADHD.gui_add("Edit", "FireRate", "xp+120 yp-2 W120", "", 100)
+ADHD.gui_add("Edit", "FireRate", "xp+120 yp-2 W50", "", 100)
 
 Gui, Add, Text, x5 yp+30, Weapon Toggle group
 ADHD.gui_add("DropDownList", "WeaponToggle", "xp+120 yp-2 W50", "None|1|2|3|4|5|6|7|8|9|0", "None")
@@ -131,13 +131,27 @@ return
 DoFire:
 	now := A_TickCount
 	out := fire_array[current_weapon]
+	if (fire_array_stagger_pos){
+		;tooltip % fire_array_stagger_pos "," fire_array_count "," last_divider "," fire_divider
+		if (fire_array_stagger_pos == fire_array_count){
+			;soundbeep
+			;msgbox % fire_array_stagger_tim
+			nextfire := now + fire_array_stagger_tim
+			SetFireTimer(1,1)
+		} else {
+			nextfire := now + (FireRate / fire_divider)
+			SetFireTimer(1,false)
+		}
+	} else {
+		nextfire := now + (FireRate / fire_divider)
+	}
 	Send % out
-	nextfire := now + (FireRate / fire_divider)
 	; If fire rate changes mid-fire, stop the timer and re-start it at new rate
 	if (last_divider != fire_divider){
 		SetFireTimer(1,false)
 	}
 
+	fire_array_count++
 	current_weapon := current_weapon + 1
 	if (current_weapon > fire_array.MaxIndex()){
 		current_weapon := 1
@@ -145,6 +159,9 @@ DoFire:
 	return
 
 ; used to start or stop the fire timer
+; mode: 0|1 - Enables / Disables timer
+; delay: 0 - next fire is FireRate ms from now
+; delay: 1 - next fire is at nextfire ("Limit Fire Rate" is being used - schedule fire for when window is up)
 SetFireTimer(mode,delay){
 	global FireRate
 	global nextfire
@@ -158,10 +175,10 @@ SetFireTimer(mode,delay){
 		Gosub, DisableTimers
 	} else {
 		tim := (FireRate / fire_divider)
-		if (delay == false){
-			SetTimer, DoFire, %tim%
-		} else {
+		if (delay){
 			SetTimer, DoFire, % nextfire - A_TickCount
+		} else {
+			SetTimer, DoFire, %tim%
 		}
 	}
 }
@@ -220,6 +237,9 @@ firectrl_init(){
 	global FireSequence
 	global fire_array := []
 	global fire_array_reset_on_release := 0
+	global fire_array_count := 1
+	global fire_array_stagger_pos := 0
+	global fire_array_stagger_tim := 0
 	global current_weapon := 1
 	global fire_divider
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
@@ -245,8 +265,36 @@ firectrl_init(){
 	}
 	
 	; Split FireSequence box from comma separated list to array
-	StringSplit, tmp, FireSequence, `,
+	;StringSplit, tmp, FireSequence, `,
+	; Strip all spaces
+	StringReplace, array_list, FireSequence, %A_SPACE%,, All
+	StringLower, array_list, array_list
+	array_list := RegExMatchGlobal(array_list, "(\w*\(\w*[,\w]*\)|[\w)]+)")
+	;array_list := RegExMatchGlobal(array_list, "(\w*\(\w*,\w*\)|[\w)]+)")
+	;array_list := RegExMatchGlobal(FireSequence, "\s*(\w*\(\s*\w*\s*,\s*\w*\s*\)|[\w)]+)\s*")
 	array_ctr := 1
+	Loop, % array_list.MaxIndex(){
+		array_item := array_list[A_Index].Value(0)
+		;msgbox % A_Index ": " array_item
+		if (array_item != ""){
+			if (array_item == "reset"){
+				fire_array_reset_on_release := 1
+			} else if (substr(array_item,1,7) == "stagger"){
+				;remove brackets
+				tmp := substr(array_item,8)
+				tmp := substr(tmp,2,strlen(tmp)-2)
+				; split by commas
+				StringSplit, tmp, tmp, `,
+				fire_array_stagger_pos := tmp1
+				fire_array_stagger_tim := tmp2
+				;msgbox % tmp1
+			} else {
+				fire_array[array_ctr] := array_item
+				array_ctr ++
+			}
+		}
+	}
+	/*
 	Loop, %tmp0%
 	{
 		StringLower, array_item, tmp%A_Index%
@@ -259,6 +307,7 @@ firectrl_init(){
 			}
 		}
 	}
+	*/
 	return
 }
 
@@ -343,8 +392,6 @@ Fire:
 	; Fire Lazors !!!
 	GoSub, DoFire
 
-	; Start the fire timer
-	SetFireTimer(1,false)
 	return
 
 ; Fired on key up
@@ -355,6 +402,7 @@ FireUp:
 	if (fire_array_reset_on_release){
 		current_weapon := 1
 	}
+	fire_array_count := 1
 	return
 
 ; Set up HotKey 2
@@ -408,6 +456,16 @@ do_jj:
 	Sleep, 100
 	Send {Space up}
 	return
+
+; From http://www.autohotkey.com/board/topic/14817-grep-global-regular-expression-match/page-2#entry578137
+RegExMatchGlobal(ByRef Haystack, NeedleRegEx) {
+   Static Options := "U)^[imsxACDJOPSUX`a`n`r]+\)"
+   NeedleRegEx := (RegExMatch(NeedleRegEx, Options, Opt) ? (InStr(Opt, "O", 1) ? "" : "O") : "O)") . NeedleRegEx
+   Match := {Len: {0: 0}}, Matches := [], FoundPos := 1
+   While (FoundPos := RegExMatch(Haystack, NeedleRegEx, Match, FoundPos + Match.Len[0]))
+      Matches[A_Index] := Match
+   Return Matches
+}
 
 ; ===================================================================================================
 ; FOOTER SECTION
