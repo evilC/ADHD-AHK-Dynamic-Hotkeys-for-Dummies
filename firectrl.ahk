@@ -132,8 +132,7 @@ DoFire:
 	now := A_TickCount
 	out := fire_array[current_weapon]
 	Send % out
-	tmp := FireRate / fire_divider
-	nextfire := now + (tmp)
+	nextfire := now + (FireRate / fire_divider)
 	; If fire rate changes mid-fire, stop the timer and re-start it at new rate
 	if (last_divider != fire_divider){
 		SetFireTimer(1,false)
@@ -220,6 +219,7 @@ firectrl_init(){
 	global ADHD
 	global FireSequence
 	global fire_array := []
+	global fire_array_reset_on_release := 0
 	global current_weapon := 1
 	global fire_divider
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
@@ -246,10 +246,17 @@ firectrl_init(){
 	
 	; Split FireSequence box from comma separated list to array
 	StringSplit, tmp, FireSequence, `,
+	array_ctr := 1
 	Loop, %tmp0%
 	{
-		if (tmp%A_Index% != ""){
-			fire_array[A_Index] := tmp%A_Index%
+		StringLower, array_item, tmp%A_Index%
+		if (array_item != ""){
+			if (array_item == "reset"){
+				fire_array_reset_on_release := 1
+			} else {
+				fire_array[array_ctr] := array_item
+				array_ctr ++
+			}
 		}
 	}
 	return
@@ -345,6 +352,9 @@ FireUp:
 	fire_on := 0
 	; Kill the timer when the key is released (Stop auto firing)
 	SetFireTimer(0,false)
+	if (fire_array_reset_on_release){
+		current_weapon := 1
+	}
 	return
 
 ; Set up HotKey 2
