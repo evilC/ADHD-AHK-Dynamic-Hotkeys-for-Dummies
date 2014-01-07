@@ -144,12 +144,15 @@ DoFire:
 		}
 	} else {
 		nextfire := now + (FireRate / fire_divider)
+		SetFireTimer(1,false)
 	}
 	Send % out
+	/*
 	; If fire rate changes mid-fire, stop the timer and re-start it at new rate
 	if (last_divider != fire_divider){
 		SetFireTimer(1,false)
 	}
+	*/
 
 	fire_array_count++
 	current_weapon := current_weapon + 1
