@@ -131,17 +131,10 @@ return
 DoFire:
 	now := A_TickCount
 	out := fire_array[current_weapon]
-	if (fire_array_stagger_pos){
-		;tooltip % fire_array_stagger_pos "," fire_array_count "," last_divider "," fire_divider
-		if (fire_array_stagger_pos == fire_array_count){
-			;soundbeep
-			;msgbox % fire_array_stagger_tim
-			nextfire := now + fire_array_stagger_tim
-			SetFireTimer(1,1)
-		} else {
-			nextfire := now + (FireRate / fire_divider)
-			SetFireTimer(1,false)
-		}
+	; If it is the first shot, process stagger...
+	if (fire_array_count == 1 && stagger_array[current_weapon] != ""){
+		nextfire := now + stagger_array[current_weapon]
+		SetFireTimer(1,1)
 	} else {
 		nextfire := now + (FireRate / fire_divider)
 		SetFireTimer(1,false)
@@ -239,10 +232,9 @@ firectrl_init(){
 	global ADHD
 	global FireSequence
 	global fire_array := []
+	global stagger_array := []
 	global fire_array_reset_on_release := 0
 	global fire_array_count := 1
-	global fire_array_stagger_pos := 0
-	global fire_array_stagger_tim := 0
 	global current_weapon := 1
 	global fire_divider
 	global nextfire := 0		; A timer for when we are next allowed to press the fire button
@@ -288,29 +280,13 @@ firectrl_init(){
 				tmp := substr(tmp,2,strlen(tmp)-2)
 				; split by commas
 				StringSplit, tmp, tmp, `,
-				fire_array_stagger_pos := tmp1
-				fire_array_stagger_tim := tmp2
-				;msgbox % tmp1
+				stagger_array[tmp1] := tmp2
 			} else {
 				fire_array[array_ctr] := array_item
 				array_ctr ++
 			}
 		}
 	}
-	/*
-	Loop, %tmp0%
-	{
-		StringLower, array_item, tmp%A_Index%
-		if (array_item != ""){
-			if (array_item == "reset"){
-				fire_array_reset_on_release := 1
-			} else {
-				fire_array[array_ctr] := array_item
-				array_ctr ++
-			}
-		}
-	}
-	*/
 	return
 }
 
