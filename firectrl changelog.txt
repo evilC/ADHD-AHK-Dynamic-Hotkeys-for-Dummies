@@ -4,6 +4,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.0
+= Fixed startup so firectrl_init only runs once.
++ Added groupmode()
++ Added reset()
++ added stagger()
+
 2.18 5th Jan 2014
 + Adjusted Jump Jet Spam timing.
   Jump Jets are now held for 100ms instead of 50.

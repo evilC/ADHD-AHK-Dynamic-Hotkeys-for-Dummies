@@ -27,7 +27,7 @@ ADHD.config_about({name: "Fire Control", version: 3.0, author: "evilC", link: "<
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADHD.config_size(375,310)
+ADHD.config_size(375,335)
 
 ; Configure update notifications:
 ADHD.config_updates("http://evilc.com/files/ahk/mwo/firectrl/firectrl.au.txt")
@@ -39,6 +39,7 @@ ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire"})
 ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"})
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 ADHD.config_hotkey_add({uiname: "Arm Lock Toggle", subroutine: "ArmLockToggle"})
+ADHD.config_hotkey_add({uiname: "Fire Mode Toggle", subroutine: "FireModeToggle"})
 ADHD.config_hotkey_add({uiname: "Jump Jet Spam", subroutine: "JumpJetSpam"})
 adhd_hk_k_5_TT := "Jump Jet spam will hit the Jump Jet key (Specified on the Main tab) quickly.`nThis helps prevent RSI when climbing hills etc."
 ;ADHD.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "FunctionalityToggle"})
@@ -90,7 +91,7 @@ ADHD.gui_add("DropDownList", "ArmLockToggle", "xp+120 yp-2 W50", "None|7|8|9|0|L
 ADHD.gui_add("CheckBox", "LimitFire", "x5 yp+30", "Limit fire rate to specified rate (Stop 'Over-Clicking')", 0)
 
 Gui, Add, Text, x5 yp+30, Scroll Lock indicates status of
-ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Arm Lock Toggle|Fire Rate", "None")
+ADHD.gui_add("DropDownList", "ScrollLockSetting", "xp+150 yp-2", "None|Weapon Toggle|Arm Lock Toggle|Fire Rate|Fire Mode", "None")
 
 Gui, Add, Text, x5 yp+35, MWO Jump Jet key
 ADHD.gui_add("Edit", "JumpJetKey", "xp+100 yp-2 W50", "", "Space")
@@ -131,15 +132,20 @@ return
 DoFire:
 	now := A_TickCount
 	out := fire_array[current_weapon]
-	; If it is the first shot, process stagger...
-	if (fire_array_count == 1 && stagger_array[current_weapon] != ""){
-		nextfire := now + stagger_array[current_weapon]
-		SetFireTimer(1,1)
+	if (groupmode){
+		tmp := groupmode_array[1]
+		Send {%tmp% down}
 	} else {
-		nextfire := now + (FireRate / fire_divider)
-		SetFireTimer(1,false)
+		; If it is the first shot, process stagger...
+		if (fire_array_count == 1 && stagger_array[current_weapon] != ""){
+			nextfire := now + stagger_array[current_weapon]
+			SetFireTimer(1,1)
+		} else {
+			nextfire := now + (FireRate / fire_divider)
+			SetFireTimer(1,false)
+		}
+		Send % out
 	}
-	Send % out
 	/*
 	; If fire rate changes mid-fire, stop the timer and re-start it at new rate
 	if (last_divider != fire_divider){
@@ -232,6 +238,8 @@ firectrl_init(){
 	global ADHD
 	global FireSequence
 	global fire_array := []
+	global groupmode := 0
+	global groupmode_array := []
 	global stagger_array := []
 	global fire_array_reset_on_release := 0
 	global fire_array_count := 1
@@ -281,6 +289,11 @@ firectrl_init(){
 				; split by commas
 				StringSplit, tmp, tmp, `,
 				stagger_array[tmp1] := tmp2
+			} else if(substr(array_item,1,9) == "groupmode"){
+				;remove brackets
+				tmp := substr(array_item,10)
+				tmp := substr(tmp,2,strlen(tmp)-2)
+				groupmode_array[1] := tmp
 			} else {
 				fire_array[array_ctr] := array_item
 				array_ctr ++
@@ -314,8 +327,12 @@ program_mode_on_hook(){
 
 ; Gets called when we exit program mode
 program_mode_off_hook(){
-	firectrl_init()
-	Gosub, DisableTimers
+	global ADHD
+	; called at start, so do not run if ADHD is starting up
+	if (!ADHD.starting_up){
+		firectrl_init()
+		Gosub, DisableTimers
+	}
 }
 
 ; Fired when the limited app changes resolution. Useful for some games that have a windowed matchmaker and fullscreen game
@@ -375,6 +392,11 @@ Fire:
 
 ; Fired on key up
 FireUp:
+	if (fire_on){
+		; Send up event for held key
+		tmp := groupmode_array[1]
+		Send {%tmp% up}
+	}
 	fire_on := 0
 	; Kill the timer when the key is released (Stop auto firing)
 	SetFireTimer(0,false)
@@ -435,6 +457,30 @@ do_jj:
 	Sleep, 100
 	Send {Space up}
 	return
+
+FireModeToggle:
+	groupmode := 1-groupmode
+	if (groupmode){
+		if (fire_on){
+			SetFireTimer(0,0)
+			Gosub, DoFire
+		}
+	} else {
+		if(fire_on){
+			; Send up event for held key
+			tmp := groupmode_array[1]
+			Send {%tmp% up}
+			Gosub, DoFire
+		}
+	}
+	if (ScrollLockSetting == "Fire Mode"){
+		if (groupmode){
+			SetScrollLockState, On
+		} else {
+			SetScrollLockState, Off
+		}
+	}
+	Return
 
 ; From http://www.autohotkey.com/board/topic/14817-grep-global-regular-expression-match/page-2#entry578137
 RegExMatchGlobal(ByRef Haystack, NeedleRegEx) {
