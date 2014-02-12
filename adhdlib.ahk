@@ -333,7 +333,7 @@ Class ADHDLib
 
 		; Create the debug GUI, but do not show yet
 		tmp := w - 30
-		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents ReadOnly,
+		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents hwndadhd_log ReadOnly,
 		Gui, 2:Add, Button, gadhd_clear_log, clear
 	}
 
@@ -1010,12 +1010,15 @@ Class ADHDLib
 	debug(msg){
 		global adhd_log_contents
 		global adhd_debug_mode
+		global adhd_log
 
 		; If in debug mode, or starting up...
 		if (adhd_debug_mode || this.starting_up){
 			adhd_log_contents := adhd_log_contents "* " msg "`n"
 			if (this.debug_ready){
 				guicontrol,2:,adhd_log_contents, % adhd_log_contents
+				; Send CTRL-END to log control to make it scroll down.
+				controlsend,,^{End},ahk_id %adhd_log%
 				gui, 2:submit, nohide
 			}
 		}
