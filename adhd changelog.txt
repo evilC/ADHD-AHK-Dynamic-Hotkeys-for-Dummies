@@ -7,7 +7,7 @@ Key:
 2.3.0
 = Moved to three number semantic versioning system
 = option_changed removed from debug list - it provided no information
-
++ Debug log now scrolls as new items are added.
 
 2.2 5th Jan 2014
 = Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.
