@@ -1014,11 +1014,12 @@ Class ADHDLib
 
 		; If in debug mode, or starting up...
 		if (adhd_debug_mode || this.starting_up){
-			adhd_log_contents := adhd_log_contents "* " msg "`n"
+			;adhd_log_contents := adhd_log_contents "* " msg "`n"
+			adhd_log_contents := "* " msg "`n " adhd_log_contents
 			if (this.debug_ready){
 				guicontrol,2:,adhd_log_contents, % adhd_log_contents
 				; Send CTRL-END to log control to make it scroll down.
-				controlsend,,^{End},ahk_id %adhd_log%
+				;controlsend,,^{End},ahk_id %adhd_log%
 				gui, 2:submit, nohide
 			}
 		}

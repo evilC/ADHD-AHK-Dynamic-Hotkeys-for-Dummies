@@ -8,7 +8,8 @@ Key:
 = Moved to three number semantic versioning system
 + Version checks now regognise newer, older, or same number versions.
 = option_changed removed from debug list - it provided no information
-+ Debug log now scrolls as new items are added.
++ Order in debug window reversed, so last item is always on top.
+  This is quicker than scrolling the window constantly to keep the bottom in view.
 
 2.2 5th Jan 2014
 = Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.
