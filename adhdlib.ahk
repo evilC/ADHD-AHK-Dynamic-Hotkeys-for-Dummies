@@ -631,7 +631,7 @@ Class ADHDLib
 		global adhd_debug_window
 		
 		if (this.starting_up != 1){
-			this.debug("option_changed - control: " A_guicontrol)
+			;this.debug("option_changed - control: " A_guicontrol)
 			
 			Gui, Submit, NoHide
 
