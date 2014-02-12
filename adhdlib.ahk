@@ -16,6 +16,8 @@ Class ADHDLib
 	
 	; Constructor - init default values
 	__New(){
+		this.core_version := "2.3.0"
+
 		this.instantiated := 1
 		this.hotkey_list := []
 		this.author_macro_name := "An ADHD Macro"					; Change this to your macro name
@@ -61,7 +63,6 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.core_version := 2.2
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -268,50 +269,55 @@ Class ADHDLib
 		UpdateStatusInfo_TT := ""
 
 		; Build version info
-		local avail := 0
 		local bad := 0
 		
+		; Check versions:
 		local tt := "Versions found on the internet:`n`nADHD library:`n"
 
-		; Check ADHD version
+		; ADHD version
 		ver := this.get_ver("http://evilc.com/files/ahk/adhd/adhd.au.txt")
-		if (ver == 0){
+		if (ver){
+			cv := this.pad_version(this.core_version)
+			rv := this.pad_version(ver)
+			diffc := this.semver_compare(cv,rv)
+
+			tt .= this.version_tooltip_create(diffc,rv,cv)
+		} else {
 			tt .= "Unknown"
 			bad++
-		} else if (this.core_version != ver){
-			tt .= "Different (" ver ", you have " this.core_version ")"
-			avail++
-		} else {
-			tt .= "Same"
 		}
-		
 		tt .= "`n`n" this.author_macro_name ":`n"
-		
-		; Check Author Script version
+
+		; Author Script version
 		ver := this.get_ver(this.author_url_prefix)
-		if (ver == 0){
+		if (ver){
+			av := this.pad_version(this.author_version)
+			rv := this.pad_version(ver)
+			diffa := this.semver_compare(av,rv)
+
+			tt .= this.version_tooltip_create(diffa,rv,av)
+		} else {
 			tt .= "Unknown"
 			bad++
-		} else if (this.author_version != ver){
-			tt .= "Different (" ver ", you have " this.author_version ")"
-			avail++
-		} else {
-			tt .= "Same"
 		}
-		
-		tt .= "`n`nTo download new versions,`nuse the links in the About tab"
-		UpdateStatusInfo_TT := tt
-		
-		if (avail){
-			GuiControl,+Cred,UpdateStatus
-			GuiControl,,UpdateStatus, Available
-		} else if (bad == 0) {
-			GuiControl,+Cgreen,UpdateStatus
-			GuiControl,,UpdateStatus, Latest
-		} else {
+
+		; Show status
+		if (bad){
 			GuiControl,+Cblack,UpdateStatus
 			GuiControl,,UpdateStatus, Unknown
+		} else if (diffc > 0 || diffa > 0){
+			GuiControl,+Cblue,UpdateStatus
+			GuiControl,,UpdateStatus, Newer
+		} else if (diffc < 0 || diffa < 0){
+			GuiControl,+Cred,UpdateStatus
+			GuiControl,,UpdateStatus, Available
+		} else {
+			GuiControl,+Cgreen,UpdateStatus
+			GuiControl,,UpdateStatus, Latest
 		}
+
+		; Apply tooltip
+		UpdateStatusInfo_TT := tt
 
 		; Add Debug window controls
 		Gui, Tab
@@ -1327,6 +1333,98 @@ Class ADHDLib
 		DllCall("shell32\ShellExecute" (A_IsUnicode ? "":"A"),uint,0,str,"RunAs",str,(A_IsCompiled ? A_ScriptFullPath
 			: A_AhkPath),str,(A_IsCompiled ? "": """" . A_ScriptFullPath . """" . A_Space) params,str,A_WorkingDir,int,1)
 		ExitApp
+	}
+
+	; Semantic version comparison from http://www.autohotkey.com/board/topic/81789-semverahk-compare-version-numbers/
+	semver_validate(version){
+		return !!RegExMatch(version, "^(\d+)\.(\d+)\.(\d+)(\-([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?(\+([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?$")
+	}
+
+	semver_parts(version, byRef out_major, byRef out_minor, byRef out_patch, byRef out_prerelease, byRef out_build){
+		return !!RegExMatch(version, "^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\-(?P<prerelease>([0-9A-Za-z\-]+\.)*([0-9A-Za-z\-]+)))?(\+?(?P<build>([0-9A-Za-z\-]+\.)*([0-9A-Za-z\-]+)))?$", out_)
+	}
+
+	semver_compare(version1, version2){
+		if (!this.semver_parts(version1, maj1, min1, pat1, pre1, bld1))
+			throw Exception("Invalid version: " version1)
+		if (!this.semver_parts(version2, maj2, min2, pat2, pre2, bld2))
+			throw Exception("Invalid version: " version2)
+	 
+		for each, part in ["maj", "min", "pat"]
+		{
+			%part%1 += 0, %part%2 += 0
+			if (%part%1 < %part%2)
+				return -1
+			else if (%part%1 > %part%2)
+				return +1
+		}
+	 
+		for each, part in ["pre", "bld"] ; { "pre" : 1, "bld" : -1 }
+		{
+			if (%part%1 && %part%2)
+			{
+				StringSplit part1_, %part%1, .
+				StringSplit part2_, %part%2, .
+				Loop % part1_0 < part2_0 ? part1_0 : part2_0 ; use the smaller amount of parts
+				{
+					if part1_%A_Index% is digit
+					{
+						if part2_%A_Index% is digit ; both are numeric: compare numerically
+						{
+							part1_%A_Index% += 0, part2_%A_Index% += 0
+							if (part1_%A_Index% < part2_%A_Index%)
+								return -1
+							else if (part1_%A_Index% > part2_%A_Index%)
+								return +1
+							continue
+						}
+					}
+					; at least one is non-numeric: compare by characters
+					if (part1_%A_Index% < part2_%A_Index%)
+						return -1
+					else if (part1_%A_Index% > part2_%A_Index%)
+						return +1
+				}
+				; all compared parts were equal - the longer one wins
+				if (part1_0 < part2_0)
+					return -1
+				else if (part1_0 > part2_0)
+					return +1
+			}
+			else if (!%part%1 && %part%2) ; only version2 has prerelease -> version1 is higher
+				return (part == "pre") ? +1 : -1
+			else if (!%part%2 && %part%1) ; only version1 has prerelease -> it is smaller
+				return (part == "pre") ? -1 : +1
+		}
+		return 0
+	}
+
+	; pad version numbers to have 3 numbers (x.y.z) at a minimum.
+	pad_version(ver){
+		stringsplit, ver, ver,.
+
+		if (ver0 < 3){
+			ctr := 3-ver0
+			Loop, %ctr% {
+				ver .= ".0"
+			}
+		}
+		return ver
+	}
+
+	; Create tooltips for core script and author script versions
+	version_tooltip_create(diff,rem,loc){
+		tt := ""
+
+		if (diff == 0){
+			tt .= "Same (" loc ")"
+		} else if (diff > 0){
+			tt .= "Newer (" rem ", you have " loc ")"
+		} else {
+			tt .= "Older (" rem ", you have " loc ")"
+		}
+
+		return tt
 	}
 }
 
