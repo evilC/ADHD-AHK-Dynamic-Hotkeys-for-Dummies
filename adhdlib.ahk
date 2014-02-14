@@ -746,6 +746,7 @@ Class ADHDLib
 		return name
 	}
 
+	; Deletes a profile
 	delete_profile(name, gotoprofile = "Default"){
 		Global adhd_current_profile
 		
@@ -782,15 +783,13 @@ Class ADHDLib
 		return
 	}
 
+	; Copies a profile
 	duplicate_profile(name){
 		global adhd_current_profile
 		
-		prompted := 0
-
 		Loop, {
 			; Blank name specified - prompt for name
 			if (name == ""){
-				prompted := 1
 				InputBox, name, Profile Name, Please enter a profile name,,,,,,,,%adhd_current_profile%
 				if (ErrorLevel){
 					return
@@ -799,12 +798,8 @@ Class ADHDLib
 			if (this.profile_unique(name)){
 				break
 			} else {
-				;if (prompted) {
-					msgbox Duplicate names are not allowed, please re-enter name.
-					name := ""
-				;} else {
-				;	return
-				;}
+				msgbox Duplicate names are not allowed, please re-enter name.
+				name := ""
 			}
 		}
 		; Create the new item in the profile list
@@ -836,6 +831,7 @@ Class ADHDLib
 		return name
 	}
 
+	; Renames a profile
 	rename_profile(){
 		old_prof := this.current_profile
 		if (this.current_profile != "Default"){
@@ -861,7 +857,7 @@ Class ADHDLib
 		return
 	}
 
-
+	; Checks if a profile name is unique
 	profile_unique(name){
 		tmp := this.profile_list
 		Loop, parse, tmp, |
