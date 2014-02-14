@@ -712,10 +712,18 @@ Class ADHDLib
 	add_profile(name){
 		global adhd_current_profile
 		
-		if (name == ""){
-			InputBox, name, Profile Name, Please enter a profile name
-			if (ErrorLevel){
-				return
+		Loop, {
+			if (name == ""){
+				InputBox, name, Profile Name, Please enter a profile name
+				if (ErrorLevel){
+					return
+				}
+			}
+			if (this.profile_unique(name)){
+				break
+			} else {
+				msgbox Duplicate names are not allowed, please re-enter name.
+				name := ""
 			}
 		}
 		if (this.profile_list == ""){
@@ -734,6 +742,8 @@ Class ADHDLib
 		; Call profile load on a nonexistant profile to force settings to defaults and reset UI
 		this.profile_changed()
 		; No need to save - profile is default options
+
+		return name
 	}
 
 	delete_profile(name, gotoprofile = "Default"){
@@ -775,15 +785,28 @@ Class ADHDLib
 	duplicate_profile(name){
 		global adhd_current_profile
 		
-		; Blank name specified - prompt for name
-		if (name == ""){
-			InputBox, name, Profile Name, Please enter a profile name,,,,,,,,%adhd_current_profile%
-			if (ErrorLevel){
-				return
+		prompted := 0
+
+		Loop, {
+			; Blank name specified - prompt for name
+			if (name == ""){
+				prompted := 1
+				InputBox, name, Profile Name, Please enter a profile name,,,,,,,,%adhd_current_profile%
+				if (ErrorLevel){
+					return
+				}
+			}
+			if (this.profile_unique(name)){
+				break
+			} else {
+				;if (prompted) {
+					msgbox Duplicate names are not allowed, please re-enter name.
+					name := ""
+				;} else {
+				;	return
+				;}
 			}
 		}
-		; ToDo: Duplicate - should just need to be able to change current name and save?
-		
 		; Create the new item in the profile list
 		if (this.profile_list == ""){
 			this.profile_list := name
@@ -810,19 +833,44 @@ Class ADHDLib
 		; Fire profile changed to update current profile in ini
 		this.profile_changed()
 
-		return
+		return name
 	}
 
 	rename_profile(){
+		old_prof := this.current_profile
 		if (this.current_profile != "Default"){
-			old_prof := this.current_profile
-			InputBox, new_prof, Profile Name, Please enter a new name,,,,,,,,%old_prof%
-			if (!ErrorLevel){
-				this.duplicate_profile(new_prof)
+			Loop {
+				InputBox, new_prof, Profile Name, Please enter a new name,,,,,,,,%old_prof%
+				if (ErrorLevel){
+					return
+				}
+				if (this.current_profile == name){
+					msgbox Please enter a different name.
+					return
+				}
+				if (this.profile_unique(name)){
+					break
+				} else {
+					msgbox Duplicate names are not allowed, please re-enter name.
+				}
+			}
+			if (this.duplicate_profile(new_prof) != ""){
 				this.delete_profile(old_prof,new_prof)
 			}
 		}
 		return
+	}
+
+
+	profile_unique(name){
+		tmp := this.profile_list
+		Loop, parse, tmp, |
+		{
+			if (A_LoopField == name){
+				return 0
+			}
+		}
+		return 1
 	}
 
 	; End profile management
