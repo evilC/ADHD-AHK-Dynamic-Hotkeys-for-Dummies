@@ -5,6 +5,8 @@ Key:
 + : Added feature
 
 3.0
+= Arm lock toggle "L" setting changed to lowercase - "l".
+  The uppercase L setting was also holding shift.
 = Fixed startup so firectrl_init only runs once.
 + Added groupmode()
 + Added reset()
