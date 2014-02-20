@@ -3,13 +3,15 @@
 /*
 
 ToDo:
-* Joystick buttons plus modifiers does not work - triggers without modifier.
-  Probably requires detecting joystick with GetKeyState loop.
+* AHK hotkey command does not support Joystick buttons plus modifiers - triggers without modifier.
+  Solution probably requires detecting joystick with GetKeyState loop.
   GetKeyState would be required to support up events anyway.
 * Joystick POV support
   Again, GetKeyState loop would fix
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
+
+Known issues:
 
 */
 
@@ -173,7 +175,7 @@ Bind(){
 			} else {
 				tmp := instr(HKFound,"NUMPAD")
 				if (tmp){
-					outstring := "NUMPAD " substr(HKFound,7)
+					outstring .= "NUMPAD " substr(HKFound,7)
 				} else {
 					outstring .= HKFound
 				}
