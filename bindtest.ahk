@@ -10,6 +10,8 @@ ToDo:
   Again, GetKeyState loop would fix
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
+* Expand to multiple hotkeys (two as an example)
+* Basic INI file support
 
 Known issues:
 
@@ -33,8 +35,12 @@ EXTRA_KEY_LIST .= "{NumpadMult}{NumpadAdd}{NumpadSub}{NumpadDiv}{NumpadEnter}"
 ;EXTRA_KEY_LIST .= "{Numlock}"
 EXTRA_KEY_LIST .= "{Capslock}"
 ;EXTRA_KEY_LIST .= "{PrintScreen}"
-; Special Keys
-EXTRA_KEY_LIST .= "{Media_Play_Pause}"
+; Browser keys
+EXTRA_KEY_LIST .= "{Browser_Back}{Browser_Forward}{Browser_Refresh}{Browser_Stop}{Browser_Search}{Browser_Favorites}{Browser_Home}"
+; Media keys
+EXTRA_KEY_LIST .= "{Volume_Mute}{Volume_Down}{Volume_Up}{Media_Next}{Media_Prev}{Media_Stop}{Media_Play_Pause}"
+; App Keys
+EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 
 ModifierState := {}
 HKLast := ""
