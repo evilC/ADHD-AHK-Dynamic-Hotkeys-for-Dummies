@@ -53,42 +53,55 @@ Bind(){
 	if (found){
 		outstring := ""
 		outhk := ""
-		; List modifiers in a specific order
-		modifiers := ["ctrl","alt","shift","win"]
+		if (ModifierCount()){
+			; List modifiers in a specific order
+			modifiers := ["ctrl","alt","shift","win"]
 
-		Loop, 4 {
-			key := modifiers[A_Index]
-			value := ModifierState[modifiers[A_Index]]
-			if (value){
-				if (outstring != ""){
-					outstring .= " + "
-				}
-				stringupper, tmp, key
-				outstring .= tmp
+			Loop, 4 {
+				key := modifiers[A_Index]
+				value := ModifierState[modifiers[A_Index]]
+				if (value){
+					if (outstring != ""){
+						outstring .= " + "
+					}
+					stringupper, tmp, key
+					outstring .= tmp
 
-				if (key == "ctrl"){
-					outhk .= "^"
-				} else if (key == "alt"){
-					outhk .= "!"
-				} else if (key == "shift"){
-					outhk .= "+"
-				} else if (key == "win"){
-					outhk .= "#"
+					if (key == "ctrl"){
+						outhk .= "^"
+					} else if (key == "alt"){
+						outhk .= "!"
+					} else if (key == "shift"){
+						outhk .= "+"
+					} else if (key == "win"){
+						outhk .= "#"
+					}
 				}
 			}
+			if (outstring != ""){
+				outstring .= " + "
+			}
+			outhk .= found
+			StringUpper, found, found
+			outstring .= found
+		} else {
+			StringUpper, found, found
+			mod := substr(found,2)
+			pref := substr(found,1,1)
+			if (pref == "L"){
+				pref := "LEFT"
+			} else if (pref == "R"){
+				pref := "RIGHT"
+			}
+			outstring := pref " " mod
+			outhk := found
 		}
-		if (outstring != ""){
-			outstring .= " + "
-		}
-		outhk .= found
-		StringUpper, found, found
-		outstring .= found
 
 		if (lasthk != ""){
 			hotkey, ~*%lasthk%, Off
 		}
 		lasthk := outhk
-		hotkey, ~*%lasthk%, DoHotkey
+		hotkey, ~*%outhk%, DoHotkey
 
 		GuiControl,, HotkeyName, %outstring%
 		;msgbox % "Hotkey Detected.`n`nHuman-Readable: " outstring "`nAHK Hotkey string: " outhk
