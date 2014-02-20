@@ -9,19 +9,33 @@ ToDo:
 * Joystick POV support
   Again, GetKeyState loop would fix
 * Allow adding to EXTRA_KEY_LIST by users
+* Hold Escape to clear binding?
 
 */
 
 #InstallKeybdHook
 #InstallMouseHook
 
-EXTRA_KEY_LIST := "{Esc}{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BS}{Capslock}{Numlock}{PrintScreen}{Pause}{Media_Play_Pause}"
-
-SingleKey := ""
+; Build list of "End Keys" for Input command
+EXTRA_KEY_LIST := "{Escape}"	; DO NOT REMOVE! - Used to quit binding
+; Standard non-printables
+EXTRA_KEY_LIST .= "{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}"
+EXTRA_KEY_LIST .= "{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BackSpace}{Pause}"
+; Numpad - Numlock ON
+EXTRA_KEY_LIST .= "{Numpad0}{Numpad1}{Numpad2}{Numpad3}{Numpad4}{Numpad5}{Numpad6}{Numpad7}{Numpad8}{Numpad9}{NumpadDot}{NumpadMult}{NumpadAdd}{NumpadSub}"
+; Numpad - Numlock OFF
+EXTRA_KEY_LIST .= "{NumpadIns}{NumpadEnd}{NumpadDown}{NumpadPgDn}{NumpadLeft}{NumpadClear}{NumpadRight}{NumpadHome}{NumpadUp}{NumpadPgUp}{NumpadDel}"
+; Numpad - Common
+EXTRA_KEY_LIST .= "{NumpadMult}{NumpadAdd}{NumpadSub}{NumpadDiv}{NumpadEnter}"
+; Stuff we may or may not want to trap
+;EXTRA_KEY_LIST .= "{Numlock}"
+EXTRA_KEY_LIST .= "{Capslock}"
+;EXTRA_KEY_LIST .= "{PrintScreen}"
+; Special Keys
+EXTRA_KEY_LIST .= "{Media_Play_Pause}"
 
 ModifierState := {}
 HKLast := ""
-
 HKJoystick := 0
 HKModifier := 0
 
@@ -30,12 +44,11 @@ Gui, Add, Button, gBind yp-1 xp+260, Set Hotkey
 Gui, Show, Center w350 h50, Keybind Test
 return
 
+; Detects a pressed key combination
 Bind:
 	Bind()
 	return
 
-
-; Detects a pressed key combination
 Bind(){
 	global ModifierState
 	global BindMode
@@ -158,7 +171,12 @@ Bind(){
 				button := substr(HKFound,5)
 				outstring .= "JOYSTICK " id " BTN " button
 			} else {
-				outstring .= HKFound
+				tmp := instr(HKFound,"NUMPAD")
+				if (tmp){
+					outstring := "NUMPAD " substr(HKFound,7)
+				} else {
+					outstring .= HKFound
+				}
 			}
 		}
 
