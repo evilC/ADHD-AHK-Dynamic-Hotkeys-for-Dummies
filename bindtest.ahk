@@ -177,6 +177,8 @@ Bind(){
 				if (tmp){
 					outstring .= "NUMPAD " substr(HKFound,7)
 				} else {
+					; Replace underscores with spaces
+					StringReplace, HKFound, HKFound, _ , %A_SPACE%, All
 					outstring .= HKFound
 				}
 			}
