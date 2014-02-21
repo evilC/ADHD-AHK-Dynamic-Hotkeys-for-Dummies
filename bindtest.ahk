@@ -12,6 +12,10 @@ ToDo:
 * Hold Escape to clear binding?
 * Encapsulate into Object
 * Do not allow duplicate hotkeys
+* Warn of binding left or right mouse button without modifiers
+* Pass-through / remap (~ prefix) option
+* Explicit or relaxed (* prefix) option
+* Warn of no up event for wheel up? Optional parameter for detect routine to allow allow keys with keyup event?
 
 Known issues:
 
