@@ -11,7 +11,6 @@ ToDo:
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
 * Expand to multiple hotkeys (two as an example)
-* Basic INI file support - persistent bindings
 
 Known issues:
 
@@ -43,9 +42,9 @@ EXTRA_KEY_LIST .= "{Volume_Mute}{Volume_Down}{Volume_Up}{Media_Next}{Media_Prev}
 EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 
 ModifierState := {}
-HKLast := ""
-HKJoystick := 0
-HKModifier := 0
+HKLast := ""		; Holds the last detected hotkey
+HKJoystick := 0		; Set to 1 if the last detected bind was a Joystick button
+HKModifier := 0		; Set to 1 if the last detected bind was a "Solitary Modifier" (A Modifier on it's own)
 ININame := BuildIniName()
 
 ; Create the GUI
@@ -136,89 +135,24 @@ Bind(){
 	}
 
 	if (HKFound){
-		msgbox % hkfound
 		; Escape was not pressed
-		StringUpper, HKFound, HKFound
-		outstring := ""
-		outhk := ""
-
-		if (HKModifier){
-			; Solitary modifier key used (eg Left / Right Alt)
-			mod := substr(HKFound,2)
-			pref := substr(HKFound,1,1)
-			if (pref == "L"){
-				pref := "LEFT"
-			} else if (pref == "R"){
-				pref := "RIGHT"
-			}
-			outstring := pref " " mod
-			outhk := HKFound
-		} else {
-			if (modct){
-				; Modifiers used in combination with something else - List modifiers in a specific order
-				modifiers := ["CTRL","ALT","SHIFT","WIN"]
-
-				Loop, 4 {
-					key := modifiers[A_Index]
-					value := ModifierState[modifiers[A_Index]]
-					if (value){
-						if (outstring != ""){
-							outstring .= " + "
-						}
-						stringupper, tmp, key
-						outstring .= tmp
-
-						if (key == "CTRL"){
-							outhk .= "^"
-						} else if (key == "ALT"){
-							outhk .= "!"
-						} else if (key == "SHIFT"){
-							outhk .= "+"
-						} else if (key == "WIN"){
-							outhk .= "#"
-						}
-					}
-				}
-				if (outstring != ""){
-					outstring .= " + "
-				}
-			}
-			; Modifiers etc processed, complete the strings
-			outhk .= HKFound
-			if (HKJoystick){
-				pos := instr(HKFound,"JOY")
-				id := substr(HKFound,1,pos-1)
-				button := substr(HKFound,5)
-				outstring .= "JOYSTICK " id " BTN " button
-			} else {
-				tmp := instr(HKFound,"NUMPAD")
-				if (tmp){
-					outstring .= "NUMPAD " substr(HKFound,7)
-				} else {
-					; Replace underscores with spaces
-					StringReplace, HKFound, HKFound, _ , %A_SPACE%, All
-					outstring .= HKFound
-				}
-			}
-		}
+		outhk := BuildHotkeyString()
 
 		; Store the hotkey so it can be disabled later
 		HKLast := outhk
 
 		; Enable the hotkeys
 		EnableHotkeys()
+
+		; Write settings to INI file
 		SaveSettings()
 
 		; Update the GUI control
-		;GuiControl,, HotkeyName, %outstring%
-
-		outstring := HotkeyToHumanReadable(HKLast,0)
-		GuiControl,, HotkeyName, %outstring%
+		val := BuildHotkeyName(HKLast,0)
+		GuiControl,, HotkeyName, %val%
 	} else {
-		; Escape was pressed - resotre original hotkey
-		if (HKLast != ""){
-			EnableHotkeys()
-		}
+		; Escape was pressed - resotre original hotkey, if any
+		EnableHotkeys()
 	}
 	return
 }
@@ -227,7 +161,9 @@ Bind(){
 EnableHotkeys(){
 	global HKLast
 
-	hotkey, ~*%HKLast%, DoHotkey, ON
+	if (HKLast != ""){
+		hotkey, ~*%HKLast%, DoHotkey, ON
+	}
 }
 
 ; Disables User-Defined Hotkeys
@@ -256,12 +192,57 @@ LoadSettings(){
 	if (tmp != "ERROR"){
 		HKLast := tmp
 
-		tmp := HotkeyToHumanReadable(HKLast,0)
+		tmp := BuildHotkeyName(HKLast,0)
 		GuiControl,, HotkeyName, %tmp%
 	}
 }
 
-HotkeyToHumanReadable(hk,joy){
+; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
+BuildHotkeyString(){
+	global HKFound
+	global HKModifier
+	global ModifierState
+
+		;StringUpper, HKFound, HKFound
+		outhk := ""
+		modct := ModifierCount()
+
+		if (HKModifier){
+			; Solitary modifier key used (eg Left / Right Alt)
+			outhk := HKFound
+		} else {
+			if (modct){
+				; Modifiers used in combination with something else - List modifiers in a specific order
+				modifiers := ["CTRL","ALT","SHIFT","WIN"]
+
+				Loop, 4 {
+					key := modifiers[A_Index]
+					value := ModifierState[modifiers[A_Index]]
+					if (value){
+						;stringupper, tmp, key
+
+						if (key == "CTRL"){
+							outhk .= "^"
+						} else if (key == "ALT"){
+							outhk .= "!"
+						} else if (key == "SHIFT"){
+							outhk .= "+"
+						} else if (key == "WIN"){
+							outhk .= "#"
+						}
+					}
+				}
+			}
+			; Modifiers etc processed, complete the strings
+			outhk .= HKFound
+		}
+
+		; Store the hotkey so it can be disabled later
+		return outhk
+}
+
+; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
+BuildHotkeyName(hk,joy){
 	global HKJoystick
 
 	outstr := ""
