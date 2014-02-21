@@ -14,7 +14,6 @@ ToDo:
 * Remove so much use of global vars.
 
 Known issues:
-* After making a joystick binding, subsequent binds put something bad in the name box
 
 */
 
@@ -185,7 +184,7 @@ SaveSettings(){
 	global HKJoystick
 
 	iniwrite, %HKLast%, %ININame%, Hotkeys, hk_1
-	iniwrite, HKJoystick, %ININame%, Hotkeys, hk_1_j
+	iniwrite, %HKJoystick%, %ININame%, Hotkeys, hk_1_j
 }
 
 ; Read settings from the INI
