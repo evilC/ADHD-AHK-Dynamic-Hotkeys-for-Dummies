@@ -11,8 +11,10 @@ ToDo:
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
 * Expand to multiple hotkeys (two as an example)
+* Remove so much use of global vars.
 
 Known issues:
+* After making a joystick binding, subsequent binds put something bad in the name box
 
 */
 
@@ -148,8 +150,9 @@ Bind(){
 		SaveSettings()
 
 		; Update the GUI control
-		val := BuildHotkeyName(HKLast,HKJoystick)
-		GuiControl,, HotkeyName, %val%
+		;val := BuildHotkeyName(HKLast,HKJoystick)
+		;GuiControl,, HotkeyName, %val%
+		LoadSettings()
 	} else {
 		; Escape was pressed - resotre original hotkey, if any
 		EnableHotkeys()
@@ -182,9 +185,7 @@ SaveSettings(){
 	global HKJoystick
 
 	iniwrite, %HKLast%, %ININame%, Hotkeys, hk_1
-	if (HKJoystick){
-		iniwrite, 1, %ININame%, Hotkeys, hk_1_j
-	}
+	iniwrite, HKJoystick, %ININame%, Hotkeys, hk_1_j
 }
 
 ; Read settings from the INI
@@ -199,13 +200,14 @@ LoadSettings(){
 
 		tmp := BuildHotkeyName(HKLast,0)
 		GuiControl,, HotkeyName, %tmp%
-	}
-	IniRead, tmp, %ININame% , Hotkeys, hk_1_j, 0
-	if (tmp != "ERROR"){
-		HKJoystick := tmp
 
-		tmp := BuildHotkeyName(HKLast,HKJoystick)
-		GuiControl,, HotkeyName, %tmp%
+		IniRead, tmp, %ININame% , Hotkeys, hk_1_j, 0
+		if (tmp != "ERROR"){
+			HKJoystick := tmp
+
+			tmp := BuildHotkeyName(HKLast,HKJoystick)
+			GuiControl,, HotkeyName, %tmp%
+		}
 	}
 }
 
@@ -255,8 +257,6 @@ BuildHotkeyString(){
 
 ; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
 BuildHotkeyName(hk,joy){
-	global HKJoystick
-
 	outstr := ""
 	modctr := 0
 	stringupper, hk, hk
