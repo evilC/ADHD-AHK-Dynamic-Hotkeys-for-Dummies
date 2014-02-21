@@ -53,15 +53,15 @@ HotkeyList := []
 NumHotkeys := 2
 
 ; Create the GUI
-Gui Add, Text,, Blah
+Gui Add, Text,, This demo allows you to bind up to %NumHotkeys% Hotkeys and test them.
 
-Gui, Add, Edit, Disabled vHotkeyName1 w250 x5 yp+25, None
-Gui, Add, Button, gBind vBind1 yp-1 xp+260, Set Hotkey
+Loop % NumHotkeys {
+	Gui, Add, Edit, Disabled vHotkeyName%A_Index% w260 x5 yp+30, None
+	Gui, Add, Button, gBind vBind%A_Index% yp-1 xp+270, Set Hotkey
+}
 
-Gui, Add, Edit, Disabled vHotkeyName2 w250 x5 yp+30, None
-Gui, Add, Button, gBind vBind2 yp-1 xp+260, Set Hotkey
-
-Gui, Show, Center w350 h90 x0 y0, Keybind Test
+height := (NumHotkeys * 30) + 30
+Gui, Show, Center w350 h%height% x0 y0, Keybind Test
 
 ; Set GUI State
 LoadSettings()
