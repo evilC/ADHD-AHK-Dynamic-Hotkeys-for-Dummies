@@ -44,11 +44,16 @@ EXTRA_KEY_LIST .= "{Volume_Mute}{Volume_Down}{Volume_Up}{Media_Next}{Media_Prev}
 EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 
 ; Detection vars
-ModifierState := {}	; The state of the modifiers at the end of the last detection sequence
+ModifierState := {}			; The state of the modifiers at the end of the last detection sequence
+HKControlType := 0			; The kind of control that the last hotkey was. 0 = regular key, 1 = mouse, 2 = joystick
+HKSecondaryInput := ""		; Set to button pressed if the last detected bind was a Mouse or Joystick button
+HKSolitaryModifier := 0		; Set to modifier pressed if the last detected bind was a "Solitary Modifier" (A Modifier on it's own)
+
+; To be removed
 HKLast := ""		; Holds the last detected hotkey
 HKMouse := 0		; Set to button pressed if the last detected bind was a Mouse button
 HKJoystick := 0		; Set to button pressed if the last detected bind was a Joystick button
-HKModifier := 0		; Set to modifier pressed if the last detected bind was a "Solitary Modifier" (A Modifier on it's own)
+
 
 ; Misc vars
 ININame := BuildIniName()
@@ -83,15 +88,19 @@ Bind(){
 	global ModifierState
 	global BindMode
 	global EXTRA_KEY_LIST
+	global HKSolitaryModifier
+	global HKControlType
+	global HKSecondaryInput
+
 	global HKLast
 	global HKFound
-	global HKModifier
 	global HKMouse
 	global HKJoystick
 
 	; init vars
 	HKFound := 0
-	HKModifier := 0
+	HKSolitaryModifier := 0
+	HKControlType := 0
 	HKMouse := 0
 	HKJoystick := 0
 	ModifierState := {ctrl: 0, alt: 0, shift: 0, win: 0}
@@ -127,13 +136,11 @@ Bind(){
 			HKFound := tmp
 			if (tmp == "Escape"){
 				; Detection ended by Escape
-				if (HKModifier){
+				if (HKSolitaryModifier){
 					; The Escape key was sent by a Solitary Modifier being released - set the Found key to the modifier
-					HKFound := HKModifier
-				} else if (HKMouse){
-					HKFound := HKMouse
-				} else if (HKJoystick){
-					HKFound := HKJoystick
+					HKFound := HKSolitaryModifier
+				} else if (HKControlType){
+					HKFound := HKSecondaryInput
 				}
 			}
 		}
@@ -235,14 +242,14 @@ LoadSettings(){
 ; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
 BuildHotkeyString(){
 	global HKFound
-	global HKModifier
+	global HKSolitaryModifier
 	global ModifierState
 
 		;StringUpper, HKFound, HKFound
 		outhk := ""
 		modct := ModifierCount()
 
-		if (HKModifier){
+		if (HKSolitaryModifier){
 			; Solitary modifier key used (eg Left / Right Alt)
 			outhk := HKFound
 		} else {
@@ -370,7 +377,7 @@ DoHotkey:
 			; If ModifierCount is 1 when an up is received, then that is a Solitary Modifier
 			; It cannot be a modifier + normal key, as this code would have quit on keydown of normal key
 
-			HKModifier := mod
+			HKSolitaryModifier := mod
 
 			; Send Escape - This will cause the Input command to quit with an EndKey of Escape
 			; But we stored the modifier key, so we will know it was not really escape
@@ -388,7 +395,8 @@ DoHotkey:
 	wheeldown::
 	wheelleft::
 	wheelright::
-		HKMouse := A_ThisHotkey
+		HKControlType := 1
+		HKSecondaryInput := A_ThisHotkey
 		;HKFound := A_ThisHotkey
 		Send {Escape}
 		return
@@ -398,7 +406,8 @@ DoHotkey:
 JoystickPressed:
 	;HKJoystick := 1
 	;HKFound := A_ThisHotkey
-	HKJoystick := A_ThisHotkey
+	HKControlType := 2
+	HKSecondaryInput := A_ThisHotkey
 	Send {Escape}
 	return
 
