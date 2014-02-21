@@ -382,6 +382,7 @@ BuildHotkeyName(hk,ctrltype){
 
 ; Detects Modifiers and Mouse Buttons in BindMode
 #If BindMode
+	; Detect key down of modifier keys
 	*lctrl::
 	*rctrl::
 	*lalt::
@@ -394,6 +395,7 @@ BuildHotkeyName(hk,ctrltype){
 		SetModifier(mod,1)
 		return
 
+	; Detect key up of modifier keys
 	*lctrl up::
 	*rctrl up::
 	*lalt up::
@@ -402,6 +404,7 @@ BuildHotkeyName(hk,ctrltype){
 	*rshift up::
 	*lwin up::
 	*rwin up::
+		; Strip * from beginning, " up" from end etc
 		mod := substr(substr(A_ThisHotkey,2),1,strlen(A_ThisHotkey) -4)
 		if (CurrentModifierCount() == 1){
 			; If CurrentModifierCount is 1 when an up is received, then that is a Solitary Modifier
@@ -417,6 +420,7 @@ BuildHotkeyName(hk,ctrltype){
 		SetModifier(mod,0)
 		return
 
+	; Detect Mouse buttons
 	lbutton::
 	rbutton::
 	mbutton::
