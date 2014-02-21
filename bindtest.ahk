@@ -11,7 +11,7 @@ ToDo:
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
 * Expand to multiple hotkeys (two as an example)
-* Basic INI file support
+* Basic INI file support - persistent bindings
 
 Known issues:
 
@@ -84,7 +84,11 @@ Bind(){
 	BindMode := 1
 
 	; Show the prompt
-	Gui, 2:Add, text, center, Please press the desired key combination.`n`n Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n`nHit Escape to cancel
+	prompt := "Please press the desired key combination.`n`n"
+	prompt .= "Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n"
+	prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
+	prompt .= "`nHit Escape to cancel"
+	Gui, 2:Add, text, center, %prompt%
 	Gui, 2:-Border +AlwaysOnTop
 	Gui, 2:Show
 
