@@ -148,7 +148,7 @@ Bind(){
 		SaveSettings()
 
 		; Update the GUI control
-		val := BuildHotkeyName(HKLast,0)
+		val := BuildHotkeyName(HKLast,HKJoystick)
 		GuiControl,, HotkeyName, %val%
 	} else {
 		; Escape was pressed - resotre original hotkey, if any
@@ -179,20 +179,32 @@ DisableHotkeys(){
 SaveSettings(){
 	global ININame
 	global HKLast
+	global HKJoystick
 
 	iniwrite, %HKLast%, %ININame%, Hotkeys, hk_1
+	if (HKJoystick){
+		iniwrite, 1, %ININame%, Hotkeys, hk_1_j
+	}
 }
 
 ; Read settings from the INI
 LoadSettings(){
 	global HKLast
 	global ININame
+	global HKJoystick
 
 	IniRead, tmp, %ININame% , Hotkeys, hk_1,
 	if (tmp != "ERROR"){
 		HKLast := tmp
 
 		tmp := BuildHotkeyName(HKLast,0)
+		GuiControl,, HotkeyName, %tmp%
+	}
+	IniRead, tmp, %ININame% , Hotkeys, hk_1_j, 0
+	if (tmp != "ERROR"){
+		HKJoystick := tmp
+
+		tmp := BuildHotkeyName(HKLast,HKJoystick)
 		GuiControl,, HotkeyName, %tmp%
 	}
 }
