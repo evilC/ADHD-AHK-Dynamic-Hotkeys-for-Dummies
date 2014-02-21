@@ -53,7 +53,7 @@ HotkeyList := []
 NumHotkeys := 2
 
 ; Create the GUI
-Gui Add, Text,, This demo allows you to bind up to %NumHotkeys% Hotkeys and test them.
+Gui Add, Text,, This demo allows you to bind up to %NumHotkeys% Hotkeys and test them.`nHotkeys are remembered between runs.
 
 Loop % NumHotkeys {
 	Gui, Add, Edit, Disabled vHotkeyName%A_Index% w260 x5 yp+30, None
