@@ -42,16 +42,27 @@ EXTRA_KEY_LIST .= "{Volume_Mute}{Volume_Down}{Volume_Up}{Media_Next}{Media_Prev}
 ; App Keys
 EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 
-ModifierState := {}
+; Detection vars
+ModifierState := {}	; The state of the modifiers at the end of the last detection sequence
 HKLast := ""		; Holds the last detected hotkey
 HKJoystick := 0		; Set to 1 if the last detected bind was a Joystick button
 HKModifier := 0		; Set to 1 if the last detected bind was a "Solitary Modifier" (A Modifier on it's own)
+
+; Misc vars
 ININame := BuildIniName()
+HotkeyList := []
+NumHotkeys := 2
 
 ; Create the GUI
-Gui, Add, Edit, Disabled vHotkeyName w250, None
+Gui Add, Text,, Blah
+
+Gui, Add, Edit, Disabled vHotkeyName1 w250 x5 yp+25, None
 Gui, Add, Button, gBind yp-1 xp+260, Set Hotkey
-Gui, Show, Center w350 h50, Keybind Test
+
+Gui, Add, Edit, Disabled vHotkeyName2 w250 x5 yp+30, None
+Gui, Add, Button, gBind yp-1 xp+260, Set Hotkey
+
+Gui, Show, Center w350 h90 x0 y0, Keybind Test
 
 ; Set GUI State
 LoadSettings()
@@ -182,6 +193,7 @@ SaveSettings(){
 	global ININame
 	global HKLast
 	global HKJoystick
+	global NumHotkeys
 
 	iniwrite, %HKLast%, %ININame%, Hotkeys, hk_1
 	iniwrite, %HKJoystick%, %ININame%, Hotkeys, hk_1_j
@@ -192,20 +204,17 @@ LoadSettings(){
 	global HKLast
 	global ININame
 	global HKJoystick
+	global NumHotkeys
 
-	IniRead, tmp, %ININame% , Hotkeys, hk_1,
-	if (tmp != "ERROR"){
-		HKLast := tmp
-
-		tmp := BuildHotkeyName(HKLast,0)
-		GuiControl,, HotkeyName, %tmp%
-
-		IniRead, tmp, %ININame% , Hotkeys, hk_1_j, 0
-		if (tmp != "ERROR"){
-			HKJoystick := tmp
-
-			tmp := BuildHotkeyName(HKLast,HKJoystick)
-			GuiControl,, HotkeyName, %tmp%
+	Loop % NumHotkeys {
+		IniRead, val, %ININame% , Hotkeys, hk_%A_Index%,
+		if (val != "ERROR"){
+			IniRead, joy, %ININame% , Hotkeys, hk_%A_Index%_j, 0
+			if (joy == "ERROR"){
+				joy := 0
+			}
+			tmp := BuildHotkeyName(val,joy)
+			GuiControl,, HotkeyName%A_Index%, %tmp%
 		}
 	}
 }
