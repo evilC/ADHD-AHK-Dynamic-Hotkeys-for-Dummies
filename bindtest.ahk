@@ -50,7 +50,7 @@ HKSecondaryInput := ""	; Set to button pressed if the last detected bind was a M
 ; Misc vars
 ININame := BuildIniName()
 HotkeyList := []
-NumHotkeys := 2
+NumHotkeys := 3
 
 ; Create the GUI
 Gui Add, Text,, This demo allows you to bind up to %NumHotkeys% Hotkeys and test them.`nHotkeys are remembered between runs.
@@ -80,6 +80,11 @@ DoHotkey1:
 DoHotkey2:
 	soundbeep
 	msgbox You pressed Hotkey 2.
+	return
+
+DoHotkey3:
+	soundbeep
+	msgbox You pressed Hotkey 3.
 	return
 
 
@@ -456,7 +461,7 @@ JoystickDetection(mode := 1){
 
 ; A Joystick button was pressed while in Binding mode
 JoystickPressed:
-	HKControlType := 2
+	HKControlType := 3
 	HKSecondaryInput := A_ThisHotkey
 	Send {Escape}
 	return
