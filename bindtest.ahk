@@ -132,6 +132,8 @@ Bind(ctrlnum){
 			if (HKControlType > 0){
 				; The Escape key was sent because a special button was used
 				detectedkey := HKSecondaryInput
+			} else {
+				detectedkey := ""
 			}
 		}
 	}
