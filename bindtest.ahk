@@ -46,10 +46,19 @@ ModifierState := {}
 HKLast := ""
 HKJoystick := 0
 HKModifier := 0
+ININame := BuildIniName()
 
+; Create the GUI
 Gui, Add, Edit, Disabled vHotkeyName w250, None
 Gui, Add, Button, gBind yp-1 xp+260, Set Hotkey
 Gui, Show, Center w350 h50, Keybind Test
+
+; Set GUI State
+LoadSettings()
+
+; Enable defined hotkeys
+EnableHotkeys()
+
 return
 
 ; Detects a pressed key combination
@@ -72,10 +81,8 @@ Bind(){
 	HKJoystick := 0
 	ModifierState := {ctrl: 0, alt: 0, shift: 0, win: 0}
 
-	; Disable existing hotkey
-	if (HKLast != ""){
-		hotkey, ~*%HKLast%, , Off
-	}
+	; Disable existing hotkeys
+	DisableHotkeys()
 
 	; Enable Joystick detection hotkeys
 	JoystickDetection(1)
@@ -129,6 +136,7 @@ Bind(){
 	}
 
 	if (HKFound){
+		msgbox % hkfound
 		; Escape was not pressed
 		StringUpper, HKFound, HKFound
 		outstring := ""
@@ -197,18 +205,123 @@ Bind(){
 		; Store the hotkey so it can be disabled later
 		HKLast := outhk
 
-		; Enable the hotkey
-		hotkey, ~*%outhk%, DoHotkey, ON
+		; Enable the hotkeys
+		EnableHotkeys()
+		SaveSettings()
 
 		; Update the GUI control
+		;GuiControl,, HotkeyName, %outstring%
+
+		outstring := HotkeyToHumanReadable(HKLast,0)
 		GuiControl,, HotkeyName, %outstring%
 	} else {
 		; Escape was pressed - resotre original hotkey
 		if (HKLast != ""){
-			hotkey, ~*%HKLast%, DoHotkey, ON
+			EnableHotkeys()
 		}
 	}
 	return
+}
+
+; Enables User-Defined Hotkeys
+EnableHotkeys(){
+	global HKLast
+
+	hotkey, ~*%HKLast%, DoHotkey, ON
+}
+
+; Disables User-Defined Hotkeys
+DisableHotkeys(){
+	global HKLast
+
+	if (HKLast != ""){
+		hotkey, ~*%HKLast%, , Off
+	}
+}
+
+; Write settings to the INI
+SaveSettings(){
+	global ININame
+	global HKLast
+
+	iniwrite, %HKLast%, %ININame%, Hotkeys, hk_1
+}
+
+; Read settings from the INI
+LoadSettings(){
+	global HKLast
+	global ININame
+
+	IniRead, tmp, %ININame% , Hotkeys, hk_1,
+	if (tmp != "ERROR"){
+		HKLast := tmp
+
+		tmp := HotkeyToHumanReadable(HKLast,0)
+		GuiControl,, HotkeyName, %tmp%
+	}
+}
+
+HotkeyToHumanReadable(hk,joy){
+	global HKJoystick
+
+	outstr := ""
+	modctr := 0
+	stringupper, hk, hk
+
+	Loop % strlen(hk) {
+		chr := substr(hk,1,1)
+		mod := 0
+
+		if (chr == "^"){
+			; Ctrl
+			mod := "CTRL"
+			modctr++
+		} else if (chr == "!"){
+			; Alt
+			mod := "ALT"
+			modctr++
+		} else if (chr == "+"){
+			; Shift
+			mod := "SHIFT"
+			modctr++
+		} else if (chr == "#"){
+			; Win
+			mod := "WIN"
+			modctr++
+		} else {
+			break
+		}
+		if (mod){
+			if (modctr > 1){
+				outstr .= " + "
+			}
+			outstr .= mod
+			; shift character out
+			hk := substr(hk,2)
+		}
+	}
+	if (modctr){
+		outstr .= " + "
+	}
+
+	if (joy){
+		pos := instr(hk,"JOY")
+		id := substr(hk,1,pos-1)
+		button := substr(hk,5)
+		outstr .= "JOYSTICK " id " BTN " button
+	} else {
+		tmp := instr(hk,"NUMPAD")
+		if (tmp){
+			outstr .= "NUMPAD " substr(hk,7)
+		} else {
+			; Replace underscores with spaces
+			StringReplace, hk, hk, _ , %A_SPACE%, All
+			outstr .= hk
+		}
+	}
+
+
+	return outstr
 }
 
 ; Test that bound hotkeys work
@@ -303,4 +416,10 @@ JoystickDetection(mode := 1){
 			hotkey, %stickid%Joy%buttonid%, JoystickPressed, %mode%
 		}
 	}
+}
+
+BuildIniName(){
+	tmp := A_Scriptname
+	Stringsplit, tmp, tmp,.
+	return tmp1 ".ini"
 }
