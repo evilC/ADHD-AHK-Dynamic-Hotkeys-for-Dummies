@@ -64,10 +64,10 @@ NumHotkeys := 2
 Gui Add, Text,, Blah
 
 Gui, Add, Edit, Disabled vHotkeyName1 w250 x5 yp+25, None
-Gui, Add, Button, gBind yp-1 xp+260, Set Hotkey
+Gui, Add, Button, gBind vBind1 yp-1 xp+260, Set Hotkey
 
 Gui, Add, Edit, Disabled vHotkeyName2 w250 x5 yp+30, None
-Gui, Add, Button, gBind yp-1 xp+260, Set Hotkey
+Gui, Add, Button, gBind vBind2 yp-1 xp+260, Set Hotkey
 
 Gui, Show, Center w350 h90 x0 y0, Keybind Test
 
@@ -81,10 +81,10 @@ return
 
 ; Detects a pressed key combination
 Bind:
-	Bind()
+	Bind(substr(A_GuiControl,5))
 	return
 
-Bind(){
+Bind(ctrlnum){
 	global ModifierState
 	global BindMode
 	global EXTRA_KEY_LIST
@@ -96,6 +96,7 @@ Bind(){
 	global HKFound
 	global HKMouse
 	global HKJoystick
+	global HotkeyList
 
 	; init vars
 	HKFound := 0
@@ -126,7 +127,7 @@ Bind(){
 	;Loop {
 		; Use input box to detect normal (non-modifier) keyboard keys
 		;Input, SingleKey, L1 M T0.1, %EXTRA_KEY_LIST%
-		Input, SingleKey, L1 M T99999, %EXTRA_KEY_LIST%
+		Input, SingleKey, L1 M, %EXTRA_KEY_LIST%
 		if (ErrorLevel == "Max" ) {
 			; A normal key was pressed
 			HKFound := SingleKey
@@ -173,11 +174,14 @@ Bind(){
 		; Store the hotkey so it can be disabled later
 		HKLast := outhk
 
-		; Enable the hotkeys
-		EnableHotkeys()
+		; Update the hotkey object
+		HotkeyList[ctrlnum] := outhk
 
 		; Write settings to INI file
 		SaveSettings()
+
+		; Enable the hotkeys
+		EnableHotkeys()
 
 		; Update the GUI control
 		;val := BuildHotkeyName(HKLast,HKJoystick)
@@ -192,19 +196,25 @@ Bind(){
 
 ; Enables User-Defined Hotkeys
 EnableHotkeys(){
-	global HKLast
+	global HotkeyList
 
-	if (HKLast != ""){
-		hotkey, ~*%HKLast%, DoHotkey, ON
+	Loop % HotkeyList.MaxIndex(){
+		hk := HotkeyList[A_Index]
+		if (hk != ""){
+			hotkey, ~*%hk%, DoHotkey, ON
+		}
 	}
 }
 
 ; Disables User-Defined Hotkeys
 DisableHotkeys(){
-	global HKLast
+	global HotkeyList
 
-	if (HKLast != ""){
-		hotkey, ~*%HKLast%, , Off
+	Loop % HotkeyList.MaxIndex(){
+		hk := HotkeyList[A_Index]
+		if (hk != ""){
+			hotkey, ~*%hk%, DoHotkey, OFF
+		}
 	}
 }
 
@@ -214,9 +224,17 @@ SaveSettings(){
 	global HKLast
 	global HKJoystick
 	global NumHotkeys
+	global HotkeyList
 
-	iniwrite, %HKLast%, %ININame%, Hotkeys, hk_1
-	iniwrite, %HKJoystick%, %ININame%, Hotkeys, hk_1_j
+	;msgbox % HotkeyList[1] "," HotkeyList[2]
+	Loop % HotkeyList.MaxIndex(){
+		hk := HotkeyList[A_Index]
+		if (hk != ""){
+			iniwrite, %hk%, %ININame%, Hotkeys, hk_%A_Index%
+			;iniwrite, %HKJoystick%, %ININame%, Hotkeys, hk_1_j
+		}
+	}
+	return
 }
 
 ; Read settings from the INI
@@ -225,15 +243,18 @@ LoadSettings(){
 	global ININame
 	global HKJoystick
 	global NumHotkeys
+	global HotkeyList
 
 	Loop % NumHotkeys {
 		IniRead, val, %ININame% , Hotkeys, hk_%A_Index%,
 		if (val != "ERROR"){
-			IniRead, joy, %ININame% , Hotkeys, hk_%A_Index%_j, 0
-			if (joy == "ERROR"){
-				joy := 0
+			IniRead, ctrltype, %ININame% , Hotkeys, hk_%A_Index%_t, 0
+			if (ctrltype == "ERROR"){
+				ctrltype := 0
 			}
-			tmp := BuildHotkeyName(val,joy)
+			tmp := BuildHotkeyName(val,ctrltype)
+
+			HotkeyList[A_Index] := val
 			GuiControl,, HotkeyName%A_Index%, %tmp%
 		}
 	}
@@ -284,7 +305,7 @@ BuildHotkeyString(){
 }
 
 ; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
-BuildHotkeyName(hk,joy){
+BuildHotkeyName(hk,ctrltype){
 	outstr := ""
 	modctr := 0
 	stringupper, hk, hk
@@ -325,7 +346,11 @@ BuildHotkeyName(hk,joy){
 		outstr .= " + "
 	}
 
-	if (joy){
+	if (ctrltype == 1){
+		if (hk == "MBUTTON") {
+			outstr .= "MIDDLE MOUSE"
+		}
+	} else if (ctrltype == 2){
 		pos := instr(hk,"JOY")
 		id := substr(hk,1,pos-1)
 		button := substr(hk,5)
