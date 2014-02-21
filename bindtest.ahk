@@ -14,6 +14,7 @@ ToDo:
 * Remove so much use of global vars.
 
 Known issues:
+* Hotkeys broken on load
 
 */
 
@@ -45,8 +46,9 @@ EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 ; Detection vars
 ModifierState := {}	; The state of the modifiers at the end of the last detection sequence
 HKLast := ""		; Holds the last detected hotkey
-HKJoystick := 0		; Set to 1 if the last detected bind was a Joystick button
-HKModifier := 0		; Set to 1 if the last detected bind was a "Solitary Modifier" (A Modifier on it's own)
+HKMouse := 0		; Set to button pressed if the last detected bind was a Mouse button
+HKJoystick := 0		; Set to button pressed if the last detected bind was a Joystick button
+HKModifier := 0		; Set to modifier pressed if the last detected bind was a "Solitary Modifier" (A Modifier on it's own)
 
 ; Misc vars
 ININame := BuildIniName()
@@ -84,11 +86,13 @@ Bind(){
 	global HKLast
 	global HKFound
 	global HKModifier
+	global HKMouse
 	global HKJoystick
 
 	; init vars
 	HKFound := 0
 	HKModifier := 0
+	HKMouse := 0
 	HKJoystick := 0
 	ModifierState := {ctrl: 0, alt: 0, shift: 0, win: 0}
 
@@ -110,26 +114,35 @@ Bind(){
 	Gui, 2:-Border +AlwaysOnTop
 	Gui, 2:Show
 
-	Loop {
+	;Loop {
 		; Use input box to detect normal (non-modifier) keyboard keys
-		Input, SingleKey, L1 M T0.1, %EXTRA_KEY_LIST%
+		;Input, SingleKey, L1 M T0.1, %EXTRA_KEY_LIST%
+		Input, SingleKey, L1 M T99999, %EXTRA_KEY_LIST%
 		if (ErrorLevel == "Max" ) {
 			; A normal key was pressed
 			HKFound := SingleKey
 		} else if (substr(ErrorLevel,1,7) == "EndKey:"){
 			; A "Special" (Non-printable) key was pressed
 			tmp := substr(ErrorLevel,8)
-			if (tmp == "Escape"){
-				break
-			}
 			HKFound := tmp
+			if (tmp == "Escape"){
+				; Detection ended by Escape
+				if (HKModifier){
+					; The Escape key was sent by a Solitary Modifier being released - set the Found key to the modifier
+					HKFound := HKModifier
+				} else if (HKMouse){
+					HKFound := HKMouse
+				} else if (HKJoystick){
+					HKFound := HKJoystick
+				}
+			}
 		}
 
 		; We use HKFound to decide whether to break out of the loop, so modifier key, mouse and joystick detection can be detected elsewhere
-		if (HKFound){
-			break
-		}
-	}
+		;if (HKFound){
+		;	break
+		;}
+	;}
 	; Stop listening to mouse, keyboard etc
 	BindMode := 0
 	JoystickDetection(0)
@@ -353,12 +366,17 @@ DoHotkey:
 	*lwin up::
 	*rwin up::
 		mod := substr(substr(A_ThisHotkey,2),1,strlen(A_ThisHotkey) -4)
-		SetModifier(mod,0)
-		if (!ModifierCount()){
-			;if other modifiers still held, do not set HKFound
-			HKModifier := 1
-			HKFound := mod
+		if (ModifierCount() == 1){
+			; If ModifierCount is 1 when an up is received, then that is a Solitary Modifier
+			; It cannot be a modifier + normal key, as this code would have quit on keydown of normal key
+
+			HKModifier := mod
+
+			; Send Escape - This will cause the Input command to quit with an EndKey of Escape
+			; But we stored the modifier key, so we will know it was not really escape
+			Send {Escape}
 		}
+		SetModifier(mod,0)
 		return
 
 	lbutton::
@@ -370,14 +388,18 @@ DoHotkey:
 	wheeldown::
 	wheelleft::
 	wheelright::
-		HKFound := A_ThisHotkey
+		HKMouse := A_ThisHotkey
+		;HKFound := A_ThisHotkey
+		Send {Escape}
 		return
 #If
 
 ; A Joystick button was pressed while in Binding mode
 JoystickPressed:
-	HKJoystick := 1
-	HKFound := A_ThisHotkey
+	;HKJoystick := 1
+	;HKFound := A_ThisHotkey
+	HKJoystick := A_ThisHotkey
+	Send {Escape}
 	return
 
 ; Sets the state of the ModifierState object to reflect the state of the modifier keys
