@@ -3,23 +3,24 @@
 /*
 
 ToDo:
-* AHK hotkey command does not support Joystick buttons plus modifiers - triggers without modifier.
-  Solution probably requires detecting joystick with GetKeyState loop.
-  GetKeyState would be required to support up events anyway.
-* Joystick POV support
-  Again, GetKeyState loop would fix
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
 * Encapsulate into Object
 * Do not allow duplicate hotkeys
 * Warn of binding left or right mouse button without modifiers
-! Pass-through / remap (~ prefix) option.
+
+Back Burner:
+* Pass-through / remap (~ prefix) option.
   Problems due to AHK limitations - declaring:
   hotkey, ^a, mysub, ON
   hotkey, ^a, mysub, OFF
   hotkey, ~^a, mysub, ON
   ... Does NOT create a ~^a mapping, the mapping is still ^a
-* Explicit or relaxed (* prefix) option
+* AHK hotkey command does not support Joystick buttons plus modifiers - triggers without modifier.
+  Solution probably requires detecting joystick with GetKeyState loop.
+  GetKeyState would be required to support up events anyway.
+* Joystick POV support
+  Again, GetKeyState loop would fix
 * Warn of no up event for wheel up? Optional parameter for detect routine to allow allow keys with keyup event?
 
 Known issues:
