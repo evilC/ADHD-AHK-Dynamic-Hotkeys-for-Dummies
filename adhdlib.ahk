@@ -775,6 +775,7 @@ Class ADHDLib
 					detectedkey := ""
 					; Start listening to key up event for Escape, to see if it was held
 					this.HKLastHotkey := ctrlnum
+
 					hotkey, Escape up, ADHD_EscapeReleased, ON
 					SetTimer, ADHD_DeleteHotkey, 1000
 				}
@@ -1451,6 +1452,9 @@ Class ADHDLib
 					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
 					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
 				}
+
+				; Disable Limit Application for all subsequently declared hotkeys
+				Hotkey, IfWinActive
 				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 
 			}
