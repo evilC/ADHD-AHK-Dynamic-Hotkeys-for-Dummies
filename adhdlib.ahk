@@ -812,49 +812,47 @@ Class ADHDLib
 		}
 
 		if (detectedkey){
-			; Update the hotkey object
-			;outhk := this.BuildHotkeyString(detectedkey,this.HKControlType)
-			;tmp := {hk: outhk, type: this.HKControlType, status: 0}
-
-			;msgbox % outhk
-
 			clash := 0
-			/*
-			Loop % HotkeyList.MaxIndex(){
+			hk := this.BuildHotkeyString(detectedkey,this.HKControlType)
+			clash := 0
+			Loop % this.hotkey_list.MaxIndex(){
 				if (A_Index == ctrlnum){
 					continue
 				}
-				if (StripPrefix(HotkeyList[A_Index].hk) == StripPrefix(tmp.hk)){
+
+				name := this.hotkey_index_to_name(A_Index)
+				if (this.hotkey_mappings[name].modified != "" && this.StripPrefix(this.hotkey_mappings[name].modified) == this.StripPrefix(hk)){
 					clash := 1
 				}
 			}
 			if (clash){
 				msgbox You cannot bind the same hotkey to two different actions. Aborting...
 			} else {
-				HotkeyList[ctrlnum] := tmp
+				this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].modified := hk
+				this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].type := this.HKControlType
+	
 			}
-			*/
-			this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].modified := this.BuildHotkeyString(detectedkey,this.HKControlType)
-			this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].type := this.HKControlType
-			;GuiControl,, adhd_hk_hotkey_%ctrlnum%, %outhk%
 			; Rebuild rest of hotkey object, save settings etc
 			this.option_changed()
-			;OptionChanged()
-			; Write settings to INI file
-			;SaveSettings()
-
-			; Update the GUI control
-			;UpdateHotkeyControls()
-
-			; Enable the hotkeys
-			;EnableHotkeys()
-
 		} else {
 			; Escape was pressed - resotre original hotkey, if any
-			;EnableHotkeys()
+			this.enable_hotkeys()
 		}
 		return
 
+	}
+
+	; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
+	StripPrefix(hk){
+		Loop {
+			chr := substr(hk,1,1)
+			if (chr == "~" || chr == "*" || chr == "$"){
+				hk := substr(hk,2)
+			} else {
+				break
+			}
+		}
+		return hk
 	}
 
 	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
