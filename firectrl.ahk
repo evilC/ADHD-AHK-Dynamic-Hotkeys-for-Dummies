@@ -27,7 +27,7 @@ ADHD.config_about({name: "Fire Control", version: 3.0, author: "evilC", link: "<
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADHD.config_size(450,335)
+ADHD.config_size(450,320)
 
 ; Configure update notifications:
 ADHD.config_updates("http://evilc.com/files/ahk/mwo/firectrl/firectrl.au.txt")
@@ -75,7 +75,7 @@ Gui, Tab, 1
 ; Create normal label
 Gui, Add, Text, x5 y40, Fire Sequence
 ; Create Edit box that has state saved in INI
-ADHD.gui_add("Edit", "FireSequence", "xp+120 yp-2 W240", "", "")
+ADHD.gui_add("Edit", "FireSequence", "xp+120 yp-2 W300", "", "")
 ; Create tooltip by adding _TT to the end of the Variable Name of a control
 FireSequence_TT := "A comma separated list of keys to hit - eg 1,2,3,4"
 

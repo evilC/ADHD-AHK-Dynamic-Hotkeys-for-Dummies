@@ -38,8 +38,6 @@ Class ADHDLib
 		this.events.option_changed := ""
 		this.events.tab_changed := ""
 		this.events.on_exit := ""
-		this.events.program_mode_on := ""
-		this.events.program_mode_off := ""
 		this.events.disable_timers := ""
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
@@ -262,10 +260,6 @@ Class ADHDLib
 		; Launch window spy
 		Gui, Add, Button, xp+125 yp-1 W15 gadhd_show_window_spy, ?
 		adhd_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
-
-		; Program mode toggle
-		Gui, Add, Checkbox, x5 yp+30 vadhd_program_mode gadhd_program_mode_changed, Program Mode
-		adhd_program_mode_TT := "Turns on program mode and lets you program keys. Turn off again to enable hotkeys"
 
 		local nexttab := this.tab_list.MaxIndex() + 2
 		Gui, Tab, %nexttab%
@@ -646,7 +640,6 @@ Class ADHDLib
 		adhd_debug_window := this.read_ini("adhd_debug_window","Settings",0)
 		GuiControl,, adhd_debug_window, %adhd_debug_window%
 
-		;this.program_mode_changed()
 		this.enable_hotkeys()
 		
 		; Fire the Author hook
@@ -1212,26 +1205,11 @@ Class ADHDLib
 	}
 
 	tab_changed(){
-		global adhd_program_mode
-		
-		; If in program mode on tab change, disable program mode
-		if (adhd_program_mode == 1){
-			GuiControl,,adhd_program_mode,0
-			this.program_mode_changed()
-		}
 		Gui, Submit, NoHide
 		this.fire_event(this.events.tab_changed)
 		return
 	}
 
-	/*
-	get_program_mode(){
-		global adhd_program_mode
-		
-		return adhd_program_mode
-	}
-	*/
-	
 	; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
 	control_name_to_set_method(name){
 		if (name == "DropDownList"){
@@ -1343,35 +1321,6 @@ Class ADHDLib
 		global adhd_log_contents
 		adhd_log_contents := ""
 		GuiControl,,adhd_log_contents,%adhd_log_contents%
-	}
-
-	; Program mode stuff
-	program_mode_changed(){
-		global adhd_limit_application
-		global adhd_limit_application_on
-		global adhd_program_mode
-		
-		this.debug("program_mode_changed")
-		Gui, Submit, NoHide
-		
-		if (adhd_program_mode == 1){
-			this.debug("Entering Program Mode")
-			; Enable controls, stop hotkeys, kill timers
-			this.disable_hotkeys(0)
-			this.disable_heartbeat()
-			GuiControl, enable, adhd_limit_application
-			GuiControl, enable, adhd_limit_application_on
-			this.fire_event(this.events.program_mode_on)
-		} else {
-			; Disable controls, start hotkeys, start heartbeat timer
-			this.debug("Exiting Program Mode")
-			this.enable_hotkeys()
-			this.enable_heartbeat()
-			GuiControl, disable, adhd_limit_application
-			GuiControl, disable, adhd_limit_application_on
-			this.fire_event(this.events.program_mode_off)
-		}
-		return
 	}
 
 	; App detection stuff
@@ -1814,22 +1763,6 @@ adhd_tab_changed:
 	ADHD.tab_changed()
 	return
 
-adhd_key_changed:
-	ADHD.key_changed(A_GuiControl)
-	return
-
-adhd_mouse_changed:
-	ADHD.mouse_changed()
-	return
-
-adhd_enable_hotkeys:
-	ADHD.enable_hotkeys()
-	return
-
-adhd_disable_hotkeys:
-	ADHD.disable_hotkeys(0)
-	return
-
 adhd_show_window_spy:
 	ADHD.show_window_spy()
 	return
@@ -1846,10 +1779,6 @@ adhd_clear_log:
 	ADHD.clear_log()
 	return
 
-adhd_program_mode_changed:
-	ADHD.program_mode_changed()
-	return
-
 adhd_heartbeat:
 	ADHD.heartbeat()
 	return
@@ -1857,8 +1786,6 @@ adhd_heartbeat:
 adhd_functionality_toggle:
 	ADHD.functionality_toggle()
 	return
-
-
 
 ADHD_DeleteHotkey:
 	SetTimer, ADHD_DeleteHotkey, Off
