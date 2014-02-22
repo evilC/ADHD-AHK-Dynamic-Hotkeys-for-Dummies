@@ -58,14 +58,23 @@ NumHotkeys := 3
 
 ; Create the GUI
 Gui Add, Text,, This demo allows you to bind up to %NumHotkeys% Hotkeys and test them.`nHotkeys are remembered between runs.
+Gui, Add, Text, x357 y25 w30 center, Wild`nMode
+
+ypos := 50
+
+;Gui, Add, Text, x5 y40 w300 center,Hotkey
+;Gui, Add, Text, x300 y40 center,~ *
 
 Loop % NumHotkeys {
-	Gui, Add, Edit, Disabled vHotkeyName%A_Index% w260 x5 yp+30, None
+	Gui, Add, Edit, Disabled vHotkeyName%A_Index% w260 x5 y%ypos%, None
 	Gui, Add, Button, gBind vBind%A_Index% yp-1 xp+270, Set Hotkey
+	Gui, Add, Checkbox, vWild%A_Index% gOptionChanged xp+90 yp+5
+	;Gui, Add, Checkbox, vBlock%A_Index% gOptionChanged xp+30 yp
+	ypos += 25
 }
 
-height := (NumHotkeys * 30) + 30
-Gui, Show, Center w350 h%height% x0 y0, Keybind Test
+height := (NumHotkeys * 30) + 60
+Gui, Show, Center w400 h%height% x0 y0, Keybind Test
 
 ; Set GUI State
 LoadSettings()
@@ -91,6 +100,27 @@ DoHotkey3:
 	msgbox You pressed Hotkey 3.
 	return
 
+; Something changed - rebuild
+OptionChanged:
+	OptionChanged()
+	return
+
+OptionChanged(){
+	global HotkeyList
+
+	Gui, Submit, NoHide
+	; Disable Hotkeys
+	DisableHotkeys()
+
+	Loop % HotkeyList.MaxIndex(){
+		;HotkeyList[A_Index].block := Block%A_Index%
+		HotkeyList[A_Index].wild := Wild%A_Index%
+	}
+
+	EnableHotkeys()
+
+	SaveSettings()
+}
 
 ; Detects a pressed key combination
 Bind:
@@ -167,16 +197,18 @@ Bind(ctrlnum){
 	if (detectedkey){
 		; Update the hotkey object
 		outhk := BuildHotkeyString(detectedkey,HKControlType)
-		HotkeyList[ctrlnum] := {hk: outhk, type: HKControlType}
+		HotkeyList[ctrlnum] := {hk: outhk, type: HKControlType, status: 0}
 
+		; Rebuild rest of hotkey object, save settings etc
+		OptionChanged()
 		; Write settings to INI file
-		SaveSettings()
+		;SaveSettings()
 
 		; Update the GUI control
 		UpdateHotkeyControls()
 
 		; Enable the hotkeys
-		EnableHotkeys()
+		;EnableHotkeys()
 	} else {
 		; Escape was pressed - resotre original hotkey, if any
 		EnableHotkeys()
@@ -187,13 +219,27 @@ Bind(ctrlnum){
 ; Enables User-Defined Hotkeys
 EnableHotkeys(){
 	global HotkeyList
-
 	Loop % HotkeyList.MaxIndex(){
+		status := HotkeyList[A_Index].status
 		hk := HotkeyList[A_Index].hk
-		if (hk != ""){
-			hotkey, ~*%hk%, DoHotkey%A_Index%, ON
+		if (hk != "" && status == 0){
+			prefix := BuildPrefix(HotkeyList[A_Index])
+			;Msgbox % "ADDING: " prefix "," hk
+			hotkey, %prefix%%hk%, DoHotkey%A_Index%, ON
+			HotkeyList[A_Index].status := 1
 		}
 	}
+}
+
+BuildPrefix(hk){
+	prefix := "~"
+	;if (!hk.block){
+	;	prefix .= "~"
+	;}
+	if (hk.wild){
+		prefix .= "*"
+	}
+	return prefix
 }
 
 ; Disables User-Defined Hotkeys
@@ -201,9 +247,14 @@ DisableHotkeys(){
 	global HotkeyList
 
 	Loop % HotkeyList.MaxIndex(){
+		status := HotkeyList[A_Index].status
 		hk := HotkeyList[A_Index].hk
-		if (hk != ""){
-			hotkey, ~*%hk%, DoHotkey%A_Index%, OFF
+		if (hk != "" && status == 1){
+			prefix := BuildPrefix(HotkeyList[A_Index])
+			;Msgbox % "REMOVING: " prefix "," hk
+			hotkey, %prefix%%hk%, DoHotkey%A_Index%, OFF
+			;hotkey, %hk%, DoHotkey%A_Index%, OFF
+			HotkeyList[A_Index].status := 0
 		}
 	}
 }
@@ -217,11 +268,15 @@ SaveSettings(){
 	Loop % HotkeyList.MaxIndex(){
 		hk := HotkeyList[A_Index].hk
 		type := HotkeyList[A_Index].type
+		;block := HotkeyList[A_Index].block
+		wild := HotkeyList[A_Index].wild
 
-		if (hk != ""){
-			iniwrite, %hk%, %ININame%, Hotkeys, hk_%A_Index%
-			iniwrite, %type%, %ININame%, Hotkeys, hk_%A_Index%_t
-		}
+		;if (hk != ""){
+			iniwrite, %hk%, %ININame%, Hotkeys, hk_%A_Index%_hk
+			iniwrite, %type%, %ININame%, Hotkeys, hk_%A_Index%_type
+			;iniwrite, %block%, %ININame%, Hotkeys, hk_%A_Index%_block
+			iniwrite, %wild%, %ININame%, Hotkeys, hk_%A_Index%_wild
+		;}
 	}
 	return
 }
@@ -233,15 +288,17 @@ LoadSettings(){
 	global HotkeyList
 
 	Loop % NumHotkeys {
-		IniRead, val, %ININame% , Hotkeys, hk_%A_Index%,
-		IniRead, type, %ININame% , Hotkeys, hk_%A_Index%_t,
-		if (val != "ERROR"){
-			IniRead, ctrltype, %ININame% , Hotkeys, hk_%A_Index%_t, 0
-			if (ctrltype == "ERROR"){
-				ctrltype := 0
-			}
+		; Init array so all items exist
+		HotkeyList[A_Index] := {hk: "", type: "", wild: ""}
 
-			HotkeyList[A_Index] := {hk: val, type: type}
+		IniRead, val, %ININame% , Hotkeys, hk_%A_Index%_hk,
+		IniRead, type, %ININame% , Hotkeys, hk_%A_Index%_type,
+		if (val != "ERROR"){
+			IniRead, type, %ININame% , Hotkeys, hk_%A_Index%_type, 0
+			;IniRead, block, %ININame% , Hotkeys, hk_%A_Index%_block, 0
+			IniRead, wild, %ININame% , Hotkeys, hk_%A_Index%_wild, 0
+
+			HotkeyList[A_Index] := {hk: val, type: type, wild: wild, status: 0}
 		}
 	}
 	UpdateHotkeyControls()
@@ -256,6 +313,11 @@ UpdateHotkeyControls(){
 			tmp := BuildHotkeyName(HotkeyList[A_Index].hk,HotkeyList[A_Index].type)
 			GuiControl,, HotkeyName%A_Index%, %tmp%
 		}
+		;tmp := HotkeyList[A_Index].block
+		;GuiControl,, Block%A_Index%, %tmp%
+
+		tmp := HotkeyList[A_Index].wild
+		GuiControl,, Wild%A_Index%, %tmp%
 	}
 }
 
