@@ -6,7 +6,6 @@ ToDo:
 * Allow adding to EXTRA_KEY_LIST by users
 * Hold Escape to clear binding?
 * Encapsulate into Object
-* Do not allow duplicate hotkeys
 * Warn of binding left or right mouse button without modifiers
 
 Back Burner:
@@ -203,7 +202,22 @@ Bind(ctrlnum){
 	if (detectedkey){
 		; Update the hotkey object
 		outhk := BuildHotkeyString(detectedkey,HKControlType)
-		HotkeyList[ctrlnum] := {hk: outhk, type: HKControlType, status: 0}
+		tmp := {hk: outhk, type: HKControlType, status: 0}
+
+		clash := 0
+		Loop % HotkeyList.MaxIndex(){
+			if (A_Index == ctrlnum){
+				continue
+			}
+			if (StripPrefix(HotkeyList[A_Index].hk) == StripPrefix(tmp.hk)){
+				clash := 1
+			}
+		}
+		if (clash){
+			msgbox You cannot bind the same hotkey to two different actions. Aborting...
+		} else {
+			HotkeyList[ctrlnum] := tmp
+		}
 
 		; Rebuild rest of hotkey object, save settings etc
 		OptionChanged()
@@ -237,6 +251,7 @@ EnableHotkeys(){
 	}
 }
 
+; Builds the prefix for a given hotkey object
 BuildPrefix(hk){
 	prefix := "~"
 	;if (!hk.block){
@@ -246,6 +261,19 @@ BuildPrefix(hk){
 		prefix .= "*"
 	}
 	return prefix
+}
+
+; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
+StripPrefix(hk){
+	Loop {
+		chr := substr(hk,1,1)
+		if (chr == "~" || chr == "*" || chr == "$"){
+			hk := substr(hk,2)
+		} else {
+			break
+		}
+	}
+	return hk
 }
 
 ; Disables User-Defined Hotkeys
