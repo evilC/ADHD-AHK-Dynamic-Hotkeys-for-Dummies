@@ -27,7 +27,7 @@ ADHD.config_about({name: "Fire Control", version: 3.0, author: "evilC", link: "<
 ADHD.config_default_app("CryENGINE")
 
 ; GUI size
-ADHD.config_size(375,335)
+ADHD.config_size(450,335)
 
 ; Configure update notifications:
 ADHD.config_updates("http://evilc.com/files/ahk/mwo/firectrl/firectrl.au.txt")

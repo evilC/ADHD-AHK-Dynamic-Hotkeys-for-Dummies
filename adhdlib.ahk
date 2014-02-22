@@ -80,6 +80,13 @@ Class ADHDLib
 		; App Keys
 		this.EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 
+		this.BindMode := 0
+		this.HKModifierState := {}	; The state of the modifiers at the end of the last detection sequence
+		this.HKControlType := 0		; The kind of control that the last hotkey was. 0 = regular key, 1 = solitary modifier, 2 = mouse, 3 = joystick
+		this.HKSecondaryInput := ""	; Set to button pressed if the last detected bind was a Mouse button, Joystick button or Solitary Modifier
+		this.HKLastHotkey := 0			; Time that Escape was pressed to exit key binding. Used to determine if Escape is held (Clear binding)
+
+
 	}
 
 	; EXPOSED METHODS
@@ -744,7 +751,7 @@ Class ADHDLib
 
 	; Detects key combinations
 	set_binding(ctrlnum){
-		global BindMode
+		;global BindMode
 
 		; init vars
 		this.HKControlType := 0
@@ -757,7 +764,7 @@ Class ADHDLib
 		;JoystickDetection(1)
 
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
-		BindMode := 1
+		this.BindMode := 1
 
 		; Show the prompt
 		prompt := "Please press the desired key combination.`n`n"
@@ -794,7 +801,7 @@ Class ADHDLib
 		}
 
 		; Stop listening to mouse, keyboard etc
-		BindMode := 0
+		this.BindMode := 0
 		;JoystickDetection(0)
 
 		; Hide prompt
@@ -1484,6 +1491,16 @@ Class ADHDLib
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
 				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+
+				; Apply "Limit app" option
+				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
+					; Enable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive, ahk_class %adhd_limit_application%
+				} else {
+					; Disable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive
+				}
+
 				; Bind down action of hotkey
 				prefix := "~"
 				if (this.hotkey_mappings[name].wild){
@@ -1886,7 +1903,7 @@ GuiClose:
 */
 
 ; Detects Modifiers and Mouse Buttons in BindMode
-#If BindMode
+#If ADHD.BindMode
 	; Detect key down of modifier keys
 	*lctrl::
 	*rctrl::
