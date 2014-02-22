@@ -4,7 +4,6 @@
 
 ToDo:
 * Allow adding to EXTRA_KEY_LIST by users
-* Hold Escape to clear binding?
 * Encapsulate into Object
 * Warn of binding left or right mouse button without modifiers
 
@@ -55,6 +54,9 @@ EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
 HKModifierState := {}	; The state of the modifiers at the end of the last detection sequence
 HKControlType := 0		; The kind of control that the last hotkey was. 0 = regular key, 1 = solitary modifier, 2 = mouse, 3 = joystick
 HKSecondaryInput := ""	; Set to button pressed if the last detected bind was a Mouse button, Joystick button or Solitary Modifier
+HKLastHotkey := 0			; Time that Escape was pressed to exit key binding. Used to determine if Escape is held (Clear binding)
+
+DefaultHKObject := {hk: "", type: "", wild: ""}
 
 ; Misc vars
 ININame := BuildIniName()
@@ -138,6 +140,7 @@ Bind(ctrlnum){
 	global EXTRA_KEY_LIST
 	global HKControlType
 	global HKSecondaryInput
+	global HKLastHotkey
 
 	global HotkeyList
 
@@ -158,7 +161,8 @@ Bind(ctrlnum){
 	prompt := "Please press the desired key combination.`n`n"
 	prompt .= "Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n"
 	prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
-	prompt .= "`nHit Escape to cancel"
+	prompt .= "`nHit Escape to cancel."
+	prompt .= "`nHold Escape to clear a binding."
 	Gui, 2:Add, text, center, %prompt%
 	Gui, 2:-Border +AlwaysOnTop
 	Gui, 2:Show
@@ -178,6 +182,10 @@ Bind(ctrlnum){
 				detectedkey := HKSecondaryInput
 			} else {
 				detectedkey := ""
+				; Start listening to key up event for Escape, to see if it was held
+				HKLastHotkey := ctrlnum
+				hotkey, Escape up, EscapeReleased, ON
+				SetTimer, DeleteHotkey, 1000
 			}
 		}
 	}
@@ -236,6 +244,30 @@ Bind(ctrlnum){
 	return
 }
 
+DeleteHotkey:
+	SetTimer, DeleteHotkey, Off
+	DeleteHotKey(HKLastHotkey)
+	return
+
+DeleteHotkey(hk){
+	global HotkeyList
+	global DefaultHKObject
+
+	soundbeep
+	DisableHotkeys()
+	HotkeyList[hk] := DefaultHKObject
+
+	OptionChanged()
+
+	UpdateHotkeyControls()
+	return
+}
+
+EscapeReleased:
+	hotkey, Escape up, EscapeReleased, OFF
+	SetTimer, DeleteHotkey, Off
+	return
+
 ; Enables User-Defined Hotkeys
 EnableHotkeys(){
 	global HotkeyList
@@ -247,6 +279,23 @@ EnableHotkeys(){
 			;Msgbox % "ADDING: " prefix "," hk
 			hotkey, %prefix%%hk%, DoHotkey%A_Index%, ON
 			HotkeyList[A_Index].status := 1
+		}
+	}
+}
+
+; Disables User-Defined Hotkeys
+DisableHotkeys(){
+	global HotkeyList
+
+	Loop % HotkeyList.MaxIndex(){
+		status := HotkeyList[A_Index].status
+		hk := HotkeyList[A_Index].hk
+		if (hk != "" && status == 1){
+			prefix := BuildPrefix(HotkeyList[A_Index])
+			;Msgbox % "REMOVING: " prefix "," hk
+			hotkey, %prefix%%hk%, DoHotkey%A_Index%, OFF
+			;hotkey, %hk%, DoHotkey%A_Index%, OFF
+			HotkeyList[A_Index].status := 0
 		}
 	}
 }
@@ -276,23 +325,6 @@ StripPrefix(hk){
 	return hk
 }
 
-; Disables User-Defined Hotkeys
-DisableHotkeys(){
-	global HotkeyList
-
-	Loop % HotkeyList.MaxIndex(){
-		status := HotkeyList[A_Index].status
-		hk := HotkeyList[A_Index].hk
-		if (hk != "" && status == 1){
-			prefix := BuildPrefix(HotkeyList[A_Index])
-			;Msgbox % "REMOVING: " prefix "," hk
-			hotkey, %prefix%%hk%, DoHotkey%A_Index%, OFF
-			;hotkey, %hk%, DoHotkey%A_Index%, OFF
-			HotkeyList[A_Index].status := 0
-		}
-	}
-}
-
 ; Write settings to the INI
 SaveSettings(){
 	global ININame
@@ -320,10 +352,11 @@ LoadSettings(){
 	global ININame
 	global NumHotkeys
 	global HotkeyList
+	global DefaultHKObject
 
 	Loop % NumHotkeys {
 		; Init array so all items exist
-		HotkeyList[A_Index] := {hk: "", type: "", wild: ""}
+		HotkeyList[A_Index] := DefaultHKObject
 
 		IniRead, val, %ININame% , Hotkeys, hk_%A_Index%_hk,
 		IniRead, type, %ININame% , Hotkeys, hk_%A_Index%_type,
@@ -346,6 +379,8 @@ UpdateHotkeyControls(){
 		if (HotkeyList[A_Index].hk != ""){
 			tmp := BuildHotkeyName(HotkeyList[A_Index].hk,HotkeyList[A_Index].type)
 			GuiControl,, HotkeyName%A_Index%, %tmp%
+		} else {
+			GuiControl,, HotkeyName%A_Index%, None
 		}
 		;tmp := HotkeyList[A_Index].block
 		;GuiControl,, Block%A_Index%, %tmp%
