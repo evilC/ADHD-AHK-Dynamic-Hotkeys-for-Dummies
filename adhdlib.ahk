@@ -684,12 +684,18 @@ Class ADHDLib
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
 
+				; Hotkey
 				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
 				tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 
+				; Strip ~ * etc and store it in umnodified opbect.
+				this.hotkey_mappings[name].unmodified := this.strip_prefix(this.hotkey_mappings[name].modified)
+
+				; Type
 				this.update_ini("adhd_hk_type_" A_Index, this.current_profile, this.hotkey_mappings[name].type,0)
 
+				; Wild
 				this.hotkey_mappings[name].wild := adhd_hk_wild_%A_Index%
 				this.update_ini("adhd_hk_wild_" A_Index, this.current_profile, this.hotkey_mappings[name].wild, 0)
 			}
@@ -1185,9 +1191,6 @@ Class ADHDLib
 	; Often a workaround is to send a keyup of the triggering key
 	; Calling send_keyup_on_press() in an action will cause this to happen
 	send_keyup_on_press(sub,mod){
-		; hotkey_mappings contains a handy lookup to hotkey mappings !
-		; contains "modified" and "unmodified" keys
-		; Note, it is REFERENCE ONLY. Changing it has no effect.
 		tmp := this.hotkey_mappings[sub][mod] " up"
 		Send {%tmp%}
 
