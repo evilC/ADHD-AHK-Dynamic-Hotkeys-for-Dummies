@@ -12,6 +12,9 @@ Key:
   This is quicker than scrolling the window constantly to keep the bottom in view.
 = Profile manipulation much more robust.
   Should no longer be possible to have duplicate profile names etc.
+= Fixed slight incompatibility issue
+  Pollution of global namespace (DisplayToolTip and RemoveToolTip)
+  These now have ADHD_ prefixes
 
 2.2 5th Jan 2014
 = Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.
