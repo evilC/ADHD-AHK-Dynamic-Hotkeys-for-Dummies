@@ -593,7 +593,6 @@ Class ADHDLib
 			this.hotkey_mappings[name].modified := tmp
 			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
-			;GuiControl,,adhd_hk_hotkey_%A_Index%, %tmp%
 
 			tmp := this.read_ini("adhd_hk_wild_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].wild := tmp
@@ -602,42 +601,6 @@ Class ADHDLib
 			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].type := tmp
 
-			/*
-			; Keyboard bindings
-			tmp := this.read_ini("adhd_hk_k_" A_Index,this.current_profile,"None")
-			GuiControl,,adhd_hk_k_%A_Index%, %tmp%
-			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
-			
-			; Mouse bindings
-			tmp := this.read_ini("adhd_hk_m_" A_Index,this.current_profile,"None")
-			GuiControl, ChooseString, adhd_hk_m_%A_Index%, %tmp%
-			if (tmp != "None"){
-				this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"] := tmp
-			}
-
-			; Control Modifier
-			modstring := ""
-			tmp := this.read_ini("adhd_hk_c_" A_Index,this.current_profile,0)
-			GuiControl,, adhd_hk_c_%A_Index%, %tmp%
-			if (tmp == 1){
-				modstring := modstring "^"
-			}
-			
-			; Shift Modifier
-			tmp := this.read_ini("adhd_hk_s_" A_Index,this.current_profile,0)
-			GuiControl,, adhd_hk_s_%A_Index%, %tmp%
-			if (tmp == 1){
-				modstring := modstring "+"
-			}
-			
-			; Alt Modifier
-			tmp := this.read_ini("adhd_hk_a_" A_Index,this.current_profile,0)
-			GuiControl,, adhd_hk_a_%A_Index%, %tmp%
-			if (tmp == 1){
-				modstring := modstring "!"
-			}
-			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["modified"] := modstring this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"]
-			*/
 		}
 		
 		; limit application name
@@ -684,17 +647,6 @@ Class ADHDLib
 
 		return
 	}
-
-	/*
-	rebuild_hotkey_mappings(){
-		Loop % this.hotkey_list.MaxIndex(){
-			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].modified := adhd_hk_hotkey_%A_Index%
-			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].unmodified := this.strip_modifiers(adhd_hk_hotkey_%A_Index%)
-			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].type := adhd_hk_type_%A_Index%
-			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].wild := adhd_hk_wild_%A_Index%
-		}
-	}
-	*/
 
 	; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
 	strip_prefix(hk){
@@ -999,7 +951,6 @@ Class ADHDLib
 
 	; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
 	BuildHotkeyString(str, type := 0){
-		;global HKModifierState
 
 		outhk := ""
 		modct := this.CurrentModifierCount()
@@ -1037,8 +988,6 @@ Class ADHDLib
 
 	; Sets the state of the HKModifierState object to reflect the state of the modifier keys
 	SetModifier(hk,state){
-		;global HKModifierState
-
 		if (hk == "lctrl" || hk == "rctrl"){
 			this.HKModifierState.ctrl := state
 		} else if (hk == "lalt" || hk == "ralt"){
@@ -1053,8 +1002,6 @@ Class ADHDLib
 
 	; Counts how many modifier keys are currently held
 	CurrentModifierCount(){
-		;global HKModifierState
-
 		return this.HKModifierState.ctrl + this.HKModifierState.alt + this.HKModifierState.shift  + this.HKModifierState.win
 	}
 
@@ -1272,11 +1219,13 @@ Class ADHDLib
 		return
 	}
 
+	/*
 	get_program_mode(){
 		global adhd_program_mode
 		
 		return adhd_program_mode
 	}
+	*/
 	
 	; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
 	control_name_to_set_method(name){
@@ -1285,65 +1234,6 @@ Class ADHDLib
 		} else {
 			return ""
 		}
-	}
-
-	; Detects a key pressed and clears the mouse box
-	key_changed(ctrl){
-		; Special keys will have a value of ""
-		text := %ctrl%
-		this.debug("key_changed: received string: " text)
-		if (text == ""){
-			ctr := 0
-			max := 1
-		} else {
-			; Check to see if just modifiers selected IN THE HOTKEY BOX
-			; We ignore modifiers in the hotkey box because we may want to bind ctrl+lbutton
-			ctr := 0
-			max := StrLen(text)
-			Loop, %max%
-			{
-				chr := substr(text,ctr,1)
-				if (chr != "^" && chr != "!" && chr != "+"){
-					ctr := ctr + 1
-				}
-			}
-			/*
-			; Only modifier keys pressed?
-			if (ctr == 0){
-				; When you hold just modifiers in a hotkey box, they appear only so long as they are held
-				; On key up, if no other keys are held, they will disappear
-				; We are not interested in them, so ignore contents of hotkey box while it is just modifiers
-				this.debug("key_changed: exiting as only modifier keys")
-				return
-			}
-			*/
-		}
-		
-		; key pressed
-		if (ctr < max && text != ""){
-			; Modifier keys used - set keyboard box to "None"
-			GuiControl,, %ctrl%, None
-			this.debug("key_changed calling option_changed")
-			this.option_changed()
-		} else {
-			; Modifiers not used - clear mouse box
-			tmp := SubStr(ctrl,11)
-			; Set the mouse field to blank
-			GuiControl,ChooseString, adhd_hk_m_%tmp%, None
-			this.debug("key_changed calling option_changed")
-			this.option_changed()
-		}
-		return
-	}
-
-	; Detects mouse selected from list and clears key box
-	mouse_changed(){
-		tmp := SubStr(A_GuiControl,11)
-		; Set the keyboard field to blank
-		GuiControl,, adhd_hk_k_%tmp%, None
-		this.debug("mouse_changed calling option_changed")
-		this.option_changed()
-		return
 	}
 
 	; INI manipulation
@@ -1613,61 +1503,6 @@ Class ADHDLib
 
 			}
 		}
-		/*
-		global adhd_limit_application
-		global adhd_limit_application_on
-		
-		; ToDo: Should not submit gui here, triggering save...
-		this.debug("enable_hotkeys")
-		
-		Gui, Submit, NoHide
-		Loop, % this.hotkey_list.MaxIndex()
-		{
-			hotkey_prefix := this.build_prefix(A_Index)
-			hotkey_keys := this.get_hotkey_string(A_Index)
-			if (hotkey_keys == "" && (hotkey_prefix == "^" || hotkey_prefix == "!" || hotkey_prefix == "+" || )){
-				if (hotkey_prefix == "^"){
-					hotkey_prefix := "LCtrl"
-				} else if (hotkey_prefix == "!"){
-					hotkey_prefix := "LAlt"
-				} else if (hotkey_prefix == "+"){
-					hotkey_prefix := "LShift"
-				}
-			}
-			
-			if (hotkey_keys != "" || hotkey_prefix != "*"){
-				hotkey_string := hotkey_prefix hotkey_keys
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
-					; Enable Limit Application for all subsequently declared hotkeys
-					Hotkey, IfWinActive, ahk_class %adhd_limit_application%
-				} else {
-					; Disable Limit Application for all subsequently declared hotkeys
-					Hotkey, IfWinActive
-				}
-				
-				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine)
-				; Bind down action of hotkey
-				Hotkey, ~%hotkey_string% , %hotkey_subroutine%
-				Hotkey, ~%hotkey_string% , %hotkey_subroutine%, On
-				
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
-					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up, On
-				}
-				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-			}
-			
-			; ToDo: Disabling of GUI controls should not be in here - put them in program mode
-			GuiControl, Disable, adhd_hk_k_%A_Index%
-			GuiControl, Disable, adhd_hk_m_%A_Index%
-			GuiControl, Disable, adhd_hk_c_%A_Index%
-			GuiControl, Disable, adhd_hk_s_%A_Index%
-			GuiControl, Disable, adhd_hk_a_%A_Index%
-		}
-		return
-		*/
 	}
 
 	disable_hotkeys(mode){
@@ -1684,8 +1519,7 @@ Class ADHDLib
 		Loop, % max
 		{
 			name := this.hotkey_index_to_name(A_Index)
-			if (name != ""){
-				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
+			if (this.hotkey_mappings[name].modified != ""){
 				hotkey_string := this.hotkey_mappings[name].modified
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
@@ -1706,68 +1540,12 @@ Class ADHDLib
 				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 
 			}
-			/*
-			hotkey_prefix := this.build_prefix(A_Index)
-			hotkey_keys := this.get_hotkey_string(A_Index)
-			if (hotkey_keys != ""){
-				hotkey_string := hotkey_prefix hotkey_keys
-				; ToDo: Is there a better way to remove a hotkey?
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine)
-				HotKey, ~%hotkey_string%, %hotkey_subroutine%, Off
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					HotKey, ~%hotkey_string% up, %hotkey_subroutine%, Off
-				}
-			}
-			GuiControl, Enable, adhd_hk_k_%A_Index%
-			GuiControl, Enable, adhd_hk_m_%A_Index%
-			GuiControl, Enable, adhd_hk_c_%A_Index%
-			GuiControl, Enable, adhd_hk_s_%A_Index%
-			GuiControl, Enable, adhd_hk_a_%A_Index%
-			*/
 		}
 		return
-		/*
-		global adhd_limit_application
-		global adhd_limit_application_on
-		
-		this.debug("disable_hotkeys")
-
-		max := this.hotkey_list.MaxIndex()
-		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
-		if (mode){
-			max -= 1
-		}
-		Loop, % max
-		{
-			hotkey_prefix := this.build_prefix(A_Index)
-			hotkey_keys := this.get_hotkey_string(A_Index)
-			if (hotkey_keys != ""){
-				hotkey_string := hotkey_prefix hotkey_keys
-				; ToDo: Is there a better way to remove a hotkey?
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine)
-				HotKey, ~%hotkey_string%, %hotkey_subroutine%, Off
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					HotKey, ~%hotkey_string% up, %hotkey_subroutine%, Off
-				}
-			}
-			GuiControl, Enable, adhd_hk_k_%A_Index%
-			GuiControl, Enable, adhd_hk_m_%A_Index%
-			GuiControl, Enable, adhd_hk_c_%A_Index%
-			GuiControl, Enable, adhd_hk_s_%A_Index%
-			GuiControl, Enable, adhd_hk_a_%A_Index%
-		}
-		return
-		*/
 	}
 
+	; Removes a hotkey - called at end of a timer, not a general purpose functions
 	DeleteHotkey(){
-		;global HotkeyList
-		;global DefaultHKObject
-
 		soundbeep
 		this.disable_hotkeys()
 		name := this.hotkey_index_to_name(this.HKLastHotkey)
@@ -1778,6 +1556,7 @@ Class ADHDLib
 		return
 	}
 
+	/*
 	get_hotkey_string(hk){
 		;Get hotkey string - could be keyboard or mouse
 		tmp := adhd_hk_k_%hk%
@@ -1789,7 +1568,9 @@ Class ADHDLib
 		}
 		return tmp
 	}
+	*/
 
+	/*
 	; Special key detection routines
 	special_key_pressed(ctrl){
 		modifier := ""
@@ -1839,7 +1620,7 @@ Class ADHDLib
 		
 		return out
 	}
-
+	*/
 	functionality_toggle(){
 		if (this.functionality_enabled){
 			this.functionality_enabled := 0
