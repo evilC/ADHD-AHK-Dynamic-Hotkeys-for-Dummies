@@ -592,8 +592,6 @@ Class ADHDLib
 
 			tmp := this.read_ini("adhd_hk_hotkey_" A_Index,this.current_profile,A_Space)
 			this.hotkey_mappings[name].modified := tmp
-			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
-			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 
 			tmp := this.read_ini("adhd_hk_wild_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].wild := tmp
@@ -602,6 +600,8 @@ Class ADHDLib
 			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].type := tmp
 
+			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 		}
 		
 		; limit application name
@@ -1534,57 +1534,6 @@ Class ADHDLib
 	}
 	*/
 
-	/*
-	; Special key detection routines
-	special_key_pressed(ctrl){
-		modifier := ""
-		If GetKeyState("Shift","P")
-			modifier .= "+"
-		If GetKeyState("Ctrl","P")
-			modifier .= "^"
-		If GetKeyState("Alt","P")
-			modifier .= "!"
-		Gui, Submit, NoHide											;If BackSpace is the first key press, Gui has never been submitted.
-		If (A_ThisHotkey == "*BackSpace" && %ctrl% && !modifier)	;If the control has text but no modifiers held,
-			GuiControl,,%ctrl%                                      ;  allow BackSpace to clear that text.
-		Else                                                     	;Otherwise,
-			GuiControl,,%ctrl%, % modifier SubStr(A_ThisHotkey,2)	;  show the hotkey.
-		this.debug("special key detect calling key_changed")
-		this.key_changed(ctrl)
-		return
-	}
-
-	hotkey_ctrl_has_focus() {
-		GuiControlGet, ctrl, Focus       ;ClassNN
-		If InStr(ctrl,"hotkey") {
-			GuiControlGet, ctrl, FocusV     ;Associated variable
-			Return, ctrl
-		}
-	}
-
-	; Builds the prefix that sets how Modifier Keys (Ctrl, Shift, Alt) work with the hotkey
-	build_prefix(hk){
-		out := ""
-		tmp = adhd_hk_c_%hk%
-		GuiControlGet,%tmp%
-		if (adhd_hk_c_%hk% == 1){
-			out := out "^"
-		}
-		if (adhd_hk_a_%hk% == 1){
-			out := out "!"
-		}
-		if (adhd_hk_s_%hk% == 1){
-			out := out "+"
-		}
-		
-		; If Ctrl, Shift or Alt are not selected, make key work when any combination of modifiers held
-		if (out == ""){
-			out := "*"
-		}
-		
-		return out
-	}
-	*/
 	functionality_toggle(){
 		if (this.functionality_enabled){
 			this.functionality_enabled := 0
