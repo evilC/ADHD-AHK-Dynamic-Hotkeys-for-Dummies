@@ -733,7 +733,7 @@ Class ADHDLib
 		global adhd_debug_window
 		
 		; Disable existing hotkeys
-		this.disable_hotkeys()
+		this.disable_hotkeys(0)
 
 		if (this.starting_up != 1){
 			;this.debug("option_changed - control: " A_guicontrol)
@@ -1590,20 +1590,24 @@ Class ADHDLib
 		Gui, Submit, NoHide
 		Loop % this.hotkey_list.MaxIndex(){
 			name := this.hotkey_index_to_name(A_Index)
-			if (name != ""){
+			if (this.hotkey_mappings[name].modified != ""){
 				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
 				hotkey_string := this.hotkey_mappings[name].modified
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine)
+				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
 				; Bind down action of hotkey
-				Hotkey, ~%hotkey_string% , %hotkey_subroutine%
-				Hotkey, ~%hotkey_string% , %hotkey_subroutine%, On
+				prefix := "~"
+				if (this.hotkey_mappings[name].wild){
+					prefix .= "*"
+				}
+				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
+				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
 				
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey
-					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
-					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up, On
+					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
+					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
 				}
 				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 
@@ -1685,13 +1689,19 @@ Class ADHDLib
 				hotkey_string := this.hotkey_mappings[name].modified
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine)
+				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+
+				prefix := "~"
+				if (this.hotkey_mappings[name].wild){
+					prefix .= "*"
+				}
+
 				; Bind down action of hotkey
-				Hotkey, ~%hotkey_string% , %hotkey_subroutine%, Off
+				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
 				
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey
-					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up, Off
+					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, Off
 				}
 				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 
