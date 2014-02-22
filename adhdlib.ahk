@@ -216,11 +216,7 @@ Class ADHDLib
 		Gui, Tab, %nexttab%
 		; BINDINGS TAB
 		Gui, Add, Text, x5 y40 W100 Center, Action
-		;Gui, Add, Text, xp+100 W70 Center, Keyboard
-		;Gui, Add, Text, xp+90 W70 Center, Mouse
-		;Gui, Add, Text, xp+82 W30 Center, Ctrl
-		;Gui, Add, Text, xp+30 W30 Center, Shift
-		;Gui, Add, Text, xp+30 W30 Center, Alt
+		Gui, Add, Text, x190 yp W100 Center, Current Binding
 
 		; Add hotkeys
 		local mb := this.mouse_buttons
@@ -239,15 +235,7 @@ Class ADHDLib
 			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+270, Bind
 			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
 			Gui, Add, Checkbox, vadhd_hk_wild_%A_Index% gadhd_option_changed xp+45 yp+5 w25 center
-			/*
-			local name := this.hotkey_list[A_Index,"uiname"]
-			Gui, Add, Text,x5 W100 y%current_row%, %name%
-			Gui, Add, Hotkey, yp-5 xp+100 W70 vadhd_hk_k_%A_Index% gadhd_key_changed
-			Gui, Add, DropDownList, yp xp+80 W90 vadhd_hk_m_%A_Index% gadhd_mouse_changed, None||%mb%
-			Gui, Add, CheckBox, xp+100 yp+5 W25 vadhd_hk_c_%A_Index% gadhd_option_changed
-			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_s_%A_Index% gadhd_option_changed
-			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_a_%A_Index% gadhd_option_changed
-			*/
+			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
 			current_row := current_row + 30
 		}
 		
