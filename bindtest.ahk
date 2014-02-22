@@ -13,7 +13,12 @@ ToDo:
 * Encapsulate into Object
 * Do not allow duplicate hotkeys
 * Warn of binding left or right mouse button without modifiers
-* Pass-through / remap (~ prefix) option
+! Pass-through / remap (~ prefix) option.
+  Problems due to AHK limitations - declaring:
+  hotkey, ^a, mysub, ON
+  hotkey, ^a, mysub, OFF
+  hotkey, ~^a, mysub, ON
+  ... Does NOT create a ~^a mapping, the mapping is still ^a
 * Explicit or relaxed (* prefix) option
 * Warn of no up event for wheel up? Optional parameter for detect routine to allow allow keys with keyup event?
 
