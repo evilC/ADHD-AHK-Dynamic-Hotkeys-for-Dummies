@@ -26,8 +26,8 @@ Class ADHDLib
 		this.author_link := ""
 		
 		this.default_app := ""
-		this.gui_w := 375
-		this.gui_h := 175
+		this.gui_w := 450
+		this.gui_h := 200
 		
 		this.ini_version := 1
 		this.write_version := 1				; set to 0 to stop writing of version to INI file on exit
@@ -57,6 +57,29 @@ Class ADHDLib
 		this.build_ini_name()
 		
 		this.functionality_enabled := 1
+
+		; Build list of "End Keys" for Input command
+		this.EXTRA_KEY_LIST := "{Escape}"	; DO NOT REMOVE! - Used to quit binding
+		; Standard non-printables
+		this.EXTRA_KEY_LIST .= "{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}"
+		this.EXTRA_KEY_LIST .= "{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BackSpace}{Pause}"
+		; Numpad - Numlock ON
+		this.EXTRA_KEY_LIST .= "{Numpad0}{Numpad1}{Numpad2}{Numpad3}{Numpad4}{Numpad5}{Numpad6}{Numpad7}{Numpad8}{Numpad9}{NumpadDot}{NumpadMult}{NumpadAdd}{NumpadSub}"
+		; Numpad - Numlock OFF
+		this.EXTRA_KEY_LIST .= "{NumpadIns}{NumpadEnd}{NumpadDown}{NumpadPgDn}{NumpadLeft}{NumpadClear}{NumpadRight}{NumpadHome}{NumpadUp}{NumpadPgUp}{NumpadDel}"
+		; Numpad - Common
+		this.EXTRA_KEY_LIST .= "{NumpadMult}{NumpadAdd}{NumpadSub}{NumpadDiv}{NumpadEnter}"
+		; Stuff we may or may not want to trap
+		;EXTRA_KEY_LIST .= "{Numlock}"
+		this.EXTRA_KEY_LIST .= "{Capslock}"
+		;EXTRA_KEY_LIST .= "{PrintScreen}"
+		; Browser keys
+		this.EXTRA_KEY_LIST .= "{Browser_Back}{Browser_Forward}{Browser_Refresh}{Browser_Stop}{Browser_Search}{Browser_Favorites}{Browser_Home}"
+		; Media keys
+		this.EXTRA_KEY_LIST .= "{Volume_Mute}{Volume_Down}{Volume_Up}{Media_Next}{Media_Prev}{Media_Stop}{Media_Play_Pause}"
+		; App Keys
+		this.EXTRA_KEY_LIST .= "{Launch_Mail}{Launch_Media}{Launch_App1}{Launch_App2}"
+
 	}
 
 	; EXPOSED METHODS
@@ -188,11 +211,11 @@ Class ADHDLib
 		Gui, Tab, %nexttab%
 		; BINDINGS TAB
 		Gui, Add, Text, x5 y40 W100 Center, Action
-		Gui, Add, Text, xp+100 W70 Center, Keyboard
-		Gui, Add, Text, xp+90 W70 Center, Mouse
-		Gui, Add, Text, xp+82 W30 Center, Ctrl
-		Gui, Add, Text, xp+30 W30 Center, Shift
-		Gui, Add, Text, xp+30 W30 Center, Alt
+		;Gui, Add, Text, xp+100 W70 Center, Keyboard
+		;Gui, Add, Text, xp+90 W70 Center, Mouse
+		;Gui, Add, Text, xp+82 W30 Center, Ctrl
+		;Gui, Add, Text, xp+30 W30 Center, Shift
+		;Gui, Add, Text, xp+30 W30 Center, Alt
 
 		; Add hotkeys
 		local mb := this.mouse_buttons
@@ -200,8 +223,18 @@ Class ADHDLib
 		; Add functionality toggle as last item in list
 		this.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
 
-		Loop, % this.hotkey_list.MaxIndex()
-		{
+		Gui, Add, Text, x410 y30 w30 center, Wild`nMode
+
+		Loop % this.hotkey_list.MaxIndex() {
+			local name := this.hotkey_list[A_Index,"uiname"]
+			Gui, Add, Text,x5 W100 y%current_row%, %name%
+			Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w260 x105 yp-3,
+			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_display_%A_Index% w160 x105 yp-3, None
+			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w95 xp+165 yp,
+			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+270, Bind
+			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
+			Gui, Add, Checkbox, vadhd_hk_wild_%A_Index% gadhd_option_changed xp+45 yp+5 w25 center
+			/*
 			local name := this.hotkey_list[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%current_row%, %name%
 			Gui, Add, Hotkey, yp-5 xp+100 W70 vadhd_hk_k_%A_Index% gadhd_key_changed
@@ -209,6 +242,7 @@ Class ADHDLib
 			Gui, Add, CheckBox, xp+100 yp+5 W25 vadhd_hk_c_%A_Index% gadhd_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_s_%A_Index% gadhd_option_changed
 			Gui, Add, CheckBox, xp+30 yp W25 vadhd_hk_a_%A_Index% gadhd_option_changed
+			*/
 			current_row := current_row + 30
 		}
 		
@@ -518,6 +552,10 @@ Class ADHDLib
 		GuiControl,,CurrentProfile,%cp%
 	}
 
+	hotkey_index_to_name(idx){
+		return this.hotkey_list[idx,"subroutine"]
+	}
+
 	; aka load profile
 	profile_changed(){
 		global adhd_debug_mode
@@ -527,7 +565,8 @@ Class ADHDLib
 		global adhd_debug_window
 		
 		; Remove old bindings before changing profile
-		this.disable_hotkeys(1)
+		;this.disable_hotkeys(1)
+		this.disable_hotkeys(0)
 		
 		GuiControlGet,cp,,adhd_current_profile
 		this.current_profile := cp
@@ -545,9 +584,25 @@ Class ADHDLib
 		; Load hotkey bindings
 		Loop, % this.hotkey_list.MaxIndex()
 		{
-			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]] := {}
-			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["index"] := A_Index
+			name := this.hotkey_index_to_name(A_Index)
 
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)] := {}
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)]["index"] := A_Index
+
+			tmp := this.read_ini("adhd_hk_hotkey_" A_Index,this.current_profile,A_Space)
+			this.hotkey_mappings[name].modified := tmp
+			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
+			;GuiControl,,adhd_hk_hotkey_%A_Index%, %tmp%
+
+			tmp := this.read_ini("adhd_hk_wild_" A_Index,this.current_profile,0)
+			this.hotkey_mappings[name].wild := tmp
+			GuiControl,, adhd_hk_wild_%A_Index%, %tmp%
+
+			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
+			this.hotkey_mappings[name].type := tmp
+
+			/*
 			; Keyboard bindings
 			tmp := this.read_ini("adhd_hk_k_" A_Index,this.current_profile,"None")
 			GuiControl,,adhd_hk_k_%A_Index%, %tmp%
@@ -582,6 +637,7 @@ Class ADHDLib
 				modstring := modstring "!"
 			}
 			this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["modified"] := modstring this.hotkey_mappings[this.hotkey_list[A_Index,"subroutine"]]["unmodified"]
+			*/
 		}
 		
 		; limit application name
@@ -620,12 +676,52 @@ Class ADHDLib
 		adhd_debug_window := this.read_ini("adhd_debug_window","Settings",0)
 		GuiControl,, adhd_debug_window, %adhd_debug_window%
 
-		this.program_mode_changed()
+		;this.program_mode_changed()
+		this.enable_hotkeys()
 		
 		; Fire the Author hook
 		this.fire_event(this.events.option_changed)
 
 		return
+	}
+
+	/*
+	rebuild_hotkey_mappings(){
+		Loop % this.hotkey_list.MaxIndex(){
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].modified := adhd_hk_hotkey_%A_Index%
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].unmodified := this.strip_modifiers(adhd_hk_hotkey_%A_Index%)
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].type := adhd_hk_type_%A_Index%
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)].wild := adhd_hk_wild_%A_Index%
+		}
+	}
+	*/
+
+	; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
+	strip_prefix(hk){
+		Loop {
+			chr := substr(hk,1,1)
+			if (chr == "~" || chr == "*" || chr == "$"){
+				hk := substr(hk,2)
+			} else {
+				break
+			}
+		}
+		return hk
+	}
+
+	; Removes ^ ! + # modifiers from a hotkey object for comparison
+	strip_modifiers(hk){
+		hk := this.strip_prefix(hk)
+
+		Loop {
+			chr := substr(hk,1,1)
+			if (chr == "^" || chr == "!" || chr == "+" || chr == "#"){
+				hk := substr(hk,2)
+			} else {
+				break
+			}
+		}
+		return hk
 	}
 
 	; aka save profile
@@ -636,19 +732,26 @@ Class ADHDLib
 		global adhd_limit_application_on
 		global adhd_debug_window
 		
+		; Disable existing hotkeys
+		this.disable_hotkeys()
+
 		if (this.starting_up != 1){
 			;this.debug("option_changed - control: " A_guicontrol)
 			
 			Gui, Submit, NoHide
 
 			; Hotkey bindings
-			Loop, % this.hotkey_list.MaxIndex()
-			{
-				this.update_ini("adhd_hk_k_" A_Index, this.current_profile, adhd_hk_k_%A_Index%, "")
-				this.update_ini("adhd_hk_m_" A_Index, this.current_profile, adhd_hk_m_%A_Index%, "None")
-				this.update_ini("adhd_hk_c_" A_Index, this.current_profile, adhd_hk_c_%A_Index%, 0)
-				this.update_ini("adhd_hk_s_" A_Index, this.current_profile, adhd_hk_s_%A_Index%, 0)
-				this.update_ini("adhd_hk_a_" A_Index, this.current_profile, adhd_hk_a_%A_Index%, 0)
+			Loop % this.hotkey_list.MaxIndex(){
+				name := this.hotkey_index_to_name(A_Index)
+
+				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
+				tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
+
+				this.update_ini("adhd_hk_type_" A_Index, this.current_profile, this.hotkey_mappings[name].type,0)
+
+				this.hotkey_mappings[name].wild := adhd_hk_wild_%A_Index%
+				this.update_ini("adhd_hk_wild_" A_Index, this.current_profile, this.hotkey_mappings[name].wild, 0)
 			}
 			
 			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
@@ -670,7 +773,10 @@ Class ADHDLib
 				tmp := this.ini_vars[A_Index,1]
 				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
 			}
-			
+
+			; Re-enable the hotkeys			
+			this.enable_hotkeys()
+
 			; Fire the Author hook
 			this.fire_event(this.events.option_changed)
 			
@@ -683,6 +789,275 @@ Class ADHDLib
 		}
 		return
 	}
+
+	; Detects key combinations
+	set_binding(ctrlnum){
+		global BindMode
+
+		; init vars
+		this.HKControlType := 0
+		this.HKModifierState := {ctrl: 0, alt: 0, shift: 0, win: 0}
+
+		; Disable existing hotkeys
+		this.disable_hotkeys(0)
+
+		; Enable Joystick detection hotkeys
+		;JoystickDetection(1)
+
+		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
+		BindMode := 1
+
+		; Show the prompt
+		prompt := "Please press the desired key combination.`n`n"
+		prompt .= "Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n"
+		prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
+		prompt .= "`nHit Escape to cancel."
+		prompt .= "`nHold Escape to clear a binding."
+		Gui, 3:Add, text, center, %prompt%
+		Gui, 3:-Border +AlwaysOnTop
+		Gui, 3:Show
+
+		outhk := ""
+
+		EXTRA_KEY_LIST := this.EXTRA_KEY_LIST
+		Input, detectedkey, L1 M, %EXTRA_KEY_LIST%
+
+		if (substr(ErrorLevel,1,7) == "EndKey:"){
+			; A "Special" (Non-printable) key was pressed
+			tmp := substr(ErrorLevel,8)
+			detectedkey := tmp
+			if (tmp == "Escape"){
+				; Detection ended by Escape
+				if (this.HKControlType > 0){
+					; The Escape key was sent because a special button was used
+					detectedkey := this.HKSecondaryInput
+				} else {
+					detectedkey := ""
+					; Start listening to key up event for Escape, to see if it was held
+					this.HKLastHotkey := ctrlnum
+					hotkey, Escape up, ADHD_EscapeReleased, ON
+					SetTimer, ADHD_DeleteHotkey, 1000
+				}
+			}
+		}
+
+		; Stop listening to mouse, keyboard etc
+		BindMode := 0
+		;JoystickDetection(0)
+
+		; Hide prompt
+		Gui, 3:Submit
+
+		;msgbox % detectedkey "`n" this.HKModifierState.ctrl
+
+		; Process results
+
+		modct := this.CurrentModifierCount()
+
+		if (detectedkey && modct && this.HKControlType == 3){
+			msgbox ,,Error, Modifiers (Ctrl, Alt, Shift, Win) are currently not supported with Joystick buttons.
+			detectedkey := ""
+		}
+
+		if (detectedkey){
+			; Update the hotkey object
+			;outhk := this.BuildHotkeyString(detectedkey,this.HKControlType)
+			;tmp := {hk: outhk, type: this.HKControlType, status: 0}
+
+			;msgbox % outhk
+
+			clash := 0
+			/*
+			Loop % HotkeyList.MaxIndex(){
+				if (A_Index == ctrlnum){
+					continue
+				}
+				if (StripPrefix(HotkeyList[A_Index].hk) == StripPrefix(tmp.hk)){
+					clash := 1
+				}
+			}
+			if (clash){
+				msgbox You cannot bind the same hotkey to two different actions. Aborting...
+			} else {
+				HotkeyList[ctrlnum] := tmp
+			}
+			*/
+			this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].modified := this.BuildHotkeyString(detectedkey,this.HKControlType)
+			this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].type := this.HKControlType
+			;GuiControl,, adhd_hk_hotkey_%ctrlnum%, %outhk%
+			; Rebuild rest of hotkey object, save settings etc
+			this.option_changed()
+			;OptionChanged()
+			; Write settings to INI file
+			;SaveSettings()
+
+			; Update the GUI control
+			;UpdateHotkeyControls()
+
+			; Enable the hotkeys
+			;EnableHotkeys()
+
+		} else {
+			; Escape was pressed - resotre original hotkey, if any
+			;EnableHotkeys()
+		}
+		return
+
+	}
+
+	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
+	BuildHotkeyName(hk,ctrltype){
+		outstr := ""
+		modctr := 0
+		stringupper, hk, hk
+
+		Loop % strlen(hk) {
+			chr := substr(hk,1,1)
+			mod := 0
+
+			if (chr == "^"){
+				; Ctrl
+				mod := "CTRL"
+				modctr++
+			} else if (chr == "!"){
+				; Alt
+				mod := "ALT"
+				modctr++
+			} else if (chr == "+"){
+				; Shift
+				mod := "SHIFT"
+				modctr++
+			} else if (chr == "#"){
+				; Win
+				mod := "WIN"
+				modctr++
+			} else {
+				break
+			}
+			if (mod){
+				if (modctr > 1){
+					outstr .= " + "
+				}
+				outstr .= mod
+				; shift character out
+				hk := substr(hk,2)
+			}
+		}
+		if (modctr){
+			outstr .= " + "
+		}
+
+		if (ctrltype == 1){
+			; Solitary Modifiers
+			pfx := substr(hk,1,1)
+			if (pfx == "L"){
+				outstr .= "LEFT "
+			} else {
+				outstr .= "RIGHT "
+			}
+			outstr .= substr(hk,2)
+		} else if (ctrltype == 2){
+			; Mouse Buttons
+			if (hk == "LBUTTON") {
+				outstr .= "LEFT MOUSE"
+			} else if (hk == "RBUTTON") {
+				outstr .= "RIGHT MOUSE"
+			} else if (hk == "MBUTTON") {
+				outstr .= "MIDDLE MOUSE"
+			} else if (hk == "XBUTTON1") {
+				outstr .= "MOUSE THUMB 1"
+			} else if (hk == "XBUTTON2") {
+				outstr .= "MOUSE THUMB 2"
+			} else if (hk == "WHEELUP") {
+				outstr .= "MOUSE WHEEL U"
+			} else if (hk == "WHEELDOWN") {
+				outstr .= "MOUSE WHEEL D"
+			} else if (hk == "WHEELLEFT") {
+				outstr .= "MOUSE WHEEL L"
+			} else if (hk == "WHEELRIGHT") {
+				outstr .= "MOUSE WHEEL R"
+			}
+		} else if (ctrltype == 3){
+			; Joystick Buttons
+			pos := instr(hk,"JOY")
+			id := substr(hk,1,pos-1)
+			button := substr(hk,5)
+			outstr .= "JOYSTICK " id " BTN " button
+		} else {
+			; Keyboard Keys
+			tmp := instr(hk,"NUMPAD")
+			if (tmp){
+				outstr .= "NUMPAD " substr(hk,7)
+			} else {
+				; Replace underscores with spaces (In case of key name like MEDIA_PLAY_PAUSE)
+				StringReplace, hk, hk, _ , %A_SPACE%, All
+				outstr .= hk
+			}
+		}
+		return outstr
+	}
+
+	; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
+	BuildHotkeyString(str, type := 0){
+		;global HKModifierState
+
+		outhk := ""
+		modct := this.CurrentModifierCount()
+
+		if (type == 1){
+			; Solitary modifier key used (eg Left / Right Alt)
+			outhk := str
+		} else {
+			if (modct){
+				; Modifiers used in combination with something else - List modifiers in a specific order
+				modifiers := ["CTRL","ALT","SHIFT","WIN"]
+
+				Loop, 4 {
+					key := modifiers[A_Index]
+					value := this.HKModifierState[modifiers[A_Index]]
+					if (value){
+						if (key == "CTRL"){
+							outhk .= "^"
+						} else if (key == "ALT"){
+							outhk .= "!"
+						} else if (key == "SHIFT"){
+							outhk .= "+"
+						} else if (key == "WIN"){
+							outhk .= "#"
+						}
+					}
+				}
+			}
+			; Modifiers etc processed, complete the string
+			outhk .= str
+		}
+
+		return outhk
+	}
+
+	; Sets the state of the HKModifierState object to reflect the state of the modifier keys
+	SetModifier(hk,state){
+		;global HKModifierState
+
+		if (hk == "lctrl" || hk == "rctrl"){
+			this.HKModifierState.ctrl := state
+		} else if (hk == "lalt" || hk == "ralt"){
+			this.HKModifierState.alt := state
+		} else if (hk == "lshift" || hk == "rshift"){
+			this.HKModifierState.shift := state
+		} else if (hk == "lwin" || hk == "rwin"){
+			this.HKModifierState.win := state
+		}
+		return
+	}
+
+	; Counts how many modifier keys are currently held
+	CurrentModifierCount(){
+		;global HKModifierState
+
+		return this.HKModifierState.ctrl + this.HKModifierState.alt + this.HKModifierState.shift  + this.HKModifierState.win
+	}
+
 
 	; Add and remove glabel is useful because:
 	; When you use GuiControl to set the contents of an edit...
@@ -1213,6 +1588,35 @@ Class ADHDLib
 		this.debug("enable_hotkeys")
 		
 		Gui, Submit, NoHide
+		Loop % this.hotkey_list.MaxIndex(){
+			name := this.hotkey_index_to_name(A_Index)
+			if (name != ""){
+				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
+				hotkey_string := this.hotkey_mappings[name].modified
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+
+				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine)
+				; Bind down action of hotkey
+				Hotkey, ~%hotkey_string% , %hotkey_subroutine%
+				Hotkey, ~%hotkey_string% , %hotkey_subroutine%, On
+				
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up
+					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up, On
+				}
+				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
+
+			}
+		}
+		/*
+		global adhd_limit_application
+		global adhd_limit_application_on
+		
+		; ToDo: Should not submit gui here, triggering save...
+		this.debug("enable_hotkeys")
+		
+		Gui, Submit, NoHide
 		Loop, % this.hotkey_list.MaxIndex()
 		{
 			hotkey_prefix := this.build_prefix(A_Index)
@@ -1259,9 +1663,62 @@ Class ADHDLib
 			GuiControl, Disable, adhd_hk_a_%A_Index%
 		}
 		return
+		*/
 	}
 
 	disable_hotkeys(mode){
+		global adhd_limit_application
+		global adhd_limit_application_on
+		
+		this.debug("disable_hotkeys")
+
+		max := this.hotkey_list.MaxIndex()
+		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
+		if (mode){
+			max -= 1
+		}
+		Loop, % max
+		{
+			name := this.hotkey_index_to_name(A_Index)
+			if (name != ""){
+				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
+				hotkey_string := this.hotkey_mappings[name].modified
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+
+				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine)
+				; Bind down action of hotkey
+				Hotkey, ~%hotkey_string% , %hotkey_subroutine%, Off
+				
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					Hotkey, ~%hotkey_string% up , %hotkey_subroutine%Up, Off
+				}
+				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
+
+			}
+			/*
+			hotkey_prefix := this.build_prefix(A_Index)
+			hotkey_keys := this.get_hotkey_string(A_Index)
+			if (hotkey_keys != ""){
+				hotkey_string := hotkey_prefix hotkey_keys
+				; ToDo: Is there a better way to remove a hotkey?
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine)
+				HotKey, ~%hotkey_string%, %hotkey_subroutine%, Off
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					HotKey, ~%hotkey_string% up, %hotkey_subroutine%, Off
+				}
+			}
+			GuiControl, Enable, adhd_hk_k_%A_Index%
+			GuiControl, Enable, adhd_hk_m_%A_Index%
+			GuiControl, Enable, adhd_hk_c_%A_Index%
+			GuiControl, Enable, adhd_hk_s_%A_Index%
+			GuiControl, Enable, adhd_hk_a_%A_Index%
+			*/
+		}
+		return
+		/*
 		global adhd_limit_application
 		global adhd_limit_application_on
 		
@@ -1293,6 +1750,21 @@ Class ADHDLib
 			GuiControl, Enable, adhd_hk_s_%A_Index%
 			GuiControl, Enable, adhd_hk_a_%A_Index%
 		}
+		return
+		*/
+	}
+
+	DeleteHotkey(){
+		;global HotkeyList
+		;global DefaultHKObject
+
+		soundbeep
+		this.disable_hotkeys()
+		name := this.hotkey_index_to_name(this.HKLastHotkey)
+		this.hotkey_mappings[name].modified := ""
+		this.hotkey_mappings[name].type := 0
+		
+		this.option_changed()
 		return
 	}
 
@@ -1511,6 +1983,10 @@ adhd_option_changed:
 	ADHD.option_changed()
 	return
 
+adhd_set_binding:
+	ADHD.set_binding(substr(A_GuiControl,14))
+	return
+
 adhd_add_profile:
 	ADHD.add_profile("")	; just clicking the button calls with empty param
 	return
@@ -1575,6 +2051,18 @@ adhd_heartbeat:
 adhd_functionality_toggle:
 	ADHD.functionality_toggle()
 	return
+
+
+
+ADHD_DeleteHotkey:
+	SetTimer, ADHD_DeleteHotkey, Off
+	ADHD.DeleteHotKey()
+	return
+
+ADHD_EscapeReleased:
+	hotkey, Escape up, ADHD_EscapeReleased, OFF
+	SetTimer, ADHD_DeleteHotkey, Off
+	return
 	
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
@@ -1585,6 +2073,7 @@ GuiClose:
 	ADHD.exit_app()
 	return
 
+/*
 ; ==========================================================================================================================
 ; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
 ; This code enables extra keys in a Hotkey GUI control
@@ -1604,5 +2093,62 @@ GuiClose:
 	; ToDo: Pass A_ThisHotkey also?
 	ADHD.special_key_pressed(adhd_ctrl)
 	return
+#If
+*/
+
+; Detects Modifiers and Mouse Buttons in BindMode
+#If BindMode
+	; Detect key down of modifier keys
+	*lctrl::
+	*rctrl::
+	*lalt::
+	*ralt::
+	*lshift::
+	*rshift::
+	*lwin::
+	*rwin::
+		adhd_tmp_modifier := substr(A_ThisHotkey,2)
+		ADHD.SetModifier(adhd_tmp_modifier,1)
+		return
+
+	; Detect key up of modifier keys
+	*lctrl up::
+	*rctrl up::
+	*lalt up::
+	*ralt up::
+	*lshift up::
+	*rshift up::
+	*lwin up::
+	*rwin up::
+		; Strip * from beginning, " up" from end etc
+		adhd_tmp_modifier := substr(substr(A_ThisHotkey,2),1,strlen(A_ThisHotkey) -4)
+		if (ADHD.CurrentModifierCount() == 1){
+			; If CurrentModifierCount is 1 when an up is received, then that is a Solitary Modifier
+			; It cannot be a modifier + normal key, as this code would have quit on keydown of normal key
+
+			ADHD.HKControlType := 1
+			ADHD.HKSecondaryInput := adhd_tmp_modifier
+
+			; Send Escape - This will cause the Input command to quit with an EndKey of Escape
+			; But we stored the modifier key, so we will know it was not really escape
+			Send {Escape}
+		}
+		ADHD.SetModifier(adhd_tmp_modifier,0)
+		return
+
+	; Detect Mouse buttons
+	lbutton::
+	rbutton::
+	mbutton::
+	xbutton1::
+	xbutton2::
+	wheelup::
+	wheeldown::
+	wheelleft::
+	wheelright::
+		ADHD.HKControlType := 2
+		ADHD.HKSecondaryInput := A_ThisHotkey
+		Send {Escape}
+		return
 #If
 
