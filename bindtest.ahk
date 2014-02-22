@@ -5,7 +5,6 @@
 ToDo:
 * Allow adding to EXTRA_KEY_LIST by users
 * Encapsulate into Object
-* Warn of binding left or right mouse button without modifiers
 
 Back Burner:
 * Pass-through / remap (~ prefix) option.
@@ -20,6 +19,8 @@ Back Burner:
 * Joystick POV support
   Again, GetKeyState loop would fix
 * Warn of no up event for wheel up? Optional parameter for detect routine to allow allow keys with keyup event?
+* Warn of binding left or right mouse button without modifiers
+  Only needed if pass-thru is optional, which it currently isn't
 
 Known issues:
 
