@@ -1482,20 +1482,20 @@ adhd_mouse_move(){
 	static CurrControl, PrevControl, _TT
 	CurrControl := A_GuiControl
 	If (CurrControl <> PrevControl){
-			SetTimer, DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
+			SetTimer, ADHD_DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
 			PrevControl := CurrControl
 	}
 	return
 	
-	DisplayToolTip:
+	ADHD_DisplayToolTip:
 	try
 			ToolTip % %CurrControl%_TT
 	catch
 			ToolTip
-	SetTimer, RemoveToolTip, -10000
+	SetTimer, ADHD_RemoveToolTip, -10000
 	return
 	
-	RemoveToolTip:
+	ADHD_RemoveToolTip:
 	ToolTip
 	return
 }
