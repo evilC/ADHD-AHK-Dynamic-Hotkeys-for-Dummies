@@ -416,6 +416,54 @@ Class ADHDLib {
 
 	}
 
+	; Adds a GUI item and registers it for storage in the INI file
+	; type(edit etc), name(variable name), options(eg xp+50), param3(eg dropdown list, label), default(used for ini file)
+	gui_add(ctype, cname, copts, cparam3, cdef){
+		; Note this function assumes global so it can create gui items
+		Global
+		Gui, Add, %ctype%, %copts% v%cname% gadhd_option_changed, %cparam3%
+		this.private.ini_vars.Insert([cname,ctype,cdef])
+	}
+
+	; Call once you are ready to actually start the macro.
+	finish_startup(){
+		global	; Remove! phase out mass use of globals
+		
+		; Show the GUI =====================================
+		local ver := this.private.core_version
+		local aver := this.private.author_version
+		local name := this.private.author_macro_name
+		local x := this.private.gui_x
+		local y := this.private.gui_y
+		local w := this.private.gui_w
+		local h := this.private.gui_h
+		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
+
+		this.private.debug_ready := 1
+
+		; Set up the links on the footer of the main page
+		h := this.private.get_gui_h() - 40
+		name := this.private.get_macro_name()
+		alink := this.private.author_help
+		Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adhd">ADHD Instructions</a>    %name% %alink%
+
+
+		;Hook for Tooltips
+		;OnMessage(0x200, "this.private.mouse_move")
+		OnMessage(0x200, "adhd_mouse_move")
+
+
+		; Finish setup =====================================
+		this.private.profile_changed()
+		this.private.debug_window_change()
+
+		this.private.debug("Finished startup")
+
+		; Finished startup, allow change of controls to fire events
+		this.private.starting_up := 0
+
+	}
+
 	; ===============================================================================================================
 
 	config_tabs(tabs){
@@ -429,14 +477,6 @@ Class ADHDLib {
 
 	get_limit_app_on(){
 		return this.private.get_limit_app_on()
-	}
-
-	finish_startup(){
-		return this.private.finish_startup()
-	}
-
-	gui_add(ctype, cname, copts, cparam3, cdef){
-		return this.private.gui_add(ctype, cname, copts, cparam3, cdef)
 	}
 
 	send_keyup_on_press(sub,mod){
@@ -582,15 +622,6 @@ Class ADHD_Private {
 	}
 
 
-	; Adds a GUI item and registers it for storage in the INI file
-	; type(edit etc), name(variable name), options(eg xp+50), param3(eg dropdown list, label), default(used for ini file)
-	gui_add(ctype, cname, copts, cparam3, cdef){
-		; Note this function assumes global so it can create gui items
-		Global
-		Gui, Add, %ctype%, %copts% v%cname% gadhd_option_changed, %cparam3%
-		this.ini_vars.Insert([cname,ctype,cdef])
-	}
-
 	build_ini_name(){
 		tmp := A_Scriptname
 		Stringsplit, tmp, tmp,.
@@ -608,44 +639,6 @@ Class ADHD_Private {
 		}
 		this.ini_name := ini_name ".ini"
 		return
-	}
-
-	finish_startup(){
-		global	; Remove! phase out mass use of globals
-		
-		; Show the GUI =====================================
-		local ver := this.core_version
-		local aver := this.author_version
-		local name := this.author_macro_name
-		local x := this.gui_x
-		local y := this.gui_y
-		local w := this.gui_w
-		local h := this.gui_h
-		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
-
-		this.debug_ready := 1
-
-		; Set up the links on the footer of the main page
-		h := this.get_gui_h() - 40
-		name := this.get_macro_name()
-		alink := this.author_help
-		Gui, Add, Link, x5 y%h%, <a href="http://evilc.com/proj/adhd">ADHD Instructions</a>    %name% %alink%
-
-
-		;Hook for Tooltips
-		;OnMessage(0x200, "this.mouse_move")
-		OnMessage(0x200, "adhd_mouse_move")
-
-
-		; Finish setup =====================================
-		this.profile_changed()
-		this.debug_window_change()
-
-		this.debug("Finished startup")
-
-		; Finished startup, allow change of controls to fire events
-		this.starting_up := 0
-
 	}
 
 	config_ini_version(ver){
