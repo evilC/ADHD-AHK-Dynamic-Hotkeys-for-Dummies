@@ -248,9 +248,6 @@ Class ADHD_Private
 		; Make sure closing the GUI using X exits the script
 		OnExit, GuiClose
 
-		; List of mouse buttons
-		this.mouse_buttons := "LButton|RButton|MButton|XButton1|XButton2|WheelUp|WheelDown|WheelLeft|WheelRight"
-
 		ini := this.ini_name
 		IniRead, x, %ini%, Settings, adhd_gui_x, unset
 		IniRead, y, %ini%, Settings, adhd_gui_y, unset
@@ -316,8 +313,7 @@ Class ADHD_Private
 		Gui, Add, Text, x190 yp W100 Center, Current Binding
 
 		; Add hotkeys
-		local mb := this.mouse_buttons
-		
+	
 		; Add functionality toggle as last item in list
 		this.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
 
@@ -330,6 +326,8 @@ Class ADHD_Private
 			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_display_%A_Index% w160 x105 yp-3, None
 			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w95 xp+165 yp,
 			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+270, Bind
+			adhd_hk_bind_%A_Index%_TT := this.hotkey_list[A_Index,"tooltip"]
+
 			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
 			Gui, Add, Checkbox, vadhd_hk_wild_%A_Index% gadhd_option_changed xp+45 yp+5 w25 center
 			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."

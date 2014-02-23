@@ -40,8 +40,7 @@ ADHD.config_hotkey_add({uiname: "Change Fire Rate", subroutine: "ChangeFireRate"
 ADHD.config_hotkey_add({uiname: "Weapon Toggle", subroutine: "WeaponToggle"})
 ADHD.config_hotkey_add({uiname: "Arm Lock Toggle", subroutine: "ArmLockToggle"})
 ADHD.config_hotkey_add({uiname: "Fire Mode Toggle", subroutine: "FireModeToggle"})
-ADHD.config_hotkey_add({uiname: "Jump Jet Spam", subroutine: "JumpJetSpam"})
-adhd_hk_k_5_TT := "Jump Jet spam will hit the Jump Jet key (Specified on the Main tab) quickly.`nThis helps prevent RSI when climbing hills etc."
+ADHD.config_hotkey_add({uiname: "Jump Jet Spam", subroutine: "JumpJetSpam", tooltip: "Jump Jet spam will hit the Jump Jet key (Specified on the Main tab) quickly.`nThis helps prevent RSI when climbing hills etc."})
 ;ADHD.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "FunctionalityToggle"})
 
 ; Hook into ADHD events
