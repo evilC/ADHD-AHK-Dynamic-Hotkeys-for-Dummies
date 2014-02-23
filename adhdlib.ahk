@@ -3,17 +3,28 @@
 Class ADHDLib
 	; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
 {
-	; ToDo:
-	; BUGS:
+	/*
+	ToDo:
 
-	; Before next release:
+	BUGS:
 
-	; Features:
+	Before next release:
+	* Test send_keyup_on_press - not ensured it worked correctly.
+	* adhd_mouse_move - always running? Limit to only run while macro is active?
+	* No stick support? But mentioned in binding popup
 
-	; Long-term:
-	; Perform checking on hotkey_list to ensure sane values (No dupes, labels do not already exist etc)
-	; Replace label names in ini with actual label names instead of 1, 2, 3 ?
-	
+	Features:
+
+
+	Long-term:
+	* organize functions into sub-objects
+	  "private" functions to ADHD.private.func?
+	  get() functions for variables instead of having apps access them direct
+	* Some way to remove self-refs to ADHD. in code?
+	* Way to move BindMode #If block inside object?
+	* Replace label names in ini with actual label names instead of 1, 2, 3 ?
+
+	*/
 	; Constructor - init default values
 	__New(){
 		this.core_version := "2.3.0"
