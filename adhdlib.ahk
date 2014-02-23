@@ -4,87 +4,84 @@ Class ADHDLib {
 	}
 
 	init(){
-		ret := this.private.init()
-		return ret
+		return this.private.init()
 	}
 
 	config_about(data){
-		ret := this.private.config_about(data)
-		return ret
+		return this.private.config_about(data)
 	}
 
 	config_size(w,h){
-		ret := this.private.config_size(w,h)
-		return ret
+		return this.private.config_size(w,h)
 	}
 
 	config_updates(url){
-		ret := this.private.config_updates(url)
-		return ret
+		return this.private.config_updates(url)
 	}
 
-	config_default_app(app){
-		ret := this.private.config_default_app(app)
-		return ret
+	config_limit_app(app){
+		return this.private.config_limit_app(app)
+	}
+
+	config_get_limit_app(){
+		return this.private.config_get_limit_app()
+	}
+
+	config_get_limit_app_on(){
+		return this.private.config_get_limit_app_on()
 	}
 
 	config_hotkey_add(data){
-		ret := this.private.config_hotkey_add(data)
-		return ret
+		return this.private.config_hotkey_add(data)
 	}
 
 	config_event(name, hook){
-		ret := this.private.config_event(name, hook)
-		return ret
+		return this.private.config_event(name, hook)
 	}
 
 	create_gui(){
-		ret := this.private.create_gui()
-		return ret
+		return this.private.create_gui()
 	}
 
 	finish_startup(){
-		ret := this.private.finish_startup()
-		return ret
+		return this.private.finish_startup()
 	}
 
 	gui_add(ctype, cname, copts, cparam3, cdef){
-		ret := this.private.gui_add(ctype, cname, copts, cparam3, cdef)
-		return ret
+		return this.private.gui_add(ctype, cname, copts, cparam3, cdef)
 	}
 
 	send_keyup_on_press(sub,mod){
-		ret := this.private.send_keyup_on_press(sub,mod)
-		return ret
+		return this.private.send_keyup_on_press(sub,mod)
 	}
 
 	exit_app(){
-		ret := this.private.exit_app()
-		return ret
+		return this.private.exit_app()
 	}
 
 	limit_app_get_size(){
-		ret := this.private.limit_app_get_size()
-		return ret
+		return this.private.limit_app_get_size()
 	}
 	
 	limit_app_get_last_size(){
-		ret := this.private.limit_app_get_last_size()
-		return ret
+		return this.private.limit_app_get_last_size()
 	}
 
 	debug(msg){
-		ret := this.private.debug(msg)
-		return ret
+		return this.private.debug(msg)
 	}
 
 	run_as_admin(){
-		ret := this.private.run_as_admin()
-		return ret
+		return this.private.run_as_admin()
 	}
 
 	is_starting_up(){
 		return this.private.starting_up
+	}
+
+	get_debug_mode(){
+		global adhd_debug_mode
+		return adhd_debug_mode
 	}
 }
 
@@ -124,7 +121,7 @@ Class ADHD_Private
 		this.author_name := "Unknown"							; Your Name
 		this.author_link := ""
 		
-		this.default_app := ""
+		this.limit_app := ""
 		this.gui_w := 450
 		this.gui_h := 200
 		
@@ -550,14 +547,20 @@ Class ADHD_Private
 		this.gui_h := h
 	}
 	
-	config_default_app(app){
-		this.default_app := app
+	config_limit_app(app){
+		this.limit_app := app
 	}
 	
-	config_get_default_app_on(){
+	config_get_limit_app_on(){
 		global adhd_limit_application_on
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application_on
+	}
+	
+	config_get_limit_app(){
+		global adhd_limit_application
+		;Gets the state of the Limit App checkbox
+		return adhd_limit_application
 	}
 	
 	config_updates(url){
@@ -690,10 +693,10 @@ Class ADHD_Private
 		
 		; limit application name
 		this.remove_glabel("adhd_limit_application")
-		if (this.default_app == "" || this.default_app == null){
-			this.default_app := A_Space
+		if (this.limit_app == "" || this.limit_app == null){
+			this.limit_app := A_Space
 		}
-		tmp := this.read_ini("adhd_limit_app",this.current_profile,this.default_app)
+		tmp := this.read_ini("adhd_limit_app",this.current_profile,this.limit_app)
 		GuiControl,, adhd_limit_application, %tmp%
 		this.add_glabel("adhd_limit_application")
 		
@@ -799,10 +802,10 @@ Class ADHD_Private
 			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
 			
 			; Limit app
-			if (this.default_app == "" || this.default_app == null){
-				this.default_app := A_Space
+			if (this.limit_app == "" || this.limit_app == null){
+				this.limit_app := A_Space
 			}
-			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.default_app)
+			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.limit_app)
 			;SB_SetText("Current profile: " this.current_profile, 2)
 			this.set_profile_statusbar()
 			

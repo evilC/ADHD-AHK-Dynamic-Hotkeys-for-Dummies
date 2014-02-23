@@ -15,6 +15,11 @@ Key:
 = Fixed slight incompatibility issue
   Pollution of global namespace (DisplayToolTip and RemoveToolTip)
   These now have ADHD_ prefixes
+= functions / variables *default_app* are now *limit_app*
+= Moved majority of functions / data into a "private" object.
+  To make it clear what functions are intended to be called by library users.
++ Added functions config_get_limit_app() and config_get_limit_app_on() to avoid need to access globals
++ get_debug_mode() function added
 
 2.2 5th Jan 2014
 = Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.

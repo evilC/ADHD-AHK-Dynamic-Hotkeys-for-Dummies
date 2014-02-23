@@ -24,7 +24,7 @@ SetKeyDelay, 0, 50
 ADHD.config_about({name: "Fire Control", version: 3.0, author: "evilC", link: "<a href=""http://evilc.com/proj/firectrl"">Homepage</a>"})
 ; The default application to limit hotkeys to.
 ; Starts disabled by default, so no danger setting to whatever you want
-ADHD.config_default_app("CryENGINE")
+ADHD.config_limit_app("CryENGINE")
 
 ; GUI size
 ADHD.config_size(450,320)
