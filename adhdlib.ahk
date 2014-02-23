@@ -9,9 +9,14 @@ Before next release:
 * Test send_keyup_on_press - not ensured it worked correctly.
 * adhd_mouse_move - always running? Limit to only run while macro is active?
 * No stick support? But mentioned in binding popup
+* Pull public funcs out of private object, so I know when I am editing user-visible stuff
+* Finish Banner comments
+* Docs
+  Description of functions available to user
+  If creating extra GUIs, first available is 4 (Suggest 5?)
+* Mechanism to find out how many GUIs ADHD uses?
 
 Features:
-
 
 Long-term:
 * Some way to remove self-refs to ADHD. in code?
