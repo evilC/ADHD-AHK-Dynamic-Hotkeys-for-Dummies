@@ -13,6 +13,16 @@ Class ADHDLib {
 		return ret
 	}
 
+	config_size(w,h){
+		ret := this.private.config_size(w,h)
+		return ret
+	}
+
+	config_updates(url){
+		ret := this.private.config_updates(url)
+		return ret
+	}
+
 	config_default_app(app){
 		ret := this.private.config_default_app(app)
 		return ret
@@ -51,6 +61,30 @@ Class ADHDLib {
 	exit_app(){
 		ret := this.private.exit_app()
 		return ret
+	}
+
+	limit_app_get_size(){
+		ret := this.private.limit_app_get_size()
+		return ret
+	}
+	
+	limit_app_get_last_size(){
+		ret := this.private.limit_app_get_last_size()
+		return ret
+	}
+
+	debug(msg){
+		ret := this.private.debug(msg)
+		return ret
+	}
+
+	run_as_admin(){
+		ret := this.private.run_as_admin()
+		return ret
+	}
+
+	is_starting_up(){
+		return this.private.starting_up
 	}
 }
 
@@ -1607,7 +1641,7 @@ Class ADHD_Private
 	}
 	
 	; Run as admin code from http://www.autohotkey.com/board/topic/46526-
-	run_as_admin() {
+	run_as_admin(){
 		Global 0
 		IfEqual, A_IsAdmin, 1, Return 0
 		Loop, %0% {

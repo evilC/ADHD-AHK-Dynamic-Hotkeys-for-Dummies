@@ -251,14 +251,14 @@ firectrl_init(){
 	global fire_on := 0
 	
 	; Only release toggle keys if we are not in program mode
-	if (!ADHD.get_program_mode()){
+	;if (!ADHD.get_program_mode()){
 		if (arm_lock_toggle_mode){
 			Gosub, DisableArmLockToggle
 		}
 		if (weapon_toggle_mode){
 			Gosub, DisableToggle
 		}
-	}
+	;}
 	
 	; This gets called in Program Mode, so now would be a good time to re-initialize
 	
@@ -329,7 +329,7 @@ program_mode_on_hook(){
 program_mode_off_hook(){
 	global ADHD
 	; called at start, so do not run if ADHD is starting up
-	if (!ADHD.starting_up){
+	if (!ADHD.is_starting_up()){
 		firectrl_init()
 		Gosub, DisableTimers
 	}
