@@ -34,7 +34,7 @@ Long-term:
  #      #   #   #  #  #        #    #   #         #      #   #  #   #  #   #    #      #    #   #  #   #  #   #
  #       ###   ####   #####   ###    ###          #       ###   #   #   ###     #     ###    ###   #   #   ###
 
-Ways for you to interact with the ADHD library are in here
+Functions in this section are intended for use by script authors.
 */
 
 Class ADHDLib {
@@ -56,6 +56,8 @@ Class ADHDLib {
 	Set various options for the script before starting
 	*/
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
 	; Make sure the macro runs with administrator priveleges.
 	; Some games etc will not see sent keys without this.
 	; Run as admin code from http://www.autohotkey.com/board/topic/46526-
@@ -69,6 +71,8 @@ Class ADHDLib {
 			: A_AhkPath),str,(A_IsCompiled ? "": """" . A_ScriptFullPath . """" . A_Space) params,str,A_WorkingDir,int,1)
 		ExitApp
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Configure the About tab
 	; Pass an associative array
@@ -88,17 +92,23 @@ Class ADHDLib {
 		}
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
 	; Sets the default option for the "Limit App" setting.
 	; If you are writing a macro for a game, you should find the game's ahk_class using the AHK Window Spy and set it here
 	config_limit_app(app){
 		this.private.limit_app := app
 	}
 	
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
 	; Sets the size of the GUI
 	config_size(w,h){
 		this.private.gui_w := w
 		this.private.gui_h := h
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Configures the update notifications system for your script
 	; If you wish to notify users when you update your script, you can have ADHD check a web URL to determine what the latest version of your script is.
@@ -107,6 +117,8 @@ Class ADHDLib {
 	config_updates(url){
 		this.private.author_url_prefix := url
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Adds a hotkey to the script
 	; Pass an associative array
@@ -119,6 +131,8 @@ Class ADHDLib {
 	config_hotkey_add(data){
 		this.private.hotkey_list.Insert(data)
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 	
 	; Adds a "hook" into ADHD - when a specific event happens, the specified label will be called
 	; Available events:
@@ -130,8 +144,37 @@ Class ADHDLib {
 	config_event(name, hook){
 		this.private.events[name] := hook
 	}
-	
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Configures tabs used by ADHD.
+	; If you wish to add aditional tabs, or change the name of the "Main" tab, pass an array of names to this function
+	; The FIRST item will ALWAYS be the "Main" tab.
+	; ADHD will add the other default tabs (Bindings, Profiles, About) at the end of these tabs. 
+	; eg: ADHD.config_tabs(Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats"))
+	config_tabs(tabs){
+		this.private.tab_list := tabs
+		return
+	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Sets the version of the INI file.
+	; Use this if you make major changes to the names of the GUI controls etc, such that an INI file would not be compatible.
+	; Set to a new version to force a message warning users that the ini file will not be compatible.
+	config_ini_version(ver){
+		return this.private.config_ini_version(ver)
+	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Determines if config version is written to INI file on exit
+	config_write_version(setting){
+		this.private.write_version := setting
+		return
+	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
 	  ###    #                    #       #                         #   #
@@ -144,6 +187,8 @@ Class ADHDLib {
 	                                                  #   #                #
 	                                                   ###                 #
 	*/
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Initializes ADHD
 	; Load settings, staring profile etc.
@@ -243,6 +288,8 @@ Class ADHDLib {
 		this.private.loaded_ini_version := iv
 
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Creates the GUI
 	create_gui(){
@@ -416,6 +463,8 @@ Class ADHDLib {
 
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
 	; Adds a GUI item and registers it for storage in the INI file
 	; type(edit etc), name(variable name), options(eg xp+50), param3(eg dropdown list, label), default(used for ini file)
 	gui_add(ctype, cname, copts, cparam3, cdef){
@@ -424,6 +473,8 @@ Class ADHDLib {
 		Gui, Add, %ctype%, %copts% v%cname% gadhd_option_changed, %cparam3%
 		this.private.ini_vars.Insert([cname,ctype,cdef])
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Call once you are ready to actually start the macro.
 	finish_startup(){
@@ -464,74 +515,143 @@ Class ADHDLib {
 
 	}
 
-	; ===============================================================================================================
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
-	config_tabs(tabs){
-		this.private.tab_list := tabs
-		return
-	}
+	/*
+	  ###           #      #                                                   #          ###           #      #
+	 #   #          #      #                                                   #         #   #          #      #
+	 #       ###   ####   ####    ###   # ##    ###           ###   # ##    ## #         #       ###   ####   ####    ###   # ##    ###
+	 #      #   #   #      #     #   #  ##  #  #                 #  ##  #  #  ##          ###   #   #   #      #     #   #  ##  #  #
+	 #  ##  #####   #      #     #####  #       ###           ####  #   #  #   #             #  #####   #      #     #####  #       ###
+	 #   #  #       #  #   #  #  #      #          #         #   #  #   #  #  ##         #   #  #       #  #   #  #  #      #          #
+	  ###    ###     ##     ##    ###   #      ####           ####  #   #   ## #          ###    ###     ##     ##    ###   #      ####
+	
+	; Functions to get and set values
+	*/
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Gets the name of the application specified in the "Limit to Application" box
 	get_limit_app(){
 		return this.private.get_limit_app()
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Gets the state of the "Limit to Application" checkbox
 	get_limit_app_on(){
 		return this.private.get_limit_app_on()
 	}
 
-	send_keyup_on_press(sub,mod){
-		return this.private.send_keyup_on_press(sub,mod)
-	}
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
-	exit_app(){
-		return this.private.exit_app()
-	}
-
+	; Gets the current size of the application specified in the "Limit to Application" box
+	; returns  an object with .w and .h properties
 	limit_app_get_size(){
 		return this.private.limit_app_get_size()
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
 	
+	; Gets the LAST size of the application specified in the "Limit to Application" box
+	; This is useful for example to detect an game going from windowed mode (lobby) to fullscreen (game)
+	; returns  an object with .w and .h properties
 	limit_app_get_last_size(){
 		return this.private.limit_app_get_last_size()
 	}
 
-	debug(msg){
-		return this.private.debug(msg)
-	}
+	; --------------------------------------------------------------------------------------------------------------------------------------
 
+	; Is ADHD still starting up?
 	is_starting_up(){
 		return this.private.starting_up
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Is ADHD in Debug Mode?
 	get_debug_mode(){
 		global adhd_debug_mode
 		return adhd_debug_mode
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Gets the name of the current tab in ADHD
 	get_current_tab(){
 		global adhd_current_tab
 		return adhd_current_tab
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Changes to the specified tab
 	set_current_tab(tab){
 		;global adhd_current_tab
 		GuiControl, Choose,adhd_current_tab, %tab%
 		return
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Is this the first time this macro has been run ?
+	; Can be used to provide custom welcome screens, set up stuff etc.
 	is_first_run(){
 		return this.private.first_run
 	}
 
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; The version of the INI file - see config_ini_version()
 	get_ini_version(){
 		return this.private.loaded_ini_version
 	}
 
-	; Determines if config version is written to INI file on exit
-	config_write_version(setting){
-		this.private.write_version := setting
-		return
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	/*
+	 #   #    #                         #####                        #       #
+	 #   #                              #                            #
+	 ## ##   ##     ###    ###          #      #   #  # ##    ###   ####    ##     ###   # ##    ###
+	 # # #    #    #      #   #         ####   #   #  ##  #  #   #   #       #    #   #  ##  #  #
+	 #   #    #     ###   #             #      #   #  #   #  #       #       #    #   #  #   #   ###
+	 #   #    #        #  #   #         #      #  ##  #   #  #   #   #  #    #    #   #  #   #      #
+	 #   #   ###   ####    ###          #       ## #  #   #   ###     ##    ###    ###   #   #  ####
+	
+	; Usefull stuff that does not fit into any other category
+	*/
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Writes something to the debug window
+	debug(msg){
+		return this.private.debug(msg)
 	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; Quits the script
+	exit_app(){
+		return this.private.exit_app()
+	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
+	; When doing a macro that is activated by holding a button, some games behave weirdly if an up event is not seen for the hotkey.
+	; eg you have a macro where holding Right Mouse performs a rapid fire...
+	; ...Some games will not work right if they do not see an up event for the Right Mouse button
+	; Use this function to send an up event for whatever key a user has bound to an action
+	; sub = the subroutine that is called for the hotkey (eg "fire")
+	; mod = "mofified" or "unmodified"
+	; If a user bound Ctrl+Right Mouse to an action...
+	; "modified" would send an up event for Ctrl+Right Mouse
+	; "unmodified" would send an up event for just Right Mouse
+	send_keyup_on_press(sub,mod){
+		return this.private.send_keyup_on_press(sub,mod)
+	}
+
+	; --------------------------------------------------------------------------------------------------------------------------------------
+
 }
 
 /*
