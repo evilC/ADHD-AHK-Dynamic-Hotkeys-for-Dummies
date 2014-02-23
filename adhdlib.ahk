@@ -42,19 +42,172 @@ Class ADHDLib {
 		this.private := New ADHD_Private
 	}
 
-	; Public functions
-	; Script Authors - these are the functions you should be using.
+	/*
+	  ###                   ##     #                           #
+	 #   #                 #  #
+	 #       ###   # ##    #      ##     ## #  #   #  # ##    ##    # ##    ## #
+	 #      #   #  ##  #  ####     #    #  #   #   #  ##  #    #    ##  #  #  #
+	 #      #   #  #   #   #       #     ##    #   #  #        #    #   #   ##
+	 #   #  #   #  #   #   #       #    #      #  ##  #        #    #   #  #
+	  ###    ###   #   #   #      ###    ###    ## #  #       ###   #   #   ###
+	                                    #   #                              #   #
+	                                     ###                                ###
+	Set various options for the script before starting
+	*/
+
+	; Make sure the macro runs with administrator priveleges.
+	; Some games etc will not see sent keys without this.
+	; Run as admin code from http://www.autohotkey.com/board/topic/46526-
+	run_as_admin(){
+		Global 0
+		IfEqual, A_IsAdmin, 1, Return 0
+		Loop, %0% {
+			params .= A_Space . %A_Index%
+		}
+		DllCall("shell32\ShellExecute" (A_IsUnicode ? "":"A"),uint,0,str,"RunAs",str,(A_IsCompiled ? A_ScriptFullPath
+			: A_AhkPath),str,(A_IsCompiled ? "": """" . A_ScriptFullPath . """" . A_Space) params,str,A_WorkingDir,int,1)
+		ExitApp
+	}
+
+	; Configure the About tab
+	; Pass an associative array
+	; name:		The name of your script
+	; author:	Your name
+	; link:		A Link to a web page about your script
+	; eg: ADHD.config_about({name: "My script", version: 1.0.0, author: "myname", link: "<a href=""http://google.com"">Google</a>"})
+	config_about(data){
+		this.private.author_macro_name := data.name					; Change this to your macro name
+		this.private.author_version := data.version									; The version number of your script
+		this.private.author_name := data.author							; Your Name
+		this.private.author_link := data.link
+		if (data.help == "" || data.help == null){
+			this.private.author_help := this.private.author_link
+		} else {
+			this.private.author_help := data.help
+		}
+	}
+
+	; Sets the default option for the "Limit App" setting.
+	; If you are writing a macro for a game, you should find the game's ahk_class using the AHK Window Spy and set it here
+	config_limit_app(app){
+		this.private.limit_app := app
+	}
+	
+
+	/*
+	  ###    #                    #       #                         #   #
+	 #   #   #                    #                                 #   #
+	 #      ####    ###   # ##   ####    ##    # ##    ## #         #   #  # ##
+	  ###    #         #  ##  #   #       #    ##  #  #  #          #   #  ##  #
+	     #   #      ####  #       #       #    #   #   ##           #   #  ##  #
+	 #   #   #  #  #   #  #       #  #    #    #   #  #             #   #  # ##
+	  ###     ##    ####  #        ##    ###   #   #   ###           ###   #
+	                                                  #   #                #
+	                                                   ###                 #
+	*/
+
+	; Initializes ADHD
+	; Load settings, staring profile etc.
 	init(){
-		return this.private.init()
+		; Perform some sanity checks
+		
+		; Check if compiled and x64
+		if (A_IsCompiled){
+			if (A_Ptrsize == 8 && this.private.x64_warning){
+				Msgbox, You have compiled this script under 64-bit AutoHotkey.`n`nAs a result, it will not work for people on 32-bit windows.`n`nDo one of the following:`n`nReinstall Autohotkey and choose a 32-bit option.`n`nCreate an x64 exe without this warning by calling config_ignore_x64_warning()
+				ExitApp
+			}
+		}
+
+		; Check the user instantiated the class
+		if (this.private.instantiated != 1){
+			msgbox You must use an instance of this class, not the class itself.`nPut something like ADHD := New ADHDLib at the start of your script
+			ExitApp
+		}
+		
+		; Check the user defined a hotkey
+		if (this.private.hotkey_list.MaxIndex() < 1){
+			if (this.private.noaction_warning){
+				msgbox, No Actions defined, Exiting...
+				ExitApp
+			}
+		}
+
+		; Check that labels specified as targets for hotkeys actually exist
+		Loop, % this.private.hotkey_list.MaxIndex()
+		{
+			If (IsLabel(this.private.hotkey_list[A_Index,"subroutine"]) == false){
+				msgbox, % "The label`n`n" this.private.hotkey_list[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
+				ExitApp
+			}
+
+		}
+		this.private.debug_ready := 0
+		
+		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
+		this.private.starting_up := 1
+
+		this.private.debug("Starting up...")
+		this.private.app_act_curr := -1						; Whether the current app is the "Limit To" app or not. Start on -1 so we can init first state of app active or inactive
+
+		; Start ADHD init vars and settings
+
+		; Variables to be stored in the INI file - will be populated by code later
+		; [Variable Name, Control Type, Default Value]
+		; eg ["MyControl","Edit","None"]
+		this.private.ini_vars := []
+		; Holds a REFERENCE copy of the hotkeys so authors can access the info (eg to quickly send a keyup after the trigger key is pressed)
+		this.private.hotkey_mappings := {}
+
+		#InstallKeybdHook
+		#InstallMouseHook
+		#MaxHotKeysPerInterval, 200
+
+		#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+		SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
+		; Make sure closing the GUI using X exits the script
+		OnExit, GuiClose
+
+		ini := this.private.ini_name
+		IniRead, x, %ini%, Settings, adhd_gui_x, unset
+		IniRead, y, %ini%, Settings, adhd_gui_y, unset
+		this.private.first_run := 0
+		if (x == "unset"){
+			msgbox, Welcome to this ADHD based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
+			x := 0	; initialize
+			this.private.first_run := 1
+		}
+		if (y == "unset"){
+			y := 0
+			this.private.first_run := 1
+		}
+
+		if (x == ""){
+			x := 0	; in case of crash empty values can get written
+		}
+		if (y == ""){
+			y := 0
+		}
+		this.private.gui_x := x
+		this.private.gui_y := y
+		
+		; Get list of profiles
+		IniRead, pl, %ini%, Settings, adhd_profile_list, %A_Space%
+		this.private.profile_list := pl
+		; Get current profile
+		IniRead, cp, %ini%, Settings, adhd_current_profile, Default
+		this.private.current_profile := cp
+
+		; Get version of INI file
+		IniRead, iv, %ini%, Settings, adhd_ini_version, 1
+		this.private.loaded_ini_version := iv
+
 	}
 
 	config_tabs(tabs){
 		this.private.tab_list := tabs
 		return
-	}
-
-	config_about(data){
-		return this.private.config_about(data)
 	}
 
 	config_size(w,h){
@@ -63,10 +216,6 @@ Class ADHDLib {
 
 	config_updates(url){
 		return this.private.config_updates(url)
-	}
-
-	config_limit_app(app){
-		return this.private.config_limit_app(app)
 	}
 
 	get_limit_app(){
@@ -115,10 +264,6 @@ Class ADHDLib {
 
 	debug(msg){
 		return this.private.debug(msg)
-	}
-
-	run_as_admin(){
-		return this.private.run_as_admin()
 	}
 
 	is_starting_up(){
@@ -244,104 +389,7 @@ Class ADHD_Private {
 		this.HKLastHotkey := 0			; Time that Escape was pressed to exit key binding. Used to determine if Escape is held (Clear binding)
 	}
 
-	; Load settings etc
-	init(){
-		; Perform some sanity checks
-		
-		; Check if compiled and x64
-		if (A_IsCompiled){
-			if (A_Ptrsize == 8 && this.x64_warning){
-				Msgbox, You have compiled this script under 64-bit AutoHotkey.`n`nAs a result, it will not work for people on 32-bit windows.`n`nDo one of the following:`n`nReinstall Autohotkey and choose a 32-bit option.`n`nCreate an x64 exe without this warning by calling config_ignore_x64_warning()
-				ExitApp
-			}
-		}
 
-		; Check the user instantiated the class
-		if (this.instantiated != 1){
-			msgbox You must use an instance of this class, not the class itself.`nPut something like ADHD := New ADHDLib at the start of your script
-			ExitApp
-		}
-		
-		; Check the user defined a hotkey
-		if (this.hotkey_list.MaxIndex() < 1){
-			if (this.noaction_warning){
-				msgbox, No Actions defined, Exiting...
-				ExitApp
-			}
-		}
-
-		; Check that labels specified as targets for hotkeys actually exist
-		Loop, % this.hotkey_list.MaxIndex()
-		{
-			If (IsLabel(this.hotkey_list[A_Index,"subroutine"]) == false){
-				msgbox, % "The label`n`n" this.hotkey_list[A_Index,"subroutine"] ":`n`n does not appear in the script.`nExiting..."
-				ExitApp
-			}
-
-		}
-		this.debug_ready := 0
-		
-		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
-		this.starting_up := 1
-
-		this.debug("Starting up...")
-		this.app_act_curr := -1						; Whether the current app is the "Limit To" app or not. Start on -1 so we can init first state of app active or inactive
-
-		; Start ADHD init vars and settings
-
-		; Variables to be stored in the INI file - will be populated by code later
-		; [Variable Name, Control Type, Default Value]
-		; eg ["MyControl","Edit","None"]
-		this.ini_vars := []
-		; Holds a REFERENCE copy of the hotkeys so authors can access the info (eg to quickly send a keyup after the trigger key is pressed)
-		this.hotkey_mappings := {}
-
-		#InstallKeybdHook
-		#InstallMouseHook
-		#MaxHotKeysPerInterval, 200
-
-		#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-		SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-
-		; Make sure closing the GUI using X exits the script
-		OnExit, GuiClose
-
-		ini := this.ini_name
-		IniRead, x, %ini%, Settings, adhd_gui_x, unset
-		IniRead, y, %ini%, Settings, adhd_gui_y, unset
-		this.first_run := 0
-		if (x == "unset"){
-			msgbox, Welcome to this ADHD based macro.`n`nThis window is appearing because no settings file was detected, one will now be created in the same folder as the script`nIf you wish to have an icon on your desktop, it is recommended you place this file somewhere other than your desktop and create a shortcut, to avoid clutter or accidental deletion.`n`nIf you need further help, look in the About tab for links to Author(s) sites.`nYou may find help there, you may also find a Donate button...
-			x := 0	; initialize
-			this.first_run := 1
-		}
-		if (y == "unset"){
-			y := 0
-			this.first_run := 1
-		}
-
-		if (x == ""){
-			x := 0	; in case of crash empty values can get written
-		}
-		if (y == ""){
-			y := 0
-		}
-		this.gui_x := x
-		this.gui_y := y
-		
-		; Get list of profiles
-		IniRead, pl, %ini%, Settings, adhd_profile_list, %A_Space%
-		this.profile_list := pl
-		; Get current profile
-		IniRead, cp, %ini%, Settings, adhd_current_profile, Default
-		this.current_profile := cp
-
-		; Get version of INI file
-		IniRead, iv, %ini%, Settings, adhd_ini_version, 1
-		this.loaded_ini_version := iv
-
-	}
-	
 	; Creates the ADHD gui
 	create_gui(){
 		; IMPORTANT !!
@@ -608,10 +656,6 @@ Class ADHD_Private {
 		this.gui_h := h
 	}
 	
-	config_limit_app(app){
-		this.limit_app := app
-	}
-	
 	get_limit_app_on(){
 		global adhd_limit_application_on
 		;Gets the state of the Limit App checkbox
@@ -626,19 +670,6 @@ Class ADHD_Private {
 	
 	config_updates(url){
 		this.author_url_prefix := url
-	}
-	
-	; Configure the About tab
-	config_about(data){
-		this.author_macro_name := data.name					; Change this to your macro name
-		this.author_version := data.version									; The version number of your script
-		this.author_name := data.author							; Your Name
-		this.author_link := data.link
-		if (data.help == "" || data.help == null){
-			this.author_help := this.author_link
-		} else {
-			this.author_help := data.help
-		}
 	}
 	
 	; Attempts to read a version from a text file at a specified URL
@@ -1702,18 +1733,6 @@ Class ADHD_Private {
 		}
 	}
 	
-	; Run as admin code from http://www.autohotkey.com/board/topic/46526-
-	run_as_admin(){
-		Global 0
-		IfEqual, A_IsAdmin, 1, Return 0
-		Loop, %0% {
-			params .= A_Space . %A_Index%
-		}
-		DllCall("shell32\ShellExecute" (A_IsUnicode ? "":"A"),uint,0,str,"RunAs",str,(A_IsCompiled ? A_ScriptFullPath
-			: A_AhkPath),str,(A_IsCompiled ? "": """" . A_ScriptFullPath . """" . A_Space) params,str,A_WorkingDir,int,1)
-		ExitApp
-	}
-
 	; Semantic version comparison from http://www.autohotkey.com/board/topic/81789-semverahk-compare-version-numbers/
 	semver_validate(version){
 		return !!RegExMatch(version, "^(\d+)\.(\d+)\.(\d+)(\-([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?(\+([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?$")
