@@ -40,6 +40,7 @@ Ways for you to interact with the ADHD library are in here
 Class ADHDLib {
 	__New(){
 		this.private := New ADHD_Private
+		this.private.parent := this
 	}
 
 	/*
@@ -93,6 +94,44 @@ Class ADHDLib {
 		this.private.limit_app := app
 	}
 	
+	; Sets the size of the GUI
+	config_size(w,h){
+		this.private.gui_w := w
+		this.private.gui_h := h
+	}
+
+	; Configures the update notifications system for your script
+	; If you wish to notify users when you update your script, you can have ADHD check a web URL to determine what the latest version of your script is.
+	; ADHD will be expecting to find a text file at that URL containing only text like so: Version = 1.2.3
+	; eg: ADHD.config_updates("http://evilc.com/files/ahk/mwo/firectrl/firectrl.au.txt")
+	config_updates(url){
+		this.private.author_url_prefix := url
+	}
+
+	; Adds a hotkey to the script
+	; Pass an associative array
+	; uiname:		The name of the hotkey
+	; subroutine: 	The label to call when this hotkey is pressed
+	;				Also be aware here that if you declare a hotkey that points to the subroutine "fire"...
+	;				"fire_up" will also be called when the hotkey is released
+	; tooltip:		A tooltip to display when the user hovers over the hotkey
+	; eg: ADHD.config_hotkey_add({uiname: "Fire", subroutine: "Fire", tooltip: "When you press this button, the fire Action will be run"})
+	config_hotkey_add(data){
+		this.private.hotkey_list.Insert(data)
+	}
+	
+	; Adds a "hook" into ADHD - when a specific event happens, the specified label will be called
+	; Available events:
+	; option_changed	An option changed
+	; tab_changed		The current tab changed
+	; on_exit			The app is about to exit
+	; app_active		The "Limited" app came into focus
+	; app_inactive		The "Limited" app went out of focus
+	config_event(name, hook){
+		this.private.events[name] := hook
+	}
+	
+
 
 	/*
 	  ###    #                    #       #                         #   #
@@ -205,17 +244,183 @@ Class ADHDLib {
 
 	}
 
+	; Creates the GUI
+	create_gui(){
+		; IMPORTANT !!
+		; Declare global for gui creation routine.
+		; Limitation of AHK - no dynamic creation of vars, and guicontrols need a global or static var
+		; Also, gui commands do not accept objects
+		; So declare temp vars as local in here
+		global
+		; Set up the GUI ====================================================
+		local w := this.private.gui_w
+		local h := this.private.gui_h - 30
+		
+		local tabs := ""
+		Loop, % this.private.tab_list.MaxIndex()
+		{
+			tabs := tabs this.private.tab_list[A_Index] "|"
+		}
+		Gui, Add, Tab2, x0 w%w% h%h% vadhd_current_tab gadhd_tab_changed, %tabs%Bindings|Profiles|About
+
+		local tabtop := 40
+		local current_row := tabtop + 20
+		
+		local nexttab := this.private.tab_list.MaxIndex() + 1
+		Gui, Tab, %nexttab%
+		; BINDINGS TAB
+		Gui, Add, Text, x5 y40 W100 Center, Action
+		Gui, Add, Text, x190 yp W100 Center, Current Binding
+
+		; Add hotkeys
+	
+		; Add functionality toggle as last item in list
+		this.private.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
+
+		Gui, Add, Text, x410 y30 w30 center, Wild`nMode
+
+		Loop % this.private.hotkey_list.MaxIndex() {
+			local name := this.private.hotkey_list[A_Index,"uiname"]
+			Gui, Add, Text,x5 W100 y%current_row%, %name%
+			Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w260 x105 yp-3,
+			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_display_%A_Index% w160 x105 yp-3, None
+			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w95 xp+165 yp,
+			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+270, Bind
+			adhd_hk_bind_%A_Index%_TT := this.private.hotkey_list[A_Index,"tooltip"]
+
+			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
+			Gui, Add, Checkbox, vadhd_hk_wild_%A_Index% gadhd_option_changed xp+45 yp+5 w25 center
+			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
+			current_row := current_row + 30
+		}
+		
+		; Limit application toggle
+		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
+
+		; Limit application Text box
+		Gui, Add, Edit, xp+170 yp+2 W120 vadhd_limit_application gadhd_option_changed,
+
+		; Launch window spy
+		Gui, Add, Button, xp+125 yp-1 W15 gadhd_show_window_spy, ?
+		adhd_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
+
+		local nexttab := this.private.tab_list.MaxIndex() + 2
+		Gui, Tab, %nexttab%
+		; PROFILES TAB
+		current_row := tabtop + 20
+		Gui, Add, Text,x5 W40 y%current_row%,Profile
+		local pl := this.private.profile_list
+		local cp := this.private.current_profile
+		Gui, Add, DropDownList, xp+35 yp-5 W300 vadhd_current_profile gadhd_profile_changed, Default||%pl%
+		Gui, Add, Button, x40 yp+25 gadhd_add_profile, Add
+		Gui, Add, Button, xp+35 yp gadhd_delete_profile, Delete
+		Gui, Add, Button, xp+47 yp gadhd_duplicate_profile, Copy
+		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename
+		GuiControl,ChooseString, adhd_current_profile, %cp%
+
+		local nexttab := this.private.tab_list.MaxIndex() + 3
+		Gui, Tab, %nexttab%
+		; ABOUT TAB
+		current_row := tabtop + 5
+		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys for Dummies (ADHD)
+		Gui, Add, Link,x5 yp+25,By Clive "evilC" Galway <a href="http://evilc.com/proj/adhd">HomePage</a>    <a href="https://github.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies">GitHub Page</a>
+		local aname := this.private.author_name
+		local mname := this.private.author_macro_name
+		Gui, Add, Link,x5 yp+35, This macro ("%mname%") was created by %aname%
+		local link := this.private.author_link
+		Gui, Add, Link,x5 yp+25, %link%
+
+		Gui, Tab
+
+		; Add a Status Bar for at-a-glance current profile readout and update status
+		local ypos := this.private.gui_h - 17
+		local tmp := this.private.gui_w - 200
+		Gui, Add, Text, x5 y%ypos%,Current Profile:
+		Gui, Add, Text, x80 y%ypos% w%tmp% vCurrentProfile,
+
+		local tmp := this.private.gui_w - 120
+		Gui, Add, Text, x%tmp% y%ypos%, Updates:
+		;local tmp := this.private.gui_w - 200
+		Gui, Add, Text, xp+50 y%ypos% w60 vUpdateStatus
+		;Gui, Add, Button, xp+48 yp-6 w20 gadhd_update_status_info, ?
+		Gui, Add, Button, xp+48 yp-6 w20 vUpdateStatusInfo, ?
+		UpdateStatusInfo_TT := ""
+
+		; Build version info
+		local bad := 0
+		
+		; Check versions:
+		local tt := "Versions found on the internet:`n`nADHD library:`n"
+
+		; ADHD version
+		ver := this.private.get_ver("http://evilc.com/files/ahk/adhd/adhd.au.txt")
+		if (ver){
+			cv := this.private.pad_version(this.private.core_version)
+			rv := this.private.pad_version(ver)
+			diffc := this.private.semver_compare(cv,rv)
+
+			tt .= this.private.version_tooltip_create(diffc,rv,cv)
+		} else {
+			tt .= "Unknown"
+			bad++
+		}
+		tt .= "`n`n" this.private.author_macro_name ":`n"
+
+		; Author Script version
+		ver := this.private.get_ver(this.private.author_url_prefix)
+		if (ver){
+			av := this.private.pad_version(this.private.author_version)
+			rv := this.private.pad_version(ver)
+			diffa := this.private.semver_compare(av,rv)
+
+			tt .= this.private.version_tooltip_create(diffa,rv,av)
+		} else {
+			tt .= "Unknown"
+			bad++
+		}
+
+		; Show status
+		if (bad){
+			GuiControl,+Cblack,UpdateStatus
+			GuiControl,,UpdateStatus, Unknown
+		} else if (diffc > 0 || diffa > 0){
+			GuiControl,+Cblue,UpdateStatus
+			GuiControl,,UpdateStatus, Newer
+		} else if (diffc < 0 || diffa < 0){
+			GuiControl,+Cred,UpdateStatus
+			GuiControl,,UpdateStatus, Available
+		} else {
+			GuiControl,+Cgreen,UpdateStatus
+			GuiControl,,UpdateStatus, Latest
+		}
+
+		; Apply tooltip
+		UpdateStatusInfo_TT := tt
+
+		; Add Debug window controls
+		Gui, Tab
+		local tmp
+		tmp := w - 90
+		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_window gadhd_debug_window_change, Show Window
+			
+		tmp := w - 180
+		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_mode gadhd_debug_change, Debug Mode
+
+		; Fire GuiSubmit while starting_up is on to set all the variables
+		Gui, Submit, NoHide
+
+		; Create the debug GUI, but do not show yet
+		tmp := w - 30
+		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents hwndadhd_log ReadOnly,
+		Gui, 2:Add, Button, gadhd_clear_log, clear
+
+	}
+
+	; ===============================================================================================================
+
 	config_tabs(tabs){
 		this.private.tab_list := tabs
 		return
-	}
-
-	config_size(w,h){
-		return this.private.config_size(w,h)
-	}
-
-	config_updates(url){
-		return this.private.config_updates(url)
 	}
 
 	get_limit_app(){
@@ -224,18 +429,6 @@ Class ADHDLib {
 
 	get_limit_app_on(){
 		return this.private.get_limit_app_on()
-	}
-
-	config_hotkey_add(data){
-		return this.private.config_hotkey_add(data)
-	}
-
-	config_event(name, hook){
-		return this.private.config_event(name, hook)
-	}
-
-	create_gui(){
-		return this.private.create_gui()
 	}
 
 	finish_startup(){
@@ -342,7 +535,6 @@ Class ADHD_Private {
 		this.events.option_changed := ""
 		this.events.tab_changed := ""
 		this.events.on_exit := ""
-		this.events.disable_timers := ""
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 		
@@ -390,179 +582,6 @@ Class ADHD_Private {
 	}
 
 
-	; Creates the ADHD gui
-	create_gui(){
-		; IMPORTANT !!
-		; Declare global for gui creation routine.
-		; Limitation of AHK - no dynamic creation of vars, and guicontrols need a global or static var
-		; Also, gui commands do not accept objects
-		; So declare temp vars as local in here
-		global
-		; Set up the GUI ====================================================
-		local w := this.gui_w
-		local h := this.gui_h - 30
-		
-		local tabs := ""
-		Loop, % this.tab_list.MaxIndex()
-		{
-			tabs := tabs this.tab_list[A_Index] "|"
-		}
-		Gui, Add, Tab2, x0 w%w% h%h% vadhd_current_tab gadhd_tab_changed, %tabs%Bindings|Profiles|About
-
-		local tabtop := 40
-		local current_row := tabtop + 20
-		
-		local nexttab := this.tab_list.MaxIndex() + 1
-		Gui, Tab, %nexttab%
-		; BINDINGS TAB
-		Gui, Add, Text, x5 y40 W100 Center, Action
-		Gui, Add, Text, x190 yp W100 Center, Current Binding
-
-		; Add hotkeys
-	
-		; Add functionality toggle as last item in list
-		this.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
-
-		Gui, Add, Text, x410 y30 w30 center, Wild`nMode
-
-		Loop % this.hotkey_list.MaxIndex() {
-			local name := this.hotkey_list[A_Index,"uiname"]
-			Gui, Add, Text,x5 W100 y%current_row%, %name%
-			Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w260 x105 yp-3,
-			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_display_%A_Index% w160 x105 yp-3, None
-			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w95 xp+165 yp,
-			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+270, Bind
-			adhd_hk_bind_%A_Index%_TT := this.hotkey_list[A_Index,"tooltip"]
-
-			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
-			Gui, Add, Checkbox, vadhd_hk_wild_%A_Index% gadhd_option_changed xp+45 yp+5 w25 center
-			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
-			current_row := current_row + 30
-		}
-		
-		; Limit application toggle
-		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
-
-		; Limit application Text box
-		Gui, Add, Edit, xp+170 yp+2 W120 vadhd_limit_application gadhd_option_changed,
-
-		; Launch window spy
-		Gui, Add, Button, xp+125 yp-1 W15 gadhd_show_window_spy, ?
-		adhd_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
-
-		local nexttab := this.tab_list.MaxIndex() + 2
-		Gui, Tab, %nexttab%
-		; PROFILES TAB
-		current_row := tabtop + 20
-		Gui, Add, Text,x5 W40 y%current_row%,Profile
-		local pl := this.profile_list
-		local cp := this.current_profile
-		Gui, Add, DropDownList, xp+35 yp-5 W300 vadhd_current_profile gadhd_profile_changed, Default||%pl%
-		Gui, Add, Button, x40 yp+25 gadhd_add_profile, Add
-		Gui, Add, Button, xp+35 yp gadhd_delete_profile, Delete
-		Gui, Add, Button, xp+47 yp gadhd_duplicate_profile, Copy
-		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename
-		GuiControl,ChooseString, adhd_current_profile, %cp%
-
-		local nexttab := this.tab_list.MaxIndex() + 3
-		Gui, Tab, %nexttab%
-		; ABOUT TAB
-		current_row := tabtop + 5
-		Gui, Add, Link,x5 y%current_row%, This macro was created using AHK Dynamic Hotkeys for Dummies (ADHD)
-		Gui, Add, Link,x5 yp+25,By Clive "evilC" Galway <a href="http://evilc.com/proj/adhd">HomePage</a>    <a href="https://github.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies">GitHub Page</a>
-		local aname := this.author_name
-		local mname := this.author_macro_name
-		Gui, Add, Link,x5 yp+35, This macro ("%mname%") was created by %aname%
-		local link := this.author_link
-		Gui, Add, Link,x5 yp+25, %link%
-
-		Gui, Tab
-
-		; Add a Status Bar for at-a-glance current profile readout and update status
-		local ypos := this.gui_h - 17
-		local tmp := this.gui_w - 200
-		Gui, Add, Text, x5 y%ypos%,Current Profile:
-		Gui, Add, Text, x80 y%ypos% w%tmp% vCurrentProfile,
-
-		local tmp := this.gui_w - 120
-		Gui, Add, Text, x%tmp% y%ypos%, Updates:
-		;local tmp := this.gui_w - 200
-		Gui, Add, Text, xp+50 y%ypos% w60 vUpdateStatus
-		;Gui, Add, Button, xp+48 yp-6 w20 gadhd_update_status_info, ?
-		Gui, Add, Button, xp+48 yp-6 w20 vUpdateStatusInfo, ?
-		UpdateStatusInfo_TT := ""
-
-		; Build version info
-		local bad := 0
-		
-		; Check versions:
-		local tt := "Versions found on the internet:`n`nADHD library:`n"
-
-		; ADHD version
-		ver := this.get_ver("http://evilc.com/files/ahk/adhd/adhd.au.txt")
-		if (ver){
-			cv := this.pad_version(this.core_version)
-			rv := this.pad_version(ver)
-			diffc := this.semver_compare(cv,rv)
-
-			tt .= this.version_tooltip_create(diffc,rv,cv)
-		} else {
-			tt .= "Unknown"
-			bad++
-		}
-		tt .= "`n`n" this.author_macro_name ":`n"
-
-		; Author Script version
-		ver := this.get_ver(this.author_url_prefix)
-		if (ver){
-			av := this.pad_version(this.author_version)
-			rv := this.pad_version(ver)
-			diffa := this.semver_compare(av,rv)
-
-			tt .= this.version_tooltip_create(diffa,rv,av)
-		} else {
-			tt .= "Unknown"
-			bad++
-		}
-
-		; Show status
-		if (bad){
-			GuiControl,+Cblack,UpdateStatus
-			GuiControl,,UpdateStatus, Unknown
-		} else if (diffc > 0 || diffa > 0){
-			GuiControl,+Cblue,UpdateStatus
-			GuiControl,,UpdateStatus, Newer
-		} else if (diffc < 0 || diffa < 0){
-			GuiControl,+Cred,UpdateStatus
-			GuiControl,,UpdateStatus, Available
-		} else {
-			GuiControl,+Cgreen,UpdateStatus
-			GuiControl,,UpdateStatus, Latest
-		}
-
-		; Apply tooltip
-		UpdateStatusInfo_TT := tt
-
-		; Add Debug window controls
-		Gui, Tab
-		local tmp
-		tmp := w - 90
-		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_window gadhd_debug_window_change, Show Window
-			
-		tmp := w - 180
-		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_mode gadhd_debug_change, Debug Mode
-
-		; Fire GuiSubmit while starting_up is on to set all the variables
-		Gui, Submit, NoHide
-
-		; Create the debug GUI, but do not show yet
-		tmp := w - 30
-		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents hwndadhd_log ReadOnly,
-		Gui, 2:Add, Button, gadhd_clear_log, clear
-
-	}
-
-	
 	; Adds a GUI item and registers it for storage in the INI file
 	; type(edit etc), name(variable name), options(eg xp+50), param3(eg dropdown list, label), default(used for ini file)
 	gui_add(ctype, cname, copts, cparam3, cdef){
@@ -641,21 +660,6 @@ Class ADHD_Private {
 		this.noaction_warning := 0
 	}
 	
-	; Setup stuff
-	config_hotkey_add(data){
-		this.hotkey_list.Insert(data)
-	}
-	
-	;ADHD.config_event("option_changed", "option_changed_hook")
-	config_event(name, hook){
-		this.events[name] := hook
-	}
-	
-	config_size(w,h){
-		this.gui_w := w
-		this.gui_h := h
-	}
-	
 	get_limit_app_on(){
 		global adhd_limit_application_on
 		;Gets the state of the Limit App checkbox
@@ -666,10 +670,6 @@ Class ADHD_Private {
 		global adhd_limit_application
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application
-	}
-	
-	config_updates(url){
-		this.author_url_prefix := url
 	}
 	
 	; Attempts to read a version from a text file at a specified URL
@@ -1590,7 +1590,6 @@ Class ADHD_Private {
 				this.app_act_curr := 0
 				
 				; Fire event hooks
-				this.fire_event(this.events.disable_timers)
 				this.debug("Firing app_inactive")
 				this.fire_event(this.events.app_inactive)
 				;Gosub, adhd_disable_author_timers	; Fire the Author hook
