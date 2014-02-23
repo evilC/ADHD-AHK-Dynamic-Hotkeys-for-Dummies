@@ -1,5 +1,100 @@
-; 3rd party functions
-; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
+Class ADHD_Private {
+	; Functions and Data that are NOT meant to be used by users of ADHD.
+	; If you wish to access data or fuctions in here, then either you are doing something unintended, or the library needs updating
+
+	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
+	BuildHotkeyName(hk,ctrltype){
+		outstr := ""
+		modctr := 0
+		stringupper, hk, hk
+
+		Loop % strlen(hk) {
+			chr := substr(hk,1,1)
+			mod := 0
+
+			if (chr == "^"){
+				; Ctrl
+				mod := "CTRL"
+				modctr++
+			} else if (chr == "!"){
+				; Alt
+				mod := "ALT"
+				modctr++
+			} else if (chr == "+"){
+				; Shift
+				mod := "SHIFT"
+				modctr++
+			} else if (chr == "#"){
+				; Win
+				mod := "WIN"
+				modctr++
+			} else {
+				break
+			}
+			if (mod){
+				if (modctr > 1){
+					outstr .= " + "
+				}
+				outstr .= mod
+				; shift character out
+				hk := substr(hk,2)
+			}
+		}
+		if (modctr){
+			outstr .= " + "
+		}
+
+		if (ctrltype == 1){
+			; Solitary Modifiers
+			pfx := substr(hk,1,1)
+			if (pfx == "L"){
+				outstr .= "LEFT "
+			} else {
+				outstr .= "RIGHT "
+			}
+			outstr .= substr(hk,2)
+		} else if (ctrltype == 2){
+			; Mouse Buttons
+			if (hk == "LBUTTON") {
+				outstr .= "LEFT MOUSE"
+			} else if (hk == "RBUTTON") {
+				outstr .= "RIGHT MOUSE"
+			} else if (hk == "MBUTTON") {
+				outstr .= "MIDDLE MOUSE"
+			} else if (hk == "XBUTTON1") {
+				outstr .= "MOUSE THUMB 1"
+			} else if (hk == "XBUTTON2") {
+				outstr .= "MOUSE THUMB 2"
+			} else if (hk == "WHEELUP") {
+				outstr .= "MOUSE WHEEL U"
+			} else if (hk == "WHEELDOWN") {
+				outstr .= "MOUSE WHEEL D"
+			} else if (hk == "WHEELLEFT") {
+				outstr .= "MOUSE WHEEL L"
+			} else if (hk == "WHEELRIGHT") {
+				outstr .= "MOUSE WHEEL R"
+			}
+		} else if (ctrltype == 3){
+			; Joystick Buttons
+			pos := instr(hk,"JOY")
+			id := substr(hk,1,pos-1)
+			button := substr(hk,5)
+			outstr .= "JOYSTICK " id " BTN " button
+		} else {
+			; Keyboard Keys
+			tmp := instr(hk,"NUMPAD")
+			if (tmp){
+				outstr .= "NUMPAD " substr(hk,7)
+			} else {
+				; Replace underscores with spaces (In case of key name like MEDIA_PLAY_PAUSE)
+				StringReplace, hk, hk, _ , %A_SPACE%, All
+				outstr .= hk
+			}
+		}
+		return outstr
+	}
+}
+
 Class ADHDLib
 	; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
 {
@@ -94,14 +189,14 @@ Class ADHDLib
 		this.HKControlType := 0		; The kind of control that the last hotkey was. 0 = regular key, 1 = solitary modifier, 2 = mouse, 3 = joystick
 		this.HKSecondaryInput := ""	; Set to button pressed if the last detected bind was a Mouse button, Joystick button or Solitary Modifier
 		this.HKLastHotkey := 0			; Time that Escape was pressed to exit key binding. Used to determine if Escape is held (Clear binding)
-
-
 	}
 
 	; EXPOSED METHODS
 	
 	; Load settings etc
 	init(){
+		this.private := New ADHD_Private
+		this.private.parent := this
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -599,7 +694,7 @@ Class ADHDLib
 			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].type := tmp
 
-			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+			tmp := this.private.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 		}
 		
@@ -697,7 +792,7 @@ Class ADHDLib
 
 				; Hotkey
 				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
-				tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+				tmp := this.private.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 
 				; Strip ~ * etc and store it in umnodified opbect.
@@ -861,6 +956,7 @@ Class ADHDLib
 		return hk
 	}
 
+	/*
 	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
 	BuildHotkeyName(hk,ctrltype){
 		outstr := ""
@@ -952,7 +1048,7 @@ Class ADHDLib
 		}
 		return outstr
 	}
-
+	*/
 	; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
 	BuildHotkeyString(str, type := 0){
 
@@ -1760,29 +1856,6 @@ adhd_exit_app:
 GuiClose:
 	ADHD.exit_app()
 	return
-
-/*
-; ==========================================================================================================================
-; Code from http://www.autohotkey.com/board/topic/47439-user-defined-dynamic-hotkeys/
-; This code enables extra keys in a Hotkey GUI control
-#MenuMaskKey vk07                 ;Requires AHK_L 38+
-#If adhd_ctrl := ADHD.hotkey_ctrl_has_focus()
-	*AppsKey::                       ;Add support for these special keys,
-	*BackSpace::                     ;  which the hotkey control does not normally allow.
-	*Delete::
-	*Enter::
-	*Escape::
-	*Pause::
-	*PrintScreen::
-	*Space::
-	*Tab::
-	; Can use mouse hotkeys like this - it detects them but does not display them
-	;~*WheelUp::
-	; ToDo: Pass A_ThisHotkey also?
-	ADHD.special_key_pressed(adhd_ctrl)
-	return
-#If
-*/
 
 ; Detects Modifiers and Mouse Buttons in BindMode
 #If ADHD.BindMode
