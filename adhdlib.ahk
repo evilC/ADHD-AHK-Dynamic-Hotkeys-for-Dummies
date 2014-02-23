@@ -1,101 +1,60 @@
-Class ADHD_Private {
-	; Functions and Data that are NOT meant to be used by users of ADHD.
-	; If you wish to access data or fuctions in here, then either you are doing something unintended, or the library needs updating
+Class ADHDLib {
+	__New(){
+		this.private := New ADHD_Private
+	}
 
-	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
-	BuildHotkeyName(hk,ctrltype){
-		outstr := ""
-		modctr := 0
-		stringupper, hk, hk
+	init(){
+		ret := this.private.init()
+		return ret
+	}
 
-		Loop % strlen(hk) {
-			chr := substr(hk,1,1)
-			mod := 0
+	config_about(data){
+		ret := this.private.config_about(data)
+		return ret
+	}
 
-			if (chr == "^"){
-				; Ctrl
-				mod := "CTRL"
-				modctr++
-			} else if (chr == "!"){
-				; Alt
-				mod := "ALT"
-				modctr++
-			} else if (chr == "+"){
-				; Shift
-				mod := "SHIFT"
-				modctr++
-			} else if (chr == "#"){
-				; Win
-				mod := "WIN"
-				modctr++
-			} else {
-				break
-			}
-			if (mod){
-				if (modctr > 1){
-					outstr .= " + "
-				}
-				outstr .= mod
-				; shift character out
-				hk := substr(hk,2)
-			}
-		}
-		if (modctr){
-			outstr .= " + "
-		}
+	config_default_app(app){
+		ret := this.private.config_default_app(app)
+		return ret
+	}
 
-		if (ctrltype == 1){
-			; Solitary Modifiers
-			pfx := substr(hk,1,1)
-			if (pfx == "L"){
-				outstr .= "LEFT "
-			} else {
-				outstr .= "RIGHT "
-			}
-			outstr .= substr(hk,2)
-		} else if (ctrltype == 2){
-			; Mouse Buttons
-			if (hk == "LBUTTON") {
-				outstr .= "LEFT MOUSE"
-			} else if (hk == "RBUTTON") {
-				outstr .= "RIGHT MOUSE"
-			} else if (hk == "MBUTTON") {
-				outstr .= "MIDDLE MOUSE"
-			} else if (hk == "XBUTTON1") {
-				outstr .= "MOUSE THUMB 1"
-			} else if (hk == "XBUTTON2") {
-				outstr .= "MOUSE THUMB 2"
-			} else if (hk == "WHEELUP") {
-				outstr .= "MOUSE WHEEL U"
-			} else if (hk == "WHEELDOWN") {
-				outstr .= "MOUSE WHEEL D"
-			} else if (hk == "WHEELLEFT") {
-				outstr .= "MOUSE WHEEL L"
-			} else if (hk == "WHEELRIGHT") {
-				outstr .= "MOUSE WHEEL R"
-			}
-		} else if (ctrltype == 3){
-			; Joystick Buttons
-			pos := instr(hk,"JOY")
-			id := substr(hk,1,pos-1)
-			button := substr(hk,5)
-			outstr .= "JOYSTICK " id " BTN " button
-		} else {
-			; Keyboard Keys
-			tmp := instr(hk,"NUMPAD")
-			if (tmp){
-				outstr .= "NUMPAD " substr(hk,7)
-			} else {
-				; Replace underscores with spaces (In case of key name like MEDIA_PLAY_PAUSE)
-				StringReplace, hk, hk, _ , %A_SPACE%, All
-				outstr .= hk
-			}
-		}
-		return outstr
+	config_hotkey_add(data){
+		ret := this.private.config_hotkey_add(data)
+		return ret
+	}
+
+	config_event(name, hook){
+		ret := this.private.config_event(name, hook)
+		return ret
+	}
+
+	create_gui(){
+		ret := this.private.create_gui()
+		return ret
+	}
+
+	finish_startup(){
+		ret := this.private.finish_startup()
+		return ret
+	}
+
+	gui_add(ctype, cname, copts, cparam3, cdef){
+		ret := this.private.gui_add(ctype, cname, copts, cparam3, cdef)
+		return ret
+	}
+
+	send_keyup_on_press(sub,mod){
+		ret := this.private.send_keyup_on_press(sub,mod)
+		return ret
+	}
+
+	exit_app(){
+		ret := this.private.exit_app()
+		return ret
 	}
 }
 
-Class ADHDLib
+Class ADHD_Private
 	; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
 {
 	/*
@@ -195,8 +154,6 @@ Class ADHDLib
 	
 	; Load settings etc
 	init(){
-		this.private := New ADHD_Private
-		this.private.parent := this
 		; Perform some sanity checks
 		
 		; Check if compiled and x64
@@ -464,6 +421,7 @@ Class ADHDLib
 		tmp := w - 30
 		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents hwndadhd_log ReadOnly,
 		Gui, 2:Add, Button, gadhd_clear_log, clear
+
 	}
 
 	
@@ -694,7 +652,7 @@ Class ADHDLib
 			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].type := tmp
 
-			tmp := this.private.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 		}
 		
@@ -792,7 +750,7 @@ Class ADHDLib
 
 				; Hotkey
 				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
-				tmp := this.private.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+				tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 
 				; Strip ~ * etc and store it in umnodified opbect.
@@ -956,7 +914,6 @@ Class ADHDLib
 		return hk
 	}
 
-	/*
 	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
 	BuildHotkeyName(hk,ctrltype){
 		outstr := ""
@@ -1048,7 +1005,7 @@ Class ADHDLib
 		}
 		return outstr
 	}
-	*/
+
 	; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
 	BuildHotkeyString(str, type := 0){
 
@@ -1782,65 +1739,65 @@ adhd_mouse_move(){
 ; Label triggers
 
 adhd_profile_changed:
-	ADHD.profile_changed()
+	ADHD.private.profile_changed()
 	return
 
 adhd_option_changed:
-	ADHD.option_changed()
+	ADHD.private.option_changed()
 	return
 
 adhd_set_binding:
-	ADHD.set_binding(substr(A_GuiControl,14))
+	ADHD.private.set_binding(substr(A_GuiControl,14))
 	return
 
 adhd_add_profile:
-	ADHD.add_profile("")	; just clicking the button calls with empty param
+	ADHD.private.add_profile("")	; just clicking the button calls with empty param
 	return
 
 ; Delete Profile pressed
 adhd_delete_profile:
-	ADHD.delete_profile(adhd_current_profile)	; Just clicking the button deletes the current profile
+	ADHD.private.delete_profile(adhd_current_profile)	; Just clicking the button deletes the current profile
 	return
 
 adhd_duplicate_profile:
-	ADHD.duplicate_profile("")
+	ADHD.private.duplicate_profile("")
 	return
 	
 adhd_rename_profile:
-	ADHD.rename_profile()
+	ADHD.private.rename_profile()
 	return
 
 adhd_tab_changed:
-	ADHD.tab_changed()
+	ADHD.private.tab_changed()
 	return
 
 adhd_show_window_spy:
-	ADHD.show_window_spy()
+	ADHD.private.show_window_spy()
 	return
 
 adhd_debug_window_change:
-	ADHD.debug_window_change()
+	ADHD.private.debug_window_change()
 	return
 
 adhd_debug_change:
-	ADHD.debug_change()
+	ADHD.private.debug_change()
 	return
 	
 adhd_clear_log:
-	ADHD.clear_log()
+	ADHD.private.clear_log()
 	return
 
 adhd_heartbeat:
-	ADHD.heartbeat()
+	ADHD.private.heartbeat()
 	return
 
 adhd_functionality_toggle:
-	ADHD.functionality_toggle()
+	ADHD.private.functionality_toggle()
 	return
 
 ADHD_DeleteHotkey:
 	SetTimer, ADHD_DeleteHotkey, Off
-	ADHD.DeleteHotKey()
+	ADHD.private.DeleteHotKey()
 	return
 
 ADHD_EscapeReleased:
@@ -1854,11 +1811,11 @@ ADHD_EscapeReleased:
 ; Kill the macro if the GUI is closed
 adhd_exit_app:
 GuiClose:
-	ADHD.exit_app()
+	ADHD.private.exit_app()
 	return
 
 ; Detects Modifiers and Mouse Buttons in BindMode
-#If ADHD.BindMode
+#If ADHD.private.BindMode
 	; Detect key down of modifier keys
 	*lctrl::
 	*rctrl::
@@ -1869,7 +1826,7 @@ GuiClose:
 	*lwin::
 	*rwin::
 		adhd_tmp_modifier := substr(A_ThisHotkey,2)
-		ADHD.SetModifier(adhd_tmp_modifier,1)
+		ADHD.private.SetModifier(adhd_tmp_modifier,1)
 		return
 
 	; Detect key up of modifier keys
@@ -1883,18 +1840,18 @@ GuiClose:
 	*rwin up::
 		; Strip * from beginning, " up" from end etc
 		adhd_tmp_modifier := substr(substr(A_ThisHotkey,2),1,strlen(A_ThisHotkey) -4)
-		if (ADHD.CurrentModifierCount() == 1){
+		if (ADHD.private.CurrentModifierCount() == 1){
 			; If CurrentModifierCount is 1 when an up is received, then that is a Solitary Modifier
 			; It cannot be a modifier + normal key, as this code would have quit on keydown of normal key
 
-			ADHD.HKControlType := 1
-			ADHD.HKSecondaryInput := adhd_tmp_modifier
+			ADHD.private.HKControlType := 1
+			ADHD.private.HKSecondaryInput := adhd_tmp_modifier
 
 			; Send Escape - This will cause the Input command to quit with an EndKey of Escape
 			; But we stored the modifier key, so we will know it was not really escape
 			Send {Escape}
 		}
-		ADHD.SetModifier(adhd_tmp_modifier,0)
+		ADHD.private.SetModifier(adhd_tmp_modifier,0)
 		return
 
 	; Detect Mouse buttons
@@ -1907,8 +1864,8 @@ GuiClose:
 	wheeldown::
 	wheelleft::
 	wheelright::
-		ADHD.HKControlType := 2
-		ADHD.HKSecondaryInput := A_ThisHotkey
+		ADHD.private.HKControlType := 2
+		ADHD.private.HKSecondaryInput := A_ThisHotkey
 		Send {Escape}
 		return
 #If
