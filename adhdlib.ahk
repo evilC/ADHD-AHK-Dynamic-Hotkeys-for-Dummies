@@ -1,10 +1,38 @@
+; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
+
+/*
+ToDo:
+
+BUGS:
+
+Before next release:
+* Test send_keyup_on_press - not ensured it worked correctly.
+* adhd_mouse_move - always running? Limit to only run while macro is active?
+* No stick support? But mentioned in binding popup
+
+Features:
+
+
+Long-term:
+* Some way to remove self-refs to ADHD. in code?
+* Way to move BindMode #If block inside object?
+* Replace label names in ini with actual label names instead of 1, 2, 3 ?
+
+*/
 Class ADHDLib {
 	__New(){
 		this.private := New ADHD_Private
 	}
 
+	; Public functions
+	; Script Authors - these are the functions you should be using.
 	init(){
 		return this.private.init()
+	}
+
+	config_tabs(tabs){
+		this.private.tab_list := tabs
+		return
 	}
 
 	config_about(data){
@@ -83,33 +111,36 @@ Class ADHDLib {
 		global adhd_debug_mode
 		return adhd_debug_mode
 	}
+
+	get_current_tab(){
+		global adhd_current_tab
+		return adhd_current_tab
+	}
+
+	set_current_tab(tab){
+		;global adhd_current_tab
+		GuiControl, Choose,adhd_current_tab, %tab%
+		return
+	}
+
+	is_first_run(){
+		return this.private.first_run
+	}
+
+	get_ini_version(){
+		return this.private.loaded_ini_version
+	}
+
+	; Determines if config version is written to INI file on exit
+	config_write_version(setting){
+		this.private.write_version := setting
+		return
+	}
 }
 
-Class ADHD_Private
-	; ADHDLib - Autohotkey Dynamic Hotkeys for Dummies
-{
-	/*
-	ToDo:
+Class ADHD_Private {
+	; PRIVATE Class - Script Authors should NOT be directly accessing stuff in here
 
-	BUGS:
-
-	Before next release:
-	* Test send_keyup_on_press - not ensured it worked correctly.
-	* adhd_mouse_move - always running? Limit to only run while macro is active?
-	* No stick support? But mentioned in binding popup
-
-	Features:
-
-
-	Long-term:
-	* organize functions into sub-objects
-	  "private" functions to ADHD.private.func?
-	  get() functions for variables instead of having apps access them direct
-	* Some way to remove self-refs to ADHD. in code?
-	* Way to move BindMode #If block inside object?
-	* Replace label names in ini with actual label names instead of 1, 2, 3 ?
-
-	*/
 	; Constructor - init default values
 	__New(){
 		this.core_version := "2.3.0"
@@ -181,8 +212,6 @@ Class ADHD_Private
 		this.HKLastHotkey := 0			; Time that Escape was pressed to exit key binding. Used to determine if Escape is held (Clear binding)
 	}
 
-	; EXPOSED METHODS
-	
 	; Load settings etc
 	init(){
 		; Perform some sanity checks
