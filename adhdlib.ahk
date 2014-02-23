@@ -51,12 +51,12 @@ Class ADHDLib {
 		return this.private.config_limit_app(app)
 	}
 
-	config_get_limit_app(){
-		return this.private.config_get_limit_app()
+	get_limit_app(){
+		return this.private.get_limit_app()
 	}
 
-	config_get_limit_app_on(){
-		return this.private.config_get_limit_app_on()
+	get_limit_app_on(){
+		return this.private.get_limit_app_on()
 	}
 
 	config_hotkey_add(data){
@@ -580,13 +580,13 @@ Class ADHD_Private {
 		this.limit_app := app
 	}
 	
-	config_get_limit_app_on(){
+	get_limit_app_on(){
 		global adhd_limit_application_on
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application_on
 	}
 	
-	config_get_limit_app(){
+	get_limit_app(){
 		global adhd_limit_application
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application
