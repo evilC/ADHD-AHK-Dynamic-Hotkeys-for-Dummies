@@ -24,6 +24,19 @@ Long-term:
 * Replace label names in ini with actual label names instead of 1, 2, 3 ?
 
 */
+
+/*
+ ####   #   #  ####   #       ###    ###          #####  #   #  #   #   ###   #####   ###    ###   #   #   ###
+ #   #  #   #   #  #  #        #    #   #         #      #   #  #   #  #   #    #      #    #   #  #   #  #   #
+ #   #  #   #   #  #  #        #    #             #      #   #  ##  #  #        #      #    #   #  ##  #  #
+ ####   #   #   ###   #        #    #             ####   #   #  # # #  #        #      #    #   #  # # #   ###
+ #      #   #   #  #  #        #    #             #      #   #  #  ##  #        #      #    #   #  #  ##      #
+ #      #   #   #  #  #        #    #   #         #      #   #  #   #  #   #    #      #    #   #  #   #  #   #
+ #       ###   ####   #####   ###    ###          #       ###   #   #   ###     #     ###    ###   #   #   ###
+
+Ways for you to interact with the ADHD library are in here
+*/
+
 Class ADHDLib {
 	__New(){
 		this.private := New ADHD_Private
@@ -142,6 +155,20 @@ Class ADHDLib {
 		return
 	}
 }
+
+/*
+ ####   ####    ###   #   #    #    #####  #####         #####  #   #  #   #   ###   #####   ###    ###   #   #   ###
+ #   #  #   #    #    #   #   # #     #    #             #      #   #  #   #  #   #    #      #    #   #  #   #  #   #
+ #   #  #   #    #    #   #  #   #    #    #             #      #   #  ##  #  #        #      #    #   #  ##  #  #
+ ####   ####     #     # #   #   #    #    ####          ####   #   #  # # #  #        #      #    #   #  # # #   ###
+ #      # #      #     # #   #####    #    #             #      #   #  #  ##  #        #      #    #   #  #  ##      #
+ #      #  #     #     # #   #   #    #    #             #      #   #  #   #  #   #    #      #    #   #  #   #  #   #
+ #      #   #   ###     #    #   #    #    #####         #       ###   #   #   ###     #     ###    ###   #   #   ###
+
+There be dragons ahead!
+There are no guarantees that these functions will remain named the same, so it is not advised to reference any stuff in here in your script.
+If you need access to stuff in here, request an update to the library!
+*/
 
 Class ADHD_Private {
 	; PRIVATE Class - Script Authors should NOT be directly accessing stuff in here
@@ -1779,6 +1806,22 @@ Class ADHD_Private {
 		return tt
 	}
 }
+
+/*
+  ###   #       ###   ####     #    #              ###   #####  #   #  #####  #####
+ #   #  #      #   #   #  #   # #   #             #   #    #    #   #  #      #
+ #      #      #   #   #  #  #   #  #             #        #    #   #  #      #
+ #      #      #   #   ###   #   #  #              ###     #    #   #  ####   ####
+ #  ##  #      #   #   #  #  #####  #                 #    #    #   #  #      #
+ #   #  #      #   #   #  #  #   #  #             #   #    #    #   #  #      #
+  ###   #####   ###   ####   #   #  #####          ###     #     ###   #      #
+
+This stuff is only here because of limitations in AHK.
+
+You should NOT reference anything prefixed "adhd_" directly.
+All access to these functions and data should be via "Public" functions.
+If there is no public function to do what you require, request a library update!
+*/
 
 ; Tooltip function from http://www.autohotkey.com/board/topic/81915-solved-gui-control-tooltip-on-hover/#entry598735
 ; ToDo: Has to be here as when handling an OnMessage callback, it has no concept of "this"
