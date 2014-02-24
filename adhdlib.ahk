@@ -134,11 +134,12 @@ Class ADHDLib {
 	
 	; Adds a "hook" into ADHD - when a specific event happens, the specified label will be called
 	; Available events:
-	; option_changed	An option changed
-	; tab_changed		The current tab changed
-	; on_exit			The app is about to exit
-	; app_active		The "Limited" app came into focus
-	; app_inactive		The "Limited" app went out of focus
+	; option_changed		An option changed
+	; tab_changed			The current tab changed
+	; on_exit				The app is about to exit
+	; app_active			The "Limited" app came into focus
+	; app_inactive			The "Limited" app went out of focus
+	; resolution_changed	The resolution of the "Limited" app changed
 	config_event(name, hook){
 		this.private.events[name] := hook
 	}
