@@ -7,7 +7,6 @@ BUGS:
 
 Before next release:
 * No stick support? But mentioned in binding popup
-* Mechanism to find out how many GUIs ADHD uses?
 * Update fc screenshots
 * Split FC off into seperate project
 
