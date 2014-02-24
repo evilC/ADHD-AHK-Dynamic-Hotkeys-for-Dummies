@@ -50,7 +50,6 @@ ADHD.config_event("program_mode_on", "program_mode_on_hook")
 ADHD.config_event("program_mode_off", "program_mode_off_hook")
 ADHD.config_event("app_active", "app_active_hook")
 ADHD.config_event("app_inactive", "app_inactive_hook")
-ADHD.config_event("disable_timers", "disable_timers_hook")
 ADHD.config_event("resolution_changed", "resolution_changed_hook")
 
 ADHD.init()
@@ -304,18 +303,12 @@ firectrl_init(){
 
 ; Gets called when the "Limited" app gets focus
 app_active_hook(){
-	
 	return
 }
 
 ; Gets called when the "Limited" app loses focus
 app_inactive_hook(){
 	firectrl_init()
-	Gosub, DisableTimers
-}
-
-; Gets called if ADHD wants to stop your timers
-disable_timers_hook(){
 	Gosub, DisableTimers
 }
 

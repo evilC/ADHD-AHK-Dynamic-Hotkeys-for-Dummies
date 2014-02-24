@@ -1,8 +1,6 @@
 ﻿; ADHD Bare bones template
 ; Simply creates an edit box and binds a hotkey to send the contents of the edit box on press of the hotkey
 
-SendMode, Event
-SetKeyDelay, 0, 50
 ; ============================================================================================
 ; Setup SECTION
 
