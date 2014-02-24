@@ -2,6 +2,8 @@
 
 /*
 ToDo:
+* Removed "disable timers" functionality last release.
+  Bad move? FC Timed fire getting stuck on after Alt-Tab?
 
 BUGS:
 
