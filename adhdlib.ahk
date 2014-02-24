@@ -702,7 +702,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.0.0"
+		this.core_version := "3.0.1"
 
 		this.instantiated := 1
 		this.hotkey_list := []
@@ -1501,9 +1501,7 @@ Class ADHD_Private {
 	; Calling send_keyup_on_press() in an action will cause this to happen
 	send_keyup_on_press(sub,mod){
 		tmp := this.hotkey_mappings[sub][mod] " up"
-		msgbox % sub " - " mod "`n" tmp
-		;Send {%tmp%}
-
+		Send {%tmp%}
 	}
 
 	tab_changed(){

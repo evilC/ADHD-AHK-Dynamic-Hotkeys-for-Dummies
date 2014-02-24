@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.0.1 24th Feb 2014
+= Ooops! I left a debug message in, was triggering any time you pressed fire.
+
 3.0.0 24th Feb 2014
 = Moved to three number semantic versioning system
 + Version checks now regognise newer, older, or same number versions.
