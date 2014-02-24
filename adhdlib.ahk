@@ -7,7 +7,6 @@ BUGS:
 
 Before next release:
 * Test send_keyup_on_press - not ensured it worked correctly.
-* adhd_mouse_move - always running? Limit to only run while macro is active?
 * No stick support? But mentioned in binding popup
 * Mechanism to find out how many GUIs ADHD uses?
 * Update fc screenshots
@@ -1961,23 +1960,29 @@ If there is no public function to do what you require, request a library update!
 ; ToDo: Has to be here as when handling an OnMessage callback, it has no concept of "this"
 adhd_mouse_move(){
 	static CurrControl, PrevControl, _TT
-	CurrControl := A_GuiControl
-	If (CurrControl <> PrevControl){
-			SetTimer, adhd_display_tooltip, -750 	; shorter wait, shows the tooltip faster
-			PrevControl := CurrControl
+
+	; Only check if current window is the AHK GUI
+	IfWinActive, % "ahk_class AutoHotkeyGUI"
+	{
+		CurrControl := A_GuiControl
+		If (CurrControl <> PrevControl){
+				SetTimer, adhd_display_tooltip, -750 	; shorter wait, shows the tooltip faster
+				PrevControl := CurrControl
+		}
+		return
+		
+		adhd_display_tooltip:
+		try
+				ToolTip % %CurrControl%_TT
+		catch
+				ToolTip
+		SetTimer, adhd_remove_tooltip, -10000
+		return
+		
+		adhd_remove_tooltip:
+		ToolTip
+		return
 	}
-	return
-	
-	adhd_display_tooltip:
-	try
-			ToolTip % %CurrControl%_TT
-	catch
-			ToolTip
-	SetTimer, adhd_remove_tooltip, -10000
-	return
-	
-	adhd_remove_tooltip:
-	ToolTip
 	return
 }
 
