@@ -1,31 +1,5 @@
 ; Proof of concept for replacement of Hotkey GUI Item
 
-/*
-
-ToDo:
-* Allow adding to EXTRA_KEY_LIST by users
-* Encapsulate into Object
-
-Back Burner:
-* Pass-through / remap (~ prefix) option.
-  Problems due to AHK limitations - declaring:
-  hotkey, ^a, mysub, ON
-  hotkey, ^a, mysub, OFF
-  hotkey, ~^a, mysub, ON
-  ... Does NOT create a ~^a mapping, the mapping is still ^a
-* AHK hotkey command does not support Joystick buttons plus modifiers - triggers without modifier.
-  Solution probably requires detecting joystick with GetKeyState loop.
-  GetKeyState would be required to support up events anyway.
-* Joystick POV support
-  Again, GetKeyState loop would fix
-* Warn of no up event for wheel up? Optional parameter for detect routine to allow allow keys with keyup event?
-* Warn of binding left or right mouse button without modifiers
-  Only needed if pass-thru is optional, which it currently isn't
-
-Known issues:
-
-*/
-
 #InstallKeybdHook
 #InstallMouseHook
 
