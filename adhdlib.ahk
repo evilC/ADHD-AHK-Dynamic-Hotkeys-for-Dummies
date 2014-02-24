@@ -622,6 +622,12 @@ Class ADHDLib {
 		return this.private.limit_app_is_active()
 	}
 
+	; Returns the number of GUIs used by ADHD.
+	; You can use this to determine the next safe number GUI to use.
+	get_guis_used(){
+		return this.private.guis_used
+	}
+
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
@@ -711,6 +717,7 @@ Class ADHD_Private {
 		this.limit_app := ""
 		this.gui_w := 450
 		this.gui_h := 200
+		this.guis_used := 3					; The number of GUIs used by ADHD. 1 = Main GUI, 2 = Debug Window, 3 = Bind popup
 		
 		this.ini_version := 1
 		this.write_version := 1				; set to 0 to stop writing of version to INI file on exit
