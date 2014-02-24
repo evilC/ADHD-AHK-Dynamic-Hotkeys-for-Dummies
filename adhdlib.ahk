@@ -9,8 +9,6 @@ Before next release:
 * Test send_keyup_on_press - not ensured it worked correctly.
 * adhd_mouse_move - always running? Limit to only run while macro is active?
 * No stick support? But mentioned in binding popup
-* Pull public funcs out of private object, so I know when I am editing user-visible stuff
-* Finish Banner comments
 * Docs
   Description of functions available to user
   If creating extra GUIs, first available is 4 (Suggest 5?)
@@ -834,12 +832,6 @@ Class ADHD_Private {
 		}
 	}
 	
-	; Unused, just here to keep a record of the OnMessage technique
-	gui_move( lParam, wParam, msg )
-	{
-		ToolTip, % "msg: " . msg . " | lParam: " . lParam . " | wParam: " . wParam
-	}
-	
 	set_profile_statusbar(){
 		cp := this.current_profile
 		GuiControl,,CurrentProfile,%cp%
@@ -892,7 +884,7 @@ Class ADHD_Private {
 			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].type := tmp
 
-			tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+			tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 		}
 		
@@ -990,7 +982,7 @@ Class ADHD_Private {
 
 				; Hotkey
 				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
-				tmp := this.BuildHotkeyName(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+				tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 
 				; Strip ~ * etc and store it in umnodified opbect.
@@ -1086,8 +1078,8 @@ Class ADHD_Private {
 					; Start listening to key up event for Escape, to see if it was held
 					this.HKLastHotkey := ctrlnum
 
-					hotkey, Escape up, ADHD_EscapeReleased, ON
-					SetTimer, ADHD_DeleteHotkey, 1000
+					hotkey, Escape up, adhd_escape_released, ON
+					SetTimer, adhd_delete_hotkey, 1000
 				}
 			}
 		}
@@ -1103,7 +1095,7 @@ Class ADHD_Private {
 
 		; Process results
 
-		modct := this.CurrentModifierCount()
+		modct := this.current_modifier_count()
 
 		if (detectedkey && modct && this.HKControlType == 3){
 			msgbox ,,Error, Modifiers (Ctrl, Alt, Shift, Win) are currently not supported with Joystick buttons.
@@ -1112,7 +1104,7 @@ Class ADHD_Private {
 
 		if (detectedkey){
 			clash := 0
-			hk := this.BuildHotkeyString(detectedkey,this.HKControlType)
+			hk := this.build_hotkey_string(detectedkey,this.HKControlType)
 			clash := 0
 			Loop % this.hotkey_list.MaxIndex(){
 				if (A_Index == ctrlnum){
@@ -1120,7 +1112,7 @@ Class ADHD_Private {
 				}
 
 				name := this.hotkey_index_to_name(A_Index)
-				if (this.hotkey_mappings[name].modified != "" && this.StripPrefix(this.hotkey_mappings[name].modified) == this.StripPrefix(hk)){
+				if (this.hotkey_mappings[name].modified != "" && this.strip_prefix(this.hotkey_mappings[name].modified) == this.strip_prefix(hk)){
 					clash := 1
 				}
 			}
@@ -1141,21 +1133,8 @@ Class ADHD_Private {
 
 	}
 
-	; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
-	StripPrefix(hk){
-		Loop {
-			chr := substr(hk,1,1)
-			if (chr == "~" || chr == "*" || chr == "$"){
-				hk := substr(hk,2)
-			} else {
-				break
-			}
-		}
-		return hk
-	}
-
 	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
-	BuildHotkeyName(hk,ctrltype){
+	build_hotkey_name(hk,ctrltype){
 		outstr := ""
 		modctr := 0
 		stringupper, hk, hk
@@ -1247,10 +1226,10 @@ Class ADHD_Private {
 	}
 
 	; Builds an AHK String (eg "^c" for CTRL + C) from the last detected hotkey
-	BuildHotkeyString(str, type := 0){
+	build_hotkey_string(str, type := 0){
 
 		outhk := ""
-		modct := this.CurrentModifierCount()
+		modct := this.current_modifier_count()
 
 		if (type == 1){
 			; Solitary modifier key used (eg Left / Right Alt)
@@ -1284,7 +1263,7 @@ Class ADHD_Private {
 	}
 
 	; Sets the state of the HKModifierState object to reflect the state of the modifier keys
-	SetModifier(hk,state){
+	set_modifier(hk,state){
 		if (hk == "lctrl" || hk == "rctrl"){
 			this.HKModifierState.ctrl := state
 		} else if (hk == "lalt" || hk == "ralt"){
@@ -1298,7 +1277,7 @@ Class ADHD_Private {
 	}
 
 	; Counts how many modifier keys are currently held
-	CurrentModifierCount(){
+	current_modifier_count(){
 		return this.HKModifierState.ctrl + this.HKModifierState.alt + this.HKModifierState.shift  + this.HKModifierState.win
 	}
 
@@ -1807,7 +1786,7 @@ Class ADHD_Private {
 	}
 
 	; Removes a hotkey - called at end of a timer, not a general purpose functions
-	DeleteHotkey(){
+	delete_hotkey(){
 		soundbeep
 		this.disable_hotkeys()
 		name := this.hotkey_index_to_name(this.HKLastHotkey)
@@ -1960,20 +1939,20 @@ adhd_mouse_move(){
 	static CurrControl, PrevControl, _TT
 	CurrControl := A_GuiControl
 	If (CurrControl <> PrevControl){
-			SetTimer, ADHD_DisplayToolTip, -750 	; shorter wait, shows the tooltip faster
+			SetTimer, adhd_display_tooltip, -750 	; shorter wait, shows the tooltip faster
 			PrevControl := CurrControl
 	}
 	return
 	
-	ADHD_DisplayToolTip:
+	adhd_display_tooltip:
 	try
 			ToolTip % %CurrControl%_TT
 	catch
 			ToolTip
-	SetTimer, ADHD_RemoveToolTip, -10000
+	SetTimer, adhd_remove_tooltip, -10000
 	return
 	
-	ADHD_RemoveToolTip:
+	adhd_remove_tooltip:
 	ToolTip
 	return
 }
@@ -2038,14 +2017,14 @@ adhd_functionality_toggle:
 	ADHD.private.functionality_toggle()
 	return
 
-ADHD_DeleteHotkey:
-	SetTimer, ADHD_DeleteHotkey, Off
-	ADHD.private.DeleteHotKey()
+adhd_delete_hotkey:
+	SetTimer, adhd_delete_hotkey, Off
+	ADHD.private.delete_hotkey()
 	return
 
-ADHD_EscapeReleased:
-	hotkey, Escape up, ADHD_EscapeReleased, OFF
-	SetTimer, ADHD_DeleteHotkey, Off
+adhd_escape_released:
+	hotkey, Escape up, adhd_escape_released, OFF
+	SetTimer, adhd_delete_hotkey, Off
 	return
 	
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
@@ -2069,7 +2048,7 @@ GuiClose:
 	*lwin::
 	*rwin::
 		adhd_tmp_modifier := substr(A_ThisHotkey,2)
-		ADHD.private.SetModifier(adhd_tmp_modifier,1)
+		ADHD.private.set_modifier(adhd_tmp_modifier,1)
 		return
 
 	; Detect key up of modifier keys
@@ -2083,8 +2062,8 @@ GuiClose:
 	*rwin up::
 		; Strip * from beginning, " up" from end etc
 		adhd_tmp_modifier := substr(substr(A_ThisHotkey,2),1,strlen(A_ThisHotkey) -4)
-		if (ADHD.private.CurrentModifierCount() == 1){
-			; If CurrentModifierCount is 1 when an up is received, then that is a Solitary Modifier
+		if (ADHD.private.current_modifier_count() == 1){
+			; If current_modifier_count is 1 when an up is received, then that is a Solitary Modifier
 			; It cannot be a modifier + normal key, as this code would have quit on keydown of normal key
 
 			ADHD.private.HKControlType := 1
@@ -2094,7 +2073,7 @@ GuiClose:
 			; But we stored the modifier key, so we will know it was not really escape
 			Send {Escape}
 		}
-		ADHD.private.SetModifier(adhd_tmp_modifier,0)
+		ADHD.private.set_modifier(adhd_tmp_modifier,0)
 		return
 
 	; Detect Mouse buttons
