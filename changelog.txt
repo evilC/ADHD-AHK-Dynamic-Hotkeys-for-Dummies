@@ -4,7 +4,7 @@ Key:
 = : Change / Fix
 + : Added feature
 
-3.0.0
+3.0.0 24th Feb 2014
 = Moved to three number semantic versioning system
 + Version checks now regognise newer, older, or same number versions.
 = option_changed removed from debug list - it provided no information
