@@ -9,9 +9,6 @@ Before next release:
 * Test send_keyup_on_press - not ensured it worked correctly.
 * adhd_mouse_move - always running? Limit to only run while macro is active?
 * No stick support? But mentioned in binding popup
-* Docs
-  Description of functions available to user
-  If creating extra GUIs, first available is 4 (Suggest 5?)
 * Mechanism to find out how many GUIs ADHD uses?
 
 Features:
@@ -175,12 +172,12 @@ Class ADHDLib {
 
 	; When compiling scripts, you should use the 32-bit version of AHK, else it will not run on 32-bit machines.
 	; On startup, ADHD checks if the script is compiled as 64-bit, and if it is, warns you.
-	; You can override that behaviour with this function
+	; You can override that behavior with this function
 	config_ignore_x64_warning(){
 		this.private.x64_warning := 0
 	}
 	
-	; When you declare a hotkey using gui_add, ADHD will automatically check if the target label exists, and warn you if it doesn't.
+	; On startup, ADHD will check to see if you have any actions defined, and will exit if not.
 	; You can override that behaviour with this function
 	config_ignore_noaction_warning(){
 		this.private.noaction_warning := 0
@@ -615,7 +612,7 @@ Class ADHDLib {
 
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
-	; The version of the INI file - see config_ini_version()
+	; Gets the version of the INI file - see config_ini_version()
 	get_ini_version(){
 		return this.private.loaded_ini_version
 	}

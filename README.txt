@@ -2,7 +2,10 @@ ADHD - AHK Dynamic Hotkeys for Dummies
 ======================================
 
 By Clive Galway - evilc@evilc.com
-http://evilc.com/proj/adh
+http://evilc.com/proj/adhd
+
+Instructions and reference:
+https://github.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies/wiki
 
 An AutoHotKey GUI library that allows authors to easily create AHK macros.
 Provides functionality to allow the end-user to configure which button triggers a macro via a GUI.
@@ -11,8 +14,8 @@ Key bindings and other settings are stored in an INI file and are remembered bet
 
 
 Features:
-* Bind any key or mouse button (With optional Ctrl, Shift, Alt modifiers) to each macro
-* Supports 7 mouse buttons (L,R,M,WheelUp/Down/Left/Right,Extra buttons 1+2) 
+* Bind any key or mouse button (With optional Ctrl, Shift, Alt, Win modifiers) to each macro
+* Supports 9 mouse buttons (L,R,M,WheelUp/Down/Left/Right,Extra buttons 1+2) 
 * Library to handle loading and saving of settings, with with default settings removed from INI
 * Supports up and key down events for each trigger button
 * Profile support
@@ -21,6 +24,7 @@ Features:
 * Sample macro included
 * Easy for someone with even a basic knowledge of AHK to write scripts with these features
 * Built-in system to link to a URL for information on your macro
+* Built-in system to notify users of updates.
 
 Obatining ADHD:
 If you wish to write macros, you are advised to download the ZIP from my homepage: http://evilc.com/proj/adhd
