@@ -39,7 +39,7 @@ Gui, Add, Text, x5 y40, String to Send
 ; Create Edit box that has state saved in INI
 ADHD.gui_add("Edit", "StringToSend", "xp+120 yp W120", "", "")
 ; Create tooltip by adding _TT to the end of the Variable Name of a control
-StringToSend_TT := "Speed at which to Fire"
+StringToSend_TT := "What to Send"
 
 ; End GUI creation section
 ; ============================================================================================

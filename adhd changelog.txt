@@ -4,7 +4,7 @@ Key:
 = : Change / Fix
 + : Added feature
 
-2.3.0
+3.0.0
 = Moved to three number semantic versioning system
 + Version checks now regognise newer, older, or same number versions.
 = option_changed removed from debug list - it provided no information
@@ -20,6 +20,7 @@ Key:
   To make it clear what functions are intended to be called by library users.
 + Added functions config_get_limit_app() and config_get_limit_app_on() to avoid need to access globals
 + get_debug_mode() function added
+
 
 2.2 5th Jan 2014
 = Fixed bindings tab a little - SPACE now works properly, BACKSPACE support restored.

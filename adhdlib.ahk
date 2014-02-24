@@ -10,6 +10,8 @@ Before next release:
 * adhd_mouse_move - always running? Limit to only run while macro is active?
 * No stick support? But mentioned in binding popup
 * Mechanism to find out how many GUIs ADHD uses?
+* Update fc screenshots
+* Split FC off into seperate project
 
 Features:
 
@@ -699,7 +701,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "2.3.0"
+		this.core_version := "3.0.0"
 
 		this.instantiated := 1
 		this.hotkey_list := []
