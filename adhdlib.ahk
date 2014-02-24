@@ -6,13 +6,13 @@ ToDo:
 BUGS:
 
 Before next release:
-* No stick support? But mentioned in binding popup
 * Update fc screenshots
 * Split FC off into seperate project
 
 Features:
 
 Long-term:
+* Re-add stick support
 * Some way to remove self-refs to ADHD. in code?
 * Way to move BindMode #If block inside object?
 * Replace label names in ini with actual label names instead of 1, 2, 3 ?
@@ -1062,7 +1062,6 @@ Class ADHD_Private {
 
 	; Detects key combinations
 	set_binding(ctrlnum){
-		;global BindMode
 
 		; init vars
 		this.HKControlType := 0
@@ -1072,7 +1071,7 @@ Class ADHD_Private {
 		this.disable_hotkeys(0)
 
 		; Enable Joystick detection hotkeys
-		;JoystickDetection(1)
+		;joystick_detection(1)
 
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
 		this.BindMode := 1
@@ -1080,7 +1079,7 @@ Class ADHD_Private {
 		; Show the prompt
 		prompt := "Please press the desired key combination.`n`n"
 		prompt .= "Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n"
-		prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
+		;prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
 		prompt .= "`nHit Escape to cancel."
 		prompt .= "`nHold Escape to clear a binding."
 		Gui, 3:Add, text, center, %prompt%
@@ -1114,7 +1113,8 @@ Class ADHD_Private {
 
 		; Stop listening to mouse, keyboard etc
 		this.BindMode := 0
-		;JoystickDetection(0)
+
+		;joystick_detection(0)
 
 		; Hide prompt
 		Gui, 3:Submit
@@ -1946,6 +1946,23 @@ Class ADHD_Private {
 
 		return tt
 	}
+
+	; Adds / removes joystick hoykeys to enable detection of joystick buttons
+	joystick_detection(mode := 1){
+		if (mode){
+			mode := "ON"
+		} else {
+			mode := "OFF"
+		}
+		Loop , 16 {
+			stickid := A_Index
+			Loop, 32 {
+				buttonid := A_Index
+				hotkey, %stickid%Joy%buttonid%, adhd_joystick_pressed, %mode%
+			}
+		}
+	}
+
 }
 
 /*
@@ -1994,6 +2011,12 @@ adhd_mouse_move(){
 	return
 }
 
+; A Joystick button was pressed while in Binding mode
+adhd_joystick_pressed:
+	HKControlType := 3
+	HKSecondaryInput := A_ThisHotkey
+	Send {Escape}
+	return
 
 ; Label triggers
 
