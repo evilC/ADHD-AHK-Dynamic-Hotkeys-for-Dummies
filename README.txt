@@ -55,11 +55,7 @@ Make sure the end of the client script reads like this:
 
 3) Double click the client script to run it
 
-Demo / Sample Script: "Fire Control"
-A stand-alone executable for this script can be found at:
-Please see http://evilc.com/proj/firectrl 
-
-Writing your own scripts using ADH:
+Writing your own scripts using ADHD:
 Please examine the sample scripts (template.ahk or firectrl.ahk) for now
 
 If editing with notepad++, you can get AHK syntax highlighting here: https://github.com/twiz-ahk/npp-ahk

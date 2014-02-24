@@ -6,8 +6,6 @@ ToDo:
 BUGS:
 
 Before next release:
-* Update fc screenshots
-* Split FC off into seperate project
 
 Features:
 
