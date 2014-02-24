@@ -1641,7 +1641,6 @@ Class ADHD_Private {
 
 	heartbeat(){
 		global adhd_limit_application
-		
 		; Check current app here.
 		; Not used to enable or disable hotkeys, used to start or stop author macros etc
 		IfWinActive, % "ahk_class " adhd_limit_application
@@ -1767,6 +1766,8 @@ Class ADHD_Private {
 
 			}
 		}
+
+		this.enable_heartbeat()
 	}
 
 	disable_hotkeys(mode){
@@ -1774,6 +1775,7 @@ Class ADHD_Private {
 		global adhd_limit_application_on
 		
 		this.debug("disable_hotkeys")
+		this.disable_heartbeat()
 
 		max := this.hotkey_list.MaxIndex()
 		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
