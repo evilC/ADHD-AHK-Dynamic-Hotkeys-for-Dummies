@@ -898,6 +898,8 @@ Class ADHD_Private {
 			tmp := this.read_ini("adhd_hk_hotkey_" A_Index,this.current_profile,A_Space)
 			this.hotkey_mappings[name].modified := tmp
 
+			this.hotkey_mappings[name].unmodified := this.strip_prefix(this.hotkey_mappings[name].modified)
+
 			tmp := this.read_ini("adhd_hk_wild_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].wild := tmp
 			GuiControl,, adhd_hk_wild_%A_Index%, %tmp%
@@ -1496,7 +1498,8 @@ Class ADHD_Private {
 	; Calling send_keyup_on_press() in an action will cause this to happen
 	send_keyup_on_press(sub,mod){
 		tmp := this.hotkey_mappings[sub][mod] " up"
-		Send {%tmp%}
+		msgbox % sub " - " mod "`n" tmp
+		;Send {%tmp%}
 
 	}
 
