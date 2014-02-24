@@ -172,6 +172,20 @@ Class ADHDLib {
 		return
 	}
 
+	; When compiling scripts, you should use the 32-bit version of AHK, else it will not run on 32-bit machines.
+	; On startup, ADHD checks if the script is compiled as 64-bit, and if it is, warns you.
+	; You can override that behaviour with this function
+	config_ignore_x64_warning(){
+		this.private.x64_warning := 0
+	}
+	
+	; When you declare a hotkey using gui_add, ADHD will automatically check if the target label exists, and warn you if it doesn't.
+	; You can override that behaviour with this function
+	config_ignore_noaction_warning(){
+		this.private.noaction_warning := 0
+	}
+	
+
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
@@ -605,6 +619,11 @@ Class ADHDLib {
 		return this.private.loaded_ini_version
 	}
 
+	; returns true if the application specified in the "Limit to Application" box is active, false if not
+	limit_app_is_active(){
+		return this.private.limit_app_is_active()
+	}
+
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
@@ -631,6 +650,17 @@ Class ADHDLib {
 	; Quits the script
 	exit_app(){
 		return this.private.exit_app()
+	}
+
+	; Compares two version numbers.
+	; May be wise to pass the version numbers to pad_version first.
+	semver_compare(version1, version2){
+		return this.private.semver_compare(version1, version2)
+	}
+
+	; Pads from one-point (ie 1) to two-point (ie 1.0) to three-point (ie 1.0.0) intelligently
+	pad_version(version){
+		return this.private.pad_version(version)
 	}
 
 	; --------------------------------------------------------------------------------------------------------------------------------------
@@ -761,14 +791,6 @@ Class ADHD_Private {
 
 	config_ini_version(ver){
 		this.ini_version := ver
-	}
-	
-	config_ignore_x64_warning(){
-		this.x64_warning := 0
-	}
-	
-	config_ignore_noaction_warning(){
-		this.noaction_warning := 0
 	}
 	
 	get_limit_app_on(){
