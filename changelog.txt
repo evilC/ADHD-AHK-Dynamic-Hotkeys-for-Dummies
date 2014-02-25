@@ -4,7 +4,7 @@ Key:
 = : Change / Fix
 + : Added feature
 
-3.0.2
+3.0.2 25th Feb 2014
 * Hotkey boxes scale to the width of the GUI
 * Code reorganisation, of no consequence to script authors.
 
