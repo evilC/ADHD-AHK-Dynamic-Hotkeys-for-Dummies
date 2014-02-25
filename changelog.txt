@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.0.3
+= Debug info for hotkey adding now also shows prefixes
+
 3.0.2 25th Feb 2014
 * Hotkey boxes scale to the width of the GUI
 * Code reorganisation, of no consequence to script authors.

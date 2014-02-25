@@ -1143,8 +1143,6 @@ Class ADHD_Private {
 				hotkey_string := this.hotkey_mappings[name].modified
 				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
-
 				; Apply "Limit app" option
 				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
 					; Enable Limit Application for all subsequently declared hotkeys
@@ -1162,6 +1160,8 @@ Class ADHD_Private {
 				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
 				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
 				
+				this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+
 				if (IsLabel(hotkey_subroutine "Up")){
 					; Bind up action of hotkey
 					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
