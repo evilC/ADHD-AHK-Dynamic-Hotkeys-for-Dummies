@@ -2,14 +2,13 @@
 
 /*
 ToDo:
-* Removed "disable timers" functionality last release.
-  Bad move? FC Timed fire getting stuck on after Alt-Tab?
 
 BUGS:
 
 Before next release:
 
 Features:
+* Hotkey box for use outside of bindings tab
 
 Long-term:
 * Re-add stick support
@@ -182,7 +181,6 @@ Class ADHDLib {
 		this.private.noaction_warning := 0
 	}
 	
-
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
@@ -704,7 +702,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.0.1"
+		this.core_version := "3.0.2"
 
 		this.instantiated := 1
 		this.hotkey_list := []
@@ -773,6 +771,40 @@ Class ADHD_Private {
 		this.HKLastHotkey := 0			; Time that Escape was pressed to exit key binding. Used to determine if Escape is held (Clear binding)
 	}
 
+	/*
+	  ###   #   #   ###          #   #                    #   ##      #
+	   #    #   #    #           #   #                    #    #
+	   #    ##  #    #           #   #   ###   # ##    ## #    #     ##    # ##    ## #
+	   #    # # #    #           #####      #  ##  #  #  ##    #      #    ##  #  #  #
+	   #    #  ##    #           #   #   ####  #   #  #   #    #      #    #   #   ##
+	   #    #   #    #           #   #  #   #  #   #  #  ##    #      #    #   #  #
+	  ###   #   #   ###          #   #   ####  #   #   ## #   ###    ###   #   #   ###
+	                                                                              #   #
+	                                                                               ###
+	Functions to handle persistent data storage
+	*/
+
+	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
+	update_ini(key, section, value, default){
+		tmp := this.ini_name
+		if (value != default){
+			; Only write the value if it differs from what is already written
+			if (this.read_ini(key,section,-1) != value){
+				IniWrite,  %value%, %tmp%, %section%, %key%
+			}
+		} else {
+			; Only delete the value if there is already a value to delete
+			if (this.read_ini(key,section,-1) != -1){
+				IniDelete, %tmp%, %section%, %key%
+			}
+		}
+	}
+
+	read_ini(key,section,default){
+		ini := this.ini_name
+		IniRead, out, %ini%, %section%, %key%, %default%
+		return out
+	}
 
 	build_ini_name(){
 		tmp := A_Scriptname
@@ -793,8 +825,49 @@ Class ADHD_Private {
 		return
 	}
 
+	/*
+	 ####            #                   #                    ###           #      #                                     #          ###           #      #
+	 #   #                               #                   #   #          #      #                                     #         #   #          #      #
+	 #   #  # ##    ##    #   #   ###   ####    ###          #       ###   ####   ####    ###   # ##    ###             #          #       ###   ####   ####    ###   # ##    ###
+	 ####   ##  #    #    #   #      #   #     #   #         #      #   #   #      #     #   #  ##  #  #               #            ###   #   #   #      #     #   #  ##  #  #
+	 #      #        #     # #    ####   #     #####         #  ##  #####   #      #     #####  #       ###           #                #  #####   #      #     #####  #       ###
+	 #      #        #     # #   #   #   #  #  #             #   #  #       #  #   #  #  #      #          #         #             #   #  #       #  #   #  #  #      #          #
+	 #      #       ###     #     ####    ##    ###           ###    ###     ##     ##    ###   #      ####          #              ###    ###     ##     ##    ###   #      ####
+	Private versions of getters and setters.
+	A bit lazy, but no biggie
+	*/
+
+	; Sets the INI version to be written out.
 	config_ini_version(ver){
 		this.ini_version := ver
+	}
+
+	get_macro_name(){
+		return this.author_macro_name
+	}
+	
+	limit_app_get_size(){
+		return {w: this.limit_app_w, h:this.limit_app_h}
+	}
+	
+	limit_app_get_last_size(){
+		return {w: this.limit_app_last_w, h:this.limit_app_last_h}	
+	}
+	
+	limit_app_is_active(){
+		if (this.app_act_curr){
+			return true
+		} else {
+			return false
+		}
+	}
+
+	get_gui_h(){
+		return this.gui_h
+	}
+	
+	get_gui_w(){
+		return this.gui_w
 	}
 	
 	get_limit_app_on(){
@@ -809,6 +882,18 @@ Class ADHD_Private {
 		return adhd_limit_application
 	}
 	
+	/*
+	 #   #             #          #                                  #       #      ##     #                   #       #
+	 #   #             #          #                                  #             #  #                        #
+	 #   #  # ##    ## #   ###   ####    ###          # ##    ###   ####    ##     #      ##     ###    ###   ####    ##     ###   # ##
+	 #   #  ##  #  #  ##      #   #     #   #         ##  #  #   #   #       #    ####     #    #   #      #   #       #    #   #  ##  #
+	 #   #  ##  #  #   #   ####   #     #####         #   #  #   #   #       #     #       #    #       ####   #       #    #   #  #   #
+	 #   #  # ##   #  ##  #   #   #  #  #             #   #  #   #   #  #    #     #       #    #   #  #   #   #  #    #    #   #  #   #
+	  ###   #       ## #   ####    ##    ###          #   #   ###     ##    ###    #      ###    ###    ####    ##    ###    ###   #   #
+	        #
+	        #
+	*/
+
 	; Attempts to read a version from a text file at a specified URL
 	get_ver(url){
 		if (url == ""){
@@ -849,6 +934,138 @@ Class ADHD_Private {
 		return out[version]
 	}
 	
+	; Semantic version comparison from http://www.autohotkey.com/board/topic/81789-semverahk-compare-version-numbers/
+	semver_validate(version){
+		return !!RegExMatch(version, "^(\d+)\.(\d+)\.(\d+)(\-([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?(\+([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?$")
+	}
+
+	semver_parts(version, byRef out_major, byRef out_minor, byRef out_patch, byRef out_prerelease, byRef out_build){
+		return !!RegExMatch(version, "^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\-(?P<prerelease>([0-9A-Za-z\-]+\.)*([0-9A-Za-z\-]+)))?(\+?(?P<build>([0-9A-Za-z\-]+\.)*([0-9A-Za-z\-]+)))?$", out_)
+	}
+
+	semver_compare(version1, version2){
+		if (!this.semver_parts(version1, maj1, min1, pat1, pre1, bld1))
+			throw Exception("Invalid version: " version1)
+		if (!this.semver_parts(version2, maj2, min2, pat2, pre2, bld2))
+			throw Exception("Invalid version: " version2)
+	 
+		for each, part in ["maj", "min", "pat"]
+		{
+			%part%1 += 0, %part%2 += 0
+			if (%part%1 < %part%2)
+				return -1
+			else if (%part%1 > %part%2)
+				return +1
+		}
+	 
+		for each, part in ["pre", "bld"] ; { "pre" : 1, "bld" : -1 }
+		{
+			if (%part%1 && %part%2)
+			{
+				StringSplit part1_, %part%1, .
+				StringSplit part2_, %part%2, .
+				Loop % part1_0 < part2_0 ? part1_0 : part2_0 ; use the smaller amount of parts
+				{
+					if part1_%A_Index% is digit
+					{
+						if part2_%A_Index% is digit ; both are numeric: compare numerically
+						{
+							part1_%A_Index% += 0, part2_%A_Index% += 0
+							if (part1_%A_Index% < part2_%A_Index%)
+								return -1
+							else if (part1_%A_Index% > part2_%A_Index%)
+								return +1
+							continue
+						}
+					}
+					; at least one is non-numeric: compare by characters
+					if (part1_%A_Index% < part2_%A_Index%)
+						return -1
+					else if (part1_%A_Index% > part2_%A_Index%)
+						return +1
+				}
+				; all compared parts were equal - the longer one wins
+				if (part1_0 < part2_0)
+					return -1
+				else if (part1_0 > part2_0)
+					return +1
+			}
+			else if (!%part%1 && %part%2) ; only version2 has prerelease -> version1 is higher
+				return (part == "pre") ? +1 : -1
+			else if (!%part%2 && %part%1) ; only version1 has prerelease -> it is smaller
+				return (part == "pre") ? -1 : +1
+		}
+		return 0
+	}
+
+	; pad version numbers to have 3 numbers (x.y.z) at a minimum.
+	pad_version(ver){
+		stringsplit, ver, ver,.
+
+		if (ver0 < 3){
+			ctr := 3-ver0
+			Loop, %ctr% {
+				ver .= ".0"
+			}
+		}
+		return ver
+	}
+
+	; Create tooltips for core script and author script versions
+	version_tooltip_create(diff,rem,loc){
+		tt := ""
+
+		if (diff == 0){
+			tt .= "Same (" loc ")"
+		} else if (diff > 0){
+			tt .= "Newer (" rem ", you have " loc ")"
+		} else {
+			tt .= "Older (" rem ", you have " loc ")"
+		}
+
+		return tt
+	}
+
+	/*
+	 #####                        #            #   #                    #   ##      #
+	 #                            #            #   #                    #    #
+	 #      #   #   ###   # ##   ####          #   #   ###   # ##    ## #    #     ##    # ##    ## #
+	 ####   #   #  #   #  ##  #   #            #####      #  ##  #  #  ##    #      #    ##  #  #  #
+	 #       # #   #####  #   #   #            #   #   ####  #   #  #   #    #      #    #   #   ##
+	 #       # #   #      #   #   #  #         #   #  #   #  #   #  #  ##    #      #    #   #  #
+	 #####    #     ###   #   #    ##          #   #   ####  #   #   ## #   ###    ###   #   #   ###
+	                                                                                            #   #
+	                                                                                             ###
+	*/
+
+	tab_changed(){
+		Gui, Submit, NoHide
+		this.fire_event(this.events.tab_changed)
+		return
+	}
+
+	; Called on app exit
+	exit_app(){	
+		Gui, +Hwndgui_id
+		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
+		ini := this.ini_name
+		if (this.read_ini("adhd_gui_x","Settings", -1) != gui_x && gui_x >= 0){
+			IniWrite, %gui_x%, %ini%, Settings, adhd_gui_x
+		}
+		if (this.read_ini("gui_y","Settings", -1) != gui_y && gui_x >= 0){
+			IniWrite, %gui_y%, %ini%, Settings, adhd_gui_y
+		}
+
+		if (this.write_version){
+			tmp := this.ini_version
+			IniWrite, %tmp%, %ini%, Settings, adhd_ini_version
+		}
+		
+		this.fire_event(this.events.on_exit)
+		ExitApp
+		return
+	}
+
 	; Fires an event.
 	; Basically executes a string as a function
 	; Checks string is not empty first
@@ -858,206 +1075,165 @@ Class ADHD_Private {
 		}
 	}
 	
+	/*
+	  ###   #   #   ###                                                                          #
+	 #   #  #   #    #                                                                           #
+	 #      #   #    #           ## #    ###   # ##    ###    ## #   ###   ## #    ###   # ##   ####
+	 #      #   #    #           # # #      #  ##  #      #  #  #   #   #  # # #  #   #  ##  #   #
+	 #  ##  #   #    #           # # #   ####  #   #   ####   ##    #####  # # #  #####  #   #   #
+	 #   #  #   #    #           # # #  #   #  #   #  #   #  #      #      # # #  #      #   #   #  #
+	  ###    ###    ###          #   #   ####  #   #   ####   ###    ###   #   #   ###   #   #    ##
+	                                                         #   #
+	                                                          ###
+	*/
+
+	; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
+	control_name_to_set_method(name){
+		if (name == "DropDownList"){
+			return "ChooseString"
+		} else {
+			return ""
+		}
+	}
+
+	; Add and remove glabel is useful because:
+	; When you use GuiControl to set the contents of an edit...
+	; .. it's glabel is fired.
+	; So remove glabel, set editbox value, re-add glabel to solve
+	add_glabel(ctrl){
+		GuiControl, +gadhd_option_changed, %ctrl%
+	}
+
+	remove_glabel(ctrl){
+		GuiControl, -g, %ctrl%
+	}
+
 	set_profile_statusbar(){
 		cp := this.current_profile
 		GuiControl,,CurrentProfile,%cp%
 	}
 
-	hotkey_index_to_name(idx){
-		return this.hotkey_list[idx,"subroutine"]
-	}
+	/*
+	 #   #          #     #                           #   #                    #   ##      #
+	 #   #          #     #                           #   #                    #    #
+	 #   #   ###   ####   #   #   ###   #   #         #   #   ###   # ##    ## #    #     ##    # ##    ## #
+	 #####  #   #   #     #  #   #   #  #   #         #####      #  ##  #  #  ##    #      #    ##  #  #  #
+	 #   #  #   #   #     ###    #####  #  ##         #   #   ####  #   #  #   #    #      #    #   #   ##
+	 #   #  #   #   #  #  #  #   #       ## #         #   #  #   #  #   #  #  ##    #      #    #   #  #
+	 #   #   ###     ##   #   #   ###       #         #   #   ####  #   #   ## #   ###    ###   #   #   ###
+	                                    #   #                                                          #   #
+	                                     ###                                                            ###
+	*/
 
-	; aka load profile
-	profile_changed(){
-		global adhd_debug_mode
-
+	enable_hotkeys(){
 		global adhd_limit_application
 		global adhd_limit_application_on
-		global adhd_debug_window
 		
-		; Remove old bindings before changing profile
-		;this.disable_hotkeys(1)
-		this.disable_hotkeys(0)
+		; ToDo: Should not submit gui here, triggering save...
+		this.debug("enable_hotkeys")
 		
-		GuiControlGet,cp,,adhd_current_profile
-		this.current_profile := cp
-		;msgbox % this.current_profile
-		this.debug("profile_changed - " this.current_profile)
 		Gui, Submit, NoHide
+		Loop % this.hotkey_list.MaxIndex(){
+			name := this.hotkey_index_to_name(A_Index)
+			if (this.hotkey_mappings[name].modified != ""){
+				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
+				hotkey_string := this.hotkey_mappings[name].modified
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-		this.update_ini("adhd_current_profile", "Settings", this.current_profile,"")
+				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+
+				; Apply "Limit app" option
+				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
+					; Enable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive, ahk_class %adhd_limit_application%
+				} else {
+					; Disable Limit Application for all subsequently declared hotkeys
+					Hotkey, IfWinActive
+				}
+
+				; Bind down action of hotkey
+				prefix := "~"
+				if (this.hotkey_mappings[name].wild){
+					prefix .= "*"
+				}
+				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
+				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
+				
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
+					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
+				}
+
+				; Disable Limit Application for all subsequently declared hotkeys
+				Hotkey, IfWinActive
+				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
+
+			}
+		}
+
+		this.enable_heartbeat()
+	}
+
+	disable_hotkeys(mode){
+		global adhd_limit_application
+		global adhd_limit_application_on
 		
-		;SB_SetText("Current profile: " this.current_profile,2) 
-		this.set_profile_statusbar() 
-		
-		this.hotkey_mappings := {}
-		
-		; Load hotkey bindings
-		Loop, % this.hotkey_list.MaxIndex()
+		this.debug("disable_hotkeys")
+		this.disable_heartbeat()
+
+		max := this.hotkey_list.MaxIndex()
+		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
+		if (mode){
+			max -= 1
+		}
+		Loop, % max
 		{
 			name := this.hotkey_index_to_name(A_Index)
+			if (this.hotkey_mappings[name].modified != ""){
+				hotkey_string := this.hotkey_mappings[name].modified
+				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)] := {}
-			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)]["index"] := A_Index
+				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
 
-			tmp := this.read_ini("adhd_hk_hotkey_" A_Index,this.current_profile,A_Space)
-			this.hotkey_mappings[name].modified := tmp
+				prefix := "~"
+				if (this.hotkey_mappings[name].wild){
+					prefix .= "*"
+				}
 
-			this.hotkey_mappings[name].unmodified := this.strip_prefix(this.hotkey_mappings[name].modified)
+				; Bind down action of hotkey
+				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
+				
+				if (IsLabel(hotkey_subroutine "Up")){
+					; Bind up action of hotkey
+					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, Off
+				}
+				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
 
-			tmp := this.read_ini("adhd_hk_wild_" A_Index,this.current_profile,0)
-			this.hotkey_mappings[name].wild := tmp
-			GuiControl,, adhd_hk_wild_%A_Index%, %tmp%
-
-			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
-			this.hotkey_mappings[name].type := tmp
-
-			tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
-			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
-		}
-		
-		; limit application name
-		this.remove_glabel("adhd_limit_application")
-		if (this.limit_app == "" || this.limit_app == null){
-			this.limit_app := A_Space
-		}
-		tmp := this.read_ini("adhd_limit_app",this.current_profile,this.limit_app)
-		GuiControl,, adhd_limit_application, %tmp%
-		this.add_glabel("adhd_limit_application")
-		
-		; limit application status
-		tmp := this.read_ini("adhd_limit_app_on",this.current_profile,0)
-		GuiControl,, adhd_limit_application_on, %tmp%
-		
-		; Get author vars from ini
-		Loop, % this.ini_vars.MaxIndex()
-		{
-			def := this.ini_vars[A_Index,3]
-			if (def == ""){
-				def := A_Space
 			}
-			key := this.ini_vars[A_Index,1]
-			sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
-			
-			this.remove_glabel(key)
-			tmp := this.read_ini(key,this.current_profile,def)
-			GuiControl,%sm%, %key%, %tmp%
-			this.add_glabel(key)
 		}
-
-		; Debug settings
-		adhd_debug_mode := this.read_ini("adhd_debug_mode","Settings",0)
-		GuiControl,, adhd_debug_mode, %adhd_debug_mode%
-		
-		adhd_debug_window := this.read_ini("adhd_debug_window","Settings",0)
-		GuiControl,, adhd_debug_window, %adhd_debug_window%
-
-		this.enable_hotkeys()
-		
-		; Fire the Author hook
-		this.fire_event(this.events.option_changed)
-
 		return
 	}
 
-	; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
-	strip_prefix(hk){
-		Loop {
-			chr := substr(hk,1,1)
-			if (chr == "~" || chr == "*" || chr == "$"){
-				hk := substr(hk,2)
-			} else {
-				break
-			}
-		}
-		return hk
-	}
-
-	; Removes ^ ! + # modifiers from a hotkey object for comparison
-	strip_modifiers(hk){
-		hk := this.strip_prefix(hk)
-
-		Loop {
-			chr := substr(hk,1,1)
-			if (chr == "^" || chr == "!" || chr == "+" || chr == "#"){
-				hk := substr(hk,2)
-			} else {
-				break
-			}
-		}
-		return hk
-	}
-
-	; aka save profile
-	option_changed(){
-		global adhd_debug_mode
-
-		global adhd_limit_application
-		global adhd_limit_application_on
-		global adhd_debug_window
+	; Removes a hotkey - called at end of a timer, not a general purpose functions
+	delete_hotkey(){
+		soundbeep
+		this.disable_hotkeys()
+		name := this.hotkey_index_to_name(this.HKLastHotkey)
+		this.hotkey_mappings[name].modified := ""
+		this.hotkey_mappings[name].type := 0
 		
-		; Disable existing hotkeys
-		this.disable_hotkeys(0)
-
-		if (this.starting_up != 1){
-			;this.debug("option_changed - control: " A_guicontrol)
-			
-			Gui, Submit, NoHide
-
-			; Hotkey bindings
-			Loop % this.hotkey_list.MaxIndex(){
-				name := this.hotkey_index_to_name(A_Index)
-
-				; Hotkey
-				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
-				tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
-				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
-
-				; Strip ~ * etc and store it in umnodified opbect.
-				this.hotkey_mappings[name].unmodified := this.strip_prefix(this.hotkey_mappings[name].modified)
-
-				; Type
-				this.update_ini("adhd_hk_type_" A_Index, this.current_profile, this.hotkey_mappings[name].type,0)
-
-				; Wild
-				this.hotkey_mappings[name].wild := adhd_hk_wild_%A_Index%
-				this.update_ini("adhd_hk_wild_" A_Index, this.current_profile, this.hotkey_mappings[name].wild, 0)
-			}
-			
-			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
-			
-			; Limit app
-			if (this.limit_app == "" || this.limit_app == null){
-				this.limit_app := A_Space
-			}
-			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.limit_app)
-			;SB_SetText("Current profile: " this.current_profile, 2)
-			this.set_profile_statusbar()
-			
-			; Limit app toggle
-			this.update_ini("adhd_limit_app_on", this.current_profile, adhd_limit_application_on, 0)
-			
-			; Add author vars to ini
-			Loop, % this.ini_vars.MaxIndex()
-			{
-				tmp := this.ini_vars[A_Index,1]
-				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
-			}
-
-			; Re-enable the hotkeys			
-			this.enable_hotkeys()
-
-			; Fire the Author hook
-			this.fire_event(this.events.option_changed)
-			
-			; Debug settings
-			this.update_ini("adhd_debug_mode", "settings", adhd_debug_mode, 0)
-			this.update_ini("adhd_debug_window", "settings", adhd_debug_window, 0)
-			
-		} else {
-			this.debug("ignoring option_changed - " A_Guicontrol)
-		}
+		this.option_changed()
 		return
+	}
+
+	; For some games, they will not let you autofire if the triggering key is still held down...
+	; even if the triggering key is not the key sent and does nothing in the game!
+	; Often a workaround is to send a keyup of the triggering key
+	; Calling send_keyup_on_press() in an action will cause this to happen
+	send_keyup_on_press(sub,mod){
+		tmp := this.hotkey_mappings[sub][mod] " up"
+		Send {%tmp%}
 	}
 
 	; Detects key combinations
@@ -1159,6 +1335,22 @@ Class ADHD_Private {
 		}
 		return
 
+	}
+
+	; Adds / removes joystick hoykeys to enable detection of joystick buttons
+	joystick_detection(mode := 1){
+		if (mode){
+			mode := "ON"
+		} else {
+			mode := "OFF"
+		}
+		Loop , 16 {
+			stickid := A_Index
+			Loop, 32 {
+				buttonid := A_Index
+				hotkey, %stickid%Joy%buttonid%, adhd_joystick_pressed, %mode%
+			}
+		}
 	}
 
 	; Builds a Human-Readable form of a Hotkey string (eg "^C" -> "CTRL + C")
@@ -1309,32 +1501,64 @@ Class ADHD_Private {
 		return this.HKModifierState.ctrl + this.HKModifierState.alt + this.HKModifierState.shift  + this.HKModifierState.win
 	}
 
-
-	; Add and remove glabel is useful because:
-	; When you use GuiControl to set the contents of an edit...
-	; .. it's glabel is fired.
-	; So remove glabel, set editbox value, re-add glabel to solve
-	add_glabel(ctrl){
-		GuiControl, +gadhd_option_changed, %ctrl%
+	hotkey_index_to_name(idx){
+		return this.hotkey_list[idx,"subroutine"]
 	}
 
-	remove_glabel(ctrl){
-		GuiControl, -g, %ctrl%
+	; Removes ~ * etc prefixes (But NOT modifiers!) from a hotkey object for comparison
+	strip_prefix(hk){
+		Loop {
+			chr := substr(hk,1,1)
+			if (chr == "~" || chr == "*" || chr == "$"){
+				hk := substr(hk,2)
+			} else {
+				break
+			}
+		}
+		return hk
 	}
 
-	get_macro_name(){
-		return this.author_macro_name
+	; Removes ^ ! + # modifiers from a hotkey object for comparison
+	strip_modifiers(hk){
+		hk := this.strip_prefix(hk)
+
+		Loop {
+			chr := substr(hk,1,1)
+			if (chr == "^" || chr == "!" || chr == "+" || chr == "#"){
+				hk := substr(hk,2)
+			} else {
+				break
+			}
+		}
+		return hk
+	}
+
+	; Turns on or off all hotkeys
+	functionality_toggle(){
+		if (this.functionality_enabled){
+			this.functionality_enabled := 0
+			soundbeep, 400, 200
+			; pass 1 as a parameter to disable_hotkeys to tell it to not disable functionality toggle
+			this.disable_hotkeys(1)
+		} else {
+			this.functionality_enabled := 1
+			soundbeep, 800, 200
+			this.enable_hotkeys()
+		}
 	}
 	
-	get_gui_h(){
-		return this.gui_h
-	}
-	
-	get_gui_w(){
-		return this.gui_w
-	}
-	
-	; Profile management - functions to manage preserving user settings
+	/*
+	 ####                   ##     #     ##                  #                        #   ##      #
+	 #   #                 #  #           #                  #                        #    #
+	 #   #  # ##    ###    #      ##      #     ###          # ##    ###   # ##    ## #    #     ##    # ##    ## #
+	 ####   ##  #  #   #  ####     #      #    #   #         ##  #      #  ##  #  #  ##    #      #    ##  #  #  #
+	 #      #      #   #   #       #      #    #####         #   #   ####  #   #  #   #    #      #    #   #   ##
+	 #      #      #   #   #       #      #    #             #   #  #   #  #   #  #  ##    #      #    #   #  #
+	 #      #       ###    #      ###    ###    ###          #   #   ####  #   #   ## #   ###    ###   #   #   ###
+	                                                                                                          #   #
+	                                                                                                           ###
+	*/
+
 	add_profile(name){
 		global adhd_current_profile
 		
@@ -1495,86 +1719,183 @@ Class ADHD_Private {
 		return 1
 	}
 
-	; End profile management
+	; aka load profile
+	profile_changed(){
+		global adhd_debug_mode
 
-	; For some games, they will not let you autofire if the triggering key is still held down...
-	; even if the triggering key is not the key sent and does nothing in the game!
-	; Often a workaround is to send a keyup of the triggering key
-	; Calling send_keyup_on_press() in an action will cause this to happen
-	send_keyup_on_press(sub,mod){
-		tmp := this.hotkey_mappings[sub][mod] " up"
-		Send {%tmp%}
-	}
-
-	tab_changed(){
+		global adhd_limit_application
+		global adhd_limit_application_on
+		global adhd_debug_window
+		
+		; Remove old bindings before changing profile
+		;this.disable_hotkeys(1)
+		this.disable_hotkeys(0)
+		
+		GuiControlGet,cp,,adhd_current_profile
+		this.current_profile := cp
+		;msgbox % this.current_profile
+		this.debug("profile_changed - " this.current_profile)
 		Gui, Submit, NoHide
-		this.fire_event(this.events.tab_changed)
-		return
-	}
 
-	; Converts a Control name (eg DropDownList) into the parameter passed to GuiControl to set that value (eg ChooseString)
-	control_name_to_set_method(name){
-		if (name == "DropDownList"){
-			return "ChooseString"
-		} else {
-			return ""
-		}
-	}
+		this.update_ini("adhd_current_profile", "Settings", this.current_profile,"")
+		
+		;SB_SetText("Current profile: " this.current_profile,2) 
+		this.set_profile_statusbar() 
+		
+		this.hotkey_mappings := {}
+		
+		; Load hotkey bindings
+		Loop, % this.hotkey_list.MaxIndex()
+		{
+			name := this.hotkey_index_to_name(A_Index)
 
-	; INI manipulation
-	
-	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
-	update_ini(key, section, value, default){
-		tmp := this.ini_name
-		if (value != default){
-			; Only write the value if it differs from what is already written
-			if (this.read_ini(key,section,-1) != value){
-				IniWrite,  %value%, %tmp%, %section%, %key%
-			}
-		} else {
-			; Only delete the value if there is already a value to delete
-			if (this.read_ini(key,section,-1) != -1){
-				IniDelete, %tmp%, %section%, %key%
-			}
-		}
-	}
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)] := {}
+			this.hotkey_mappings[this.hotkey_index_to_name(A_Index)]["index"] := A_Index
 
-	read_ini(key,section,default){
-		ini := this.ini_name
-		IniRead, out, %ini%, %section%, %key%, %default%
-		return out
-	}
+			tmp := this.read_ini("adhd_hk_hotkey_" A_Index,this.current_profile,A_Space)
+			this.hotkey_mappings[name].modified := tmp
 
-	; Called on app exit
-	exit_app(){	
-		Gui, +Hwndgui_id
-		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
-		ini := this.ini_name
-		if (this.read_ini("adhd_gui_x","Settings", -1) != gui_x && gui_x >= 0){
-			IniWrite, %gui_x%, %ini%, Settings, adhd_gui_x
-		}
-		if (this.read_ini("gui_y","Settings", -1) != gui_y && gui_x >= 0){
-			IniWrite, %gui_y%, %ini%, Settings, adhd_gui_y
-		}
+			this.hotkey_mappings[name].unmodified := this.strip_prefix(this.hotkey_mappings[name].modified)
 
-		if (this.write_version){
-			tmp := this.ini_version
-			IniWrite, %tmp%, %ini%, Settings, adhd_ini_version
+			tmp := this.read_ini("adhd_hk_wild_" A_Index,this.current_profile,0)
+			this.hotkey_mappings[name].wild := tmp
+			GuiControl,, adhd_hk_wild_%A_Index%, %tmp%
+
+			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
+			this.hotkey_mappings[name].type := tmp
+
+			tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 		}
 		
-		this.fire_event(this.events.on_exit)
-		ExitApp
+		; limit application name
+		this.remove_glabel("adhd_limit_application")
+		if (this.limit_app == "" || this.limit_app == null){
+			this.limit_app := A_Space
+		}
+		tmp := this.read_ini("adhd_limit_app",this.current_profile,this.limit_app)
+		GuiControl,, adhd_limit_application, %tmp%
+		this.add_glabel("adhd_limit_application")
+		
+		; limit application status
+		tmp := this.read_ini("adhd_limit_app_on",this.current_profile,0)
+		GuiControl,, adhd_limit_application_on, %tmp%
+		
+		; Get author vars from ini
+		Loop, % this.ini_vars.MaxIndex()
+		{
+			def := this.ini_vars[A_Index,3]
+			if (def == ""){
+				def := A_Space
+			}
+			key := this.ini_vars[A_Index,1]
+			sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
+			
+			this.remove_glabel(key)
+			tmp := this.read_ini(key,this.current_profile,def)
+			GuiControl,%sm%, %key%, %tmp%
+			this.add_glabel(key)
+		}
+
+		; Debug settings
+		adhd_debug_mode := this.read_ini("adhd_debug_mode","Settings",0)
+		GuiControl,, adhd_debug_mode, %adhd_debug_mode%
+		
+		adhd_debug_window := this.read_ini("adhd_debug_window","Settings",0)
+		GuiControl,, adhd_debug_window, %adhd_debug_window%
+
+		this.enable_hotkeys()
+		
+		; Fire the Author hook
+		this.fire_event(this.events.option_changed)
+
 		return
 	}
 
-	show_window_spy(){
-		SplitPath, A_AhkPath,,tmp
-		tmp := tmp "\AU3_Spy.exe"
-		IfExist, %tmp%
-			Run, %tmp%
+	; aka save profile
+	option_changed(){
+		global adhd_debug_mode
+
+		global adhd_limit_application
+		global adhd_limit_application_on
+		global adhd_debug_window
+		
+		; Disable existing hotkeys
+		this.disable_hotkeys(0)
+
+		if (this.starting_up != 1){
+			;this.debug("option_changed - control: " A_guicontrol)
+			
+			Gui, Submit, NoHide
+
+			; Hotkey bindings
+			Loop % this.hotkey_list.MaxIndex(){
+				name := this.hotkey_index_to_name(A_Index)
+
+				; Hotkey
+				this.update_ini("adhd_hk_hotkey_" A_Index, this.current_profile, this.hotkey_mappings[name].modified, "")
+				tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
+				GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
+
+				; Strip ~ * etc and store it in umnodified opbect.
+				this.hotkey_mappings[name].unmodified := this.strip_prefix(this.hotkey_mappings[name].modified)
+
+				; Type
+				this.update_ini("adhd_hk_type_" A_Index, this.current_profile, this.hotkey_mappings[name].type,0)
+
+				; Wild
+				this.hotkey_mappings[name].wild := adhd_hk_wild_%A_Index%
+				this.update_ini("adhd_hk_wild_" A_Index, this.current_profile, this.hotkey_mappings[name].wild, 0)
+			}
+			
+			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
+			
+			; Limit app
+			if (this.limit_app == "" || this.limit_app == null){
+				this.limit_app := A_Space
+			}
+			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.limit_app)
+			;SB_SetText("Current profile: " this.current_profile, 2)
+			this.set_profile_statusbar()
+			
+			; Limit app toggle
+			this.update_ini("adhd_limit_app_on", this.current_profile, adhd_limit_application_on, 0)
+			
+			; Add author vars to ini
+			Loop, % this.ini_vars.MaxIndex()
+			{
+				tmp := this.ini_vars[A_Index,1]
+				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
+			}
+
+			; Re-enable the hotkeys			
+			this.enable_hotkeys()
+
+			; Fire the Author hook
+			this.fire_event(this.events.option_changed)
+			
+			; Debug settings
+			this.update_ini("adhd_debug_mode", "settings", adhd_debug_mode, 0)
+			this.update_ini("adhd_debug_window", "settings", adhd_debug_window, 0)
+			
+		} else {
+			this.debug("ignoring option_changed - " A_Guicontrol)
+		}
+		return
 	}
 
-	; Debug functions
+	/*
+	 ####          #                           #####                        #       #
+	  #  #         #                           #                            #
+	  #  #   ###   # ##   #   #   ## #         #      #   #  # ##    ###   ####    ##     ###   # ##    ###
+	  #  #  #   #  ##  #  #   #  #  #          ####   #   #  ##  #  #   #   #       #    #   #  ##  #  #
+	  #  #  #####  #   #  #   #   ##           #      #   #  #   #  #       #       #    #   #  #   #   ###
+	  #  #  #      ##  #  #  ##  #             #      #  ##  #   #  #   #   #  #    #    #   #  #   #      #
+	 ####    ###   # ##    ## #   ###          #       ## #  #   #   ###     ##    ###    ###   #   #  ####
+	                             #   #
+	                              ###
+	*/
+
 	debug_window_change(){
 		global adhd_debug_window
 		
@@ -1624,6 +1945,19 @@ Class ADHD_Private {
 		adhd_log_contents := ""
 		GuiControl,,adhd_log_contents,%adhd_log_contents%
 	}
+
+	/*
+	   #                         ####           #                    #       #
+	  # #                         #  #          #                    #
+	 #   #  # ##   # ##           #  #   ###   ####    ###    ###   ####    ##     ###   # ##
+	 #   #  ##  #  ##  #          #  #  #   #   #     #   #  #   #   #       #    #   #  ##  #
+	 #####  ##  #  ##  #          #  #  #####   #     #####  #       #       #    #   #  #   #
+	 #   #  # ##   # ##           #  #  #       #  #  #      #   #   #  #    #    #   #  #   #
+	 #   #  #      #             ####    ###     ##    ###    ###     ##    ###    ###   #   #
+	        #      #
+	        #      #
+	Functions to detect which app is the current app
+	*/
 
 	; App detection stuff
 	enable_heartbeat(){
@@ -1685,14 +2019,6 @@ Class ADHD_Private {
 		return
 	}
 
-	limit_app_get_size(){
-		return {w: this.limit_app_w, h:this.limit_app_h}
-	}
-	
-	limit_app_get_last_size(){
-		return {w: this.limit_app_last_w, h:this.limit_app_last_h}	
-	}
-	
 	app_active(act){
 		if (act){
 			if (this.app_act_curr == 0){
@@ -1715,115 +2041,22 @@ Class ADHD_Private {
 		}
 	}
 
-	limit_app_is_active(){
-		if (this.app_act_curr){
-			return true
-		} else {
-			return false
-		}
-	}
-	
-	; Hotkey detection routines
-	enable_hotkeys(){
-		global adhd_limit_application
-		global adhd_limit_application_on
-		
-		; ToDo: Should not submit gui here, triggering save...
-		this.debug("enable_hotkeys")
-		
-		Gui, Submit, NoHide
-		Loop % this.hotkey_list.MaxIndex(){
-			name := this.hotkey_index_to_name(A_Index)
-			if (this.hotkey_mappings[name].modified != ""){
-				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
-				hotkey_string := this.hotkey_mappings[name].modified
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+	/*
+	 #   #    #
+	 #   #
+	 ## ##   ##     ###    ###
+	 # # #    #    #      #   #
+	 #   #    #     ###   #
+	 #   #    #        #  #   #
+	 #   #   ###   ####    ###
+	Miscellaneous or unsorted stuff
+	*/
 
-				this.debug("Adding hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
-
-				; Apply "Limit app" option
-				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
-					; Enable Limit Application for all subsequently declared hotkeys
-					Hotkey, IfWinActive, ahk_class %adhd_limit_application%
-				} else {
-					; Disable Limit Application for all subsequently declared hotkeys
-					Hotkey, IfWinActive
-				}
-
-				; Bind down action of hotkey
-				prefix := "~"
-				if (this.hotkey_mappings[name].wild){
-					prefix .= "*"
-				}
-				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
-				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
-				
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
-					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
-				}
-
-				; Disable Limit Application for all subsequently declared hotkeys
-				Hotkey, IfWinActive
-				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-
-			}
-		}
-
-		this.enable_heartbeat()
-	}
-
-	disable_hotkeys(mode){
-		global adhd_limit_application
-		global adhd_limit_application_on
-		
-		this.debug("disable_hotkeys")
-		this.disable_heartbeat()
-
-		max := this.hotkey_list.MaxIndex()
-		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
-		if (mode){
-			max -= 1
-		}
-		Loop, % max
-		{
-			name := this.hotkey_index_to_name(A_Index)
-			if (this.hotkey_mappings[name].modified != ""){
-				hotkey_string := this.hotkey_mappings[name].modified
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-
-				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
-
-				prefix := "~"
-				if (this.hotkey_mappings[name].wild){
-					prefix .= "*"
-				}
-
-				; Bind down action of hotkey
-				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
-				
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, Off
-				}
-				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-
-			}
-		}
-		return
-	}
-
-	; Removes a hotkey - called at end of a timer, not a general purpose functions
-	delete_hotkey(){
-		soundbeep
-		this.disable_hotkeys()
-		name := this.hotkey_index_to_name(this.HKLastHotkey)
-		this.hotkey_mappings[name].modified := ""
-		this.hotkey_mappings[name].type := 0
-		
-		this.option_changed()
-		return
+	show_window_spy(){
+		SplitPath, A_AhkPath,,tmp
+		tmp := tmp "\AU3_Spy.exe"
+		IfExist, %tmp%
+			Run, %tmp%
 	}
 
 	/*
@@ -1839,127 +2072,6 @@ Class ADHD_Private {
 		return tmp
 	}
 	*/
-
-	functionality_toggle(){
-		if (this.functionality_enabled){
-			this.functionality_enabled := 0
-			soundbeep, 400, 200
-			; pass 1 as a parameter to disable_hotkeys to tell it to not disable functionality toggle
-			this.disable_hotkeys(1)
-		} else {
-			this.functionality_enabled := 1
-			soundbeep, 800, 200
-			this.enable_hotkeys()
-		}
-	}
-	
-	; Semantic version comparison from http://www.autohotkey.com/board/topic/81789-semverahk-compare-version-numbers/
-	semver_validate(version){
-		return !!RegExMatch(version, "^(\d+)\.(\d+)\.(\d+)(\-([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?(\+([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?$")
-	}
-
-	semver_parts(version, byRef out_major, byRef out_minor, byRef out_patch, byRef out_prerelease, byRef out_build){
-		return !!RegExMatch(version, "^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(\-(?P<prerelease>([0-9A-Za-z\-]+\.)*([0-9A-Za-z\-]+)))?(\+?(?P<build>([0-9A-Za-z\-]+\.)*([0-9A-Za-z\-]+)))?$", out_)
-	}
-
-	semver_compare(version1, version2){
-		if (!this.semver_parts(version1, maj1, min1, pat1, pre1, bld1))
-			throw Exception("Invalid version: " version1)
-		if (!this.semver_parts(version2, maj2, min2, pat2, pre2, bld2))
-			throw Exception("Invalid version: " version2)
-	 
-		for each, part in ["maj", "min", "pat"]
-		{
-			%part%1 += 0, %part%2 += 0
-			if (%part%1 < %part%2)
-				return -1
-			else if (%part%1 > %part%2)
-				return +1
-		}
-	 
-		for each, part in ["pre", "bld"] ; { "pre" : 1, "bld" : -1 }
-		{
-			if (%part%1 && %part%2)
-			{
-				StringSplit part1_, %part%1, .
-				StringSplit part2_, %part%2, .
-				Loop % part1_0 < part2_0 ? part1_0 : part2_0 ; use the smaller amount of parts
-				{
-					if part1_%A_Index% is digit
-					{
-						if part2_%A_Index% is digit ; both are numeric: compare numerically
-						{
-							part1_%A_Index% += 0, part2_%A_Index% += 0
-							if (part1_%A_Index% < part2_%A_Index%)
-								return -1
-							else if (part1_%A_Index% > part2_%A_Index%)
-								return +1
-							continue
-						}
-					}
-					; at least one is non-numeric: compare by characters
-					if (part1_%A_Index% < part2_%A_Index%)
-						return -1
-					else if (part1_%A_Index% > part2_%A_Index%)
-						return +1
-				}
-				; all compared parts were equal - the longer one wins
-				if (part1_0 < part2_0)
-					return -1
-				else if (part1_0 > part2_0)
-					return +1
-			}
-			else if (!%part%1 && %part%2) ; only version2 has prerelease -> version1 is higher
-				return (part == "pre") ? +1 : -1
-			else if (!%part%2 && %part%1) ; only version1 has prerelease -> it is smaller
-				return (part == "pre") ? -1 : +1
-		}
-		return 0
-	}
-
-	; pad version numbers to have 3 numbers (x.y.z) at a minimum.
-	pad_version(ver){
-		stringsplit, ver, ver,.
-
-		if (ver0 < 3){
-			ctr := 3-ver0
-			Loop, %ctr% {
-				ver .= ".0"
-			}
-		}
-		return ver
-	}
-
-	; Create tooltips for core script and author script versions
-	version_tooltip_create(diff,rem,loc){
-		tt := ""
-
-		if (diff == 0){
-			tt .= "Same (" loc ")"
-		} else if (diff > 0){
-			tt .= "Newer (" rem ", you have " loc ")"
-		} else {
-			tt .= "Older (" rem ", you have " loc ")"
-		}
-
-		return tt
-	}
-
-	; Adds / removes joystick hoykeys to enable detection of joystick buttons
-	joystick_detection(mode := 1){
-		if (mode){
-			mode := "ON"
-		} else {
-			mode := "OFF"
-		}
-		Loop , 16 {
-			stickid := A_Index
-			Loop, 32 {
-				buttonid := A_Index
-				hotkey, %stickid%Joy%buttonid%, adhd_joystick_pressed, %mode%
-			}
-		}
-	}
 
 }
 

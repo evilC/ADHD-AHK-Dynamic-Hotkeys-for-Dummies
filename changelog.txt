@@ -4,6 +4,10 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.0.2
+* Code reorganisation, of no consequence to script authors.
+
+
 3.0.1 24th Feb 2014
 = Ooops! I left a debug message in, was triggering any time you pressed fire.
 
