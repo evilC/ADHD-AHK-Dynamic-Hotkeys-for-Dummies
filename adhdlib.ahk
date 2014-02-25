@@ -333,13 +333,16 @@ Class ADHDLib {
 
 		Gui, Add, Text, x410 y30 w30 center, Wild`nMode
 
+		hotkey_w := this.private.gui_w - 190
+		hotkey_after := hotkey_w + 10
+
 		Loop % this.private.hotkey_list.MaxIndex() {
 			local name := this.private.hotkey_list[A_Index,"uiname"]
 			Gui, Add, Text,x5 W100 y%current_row%, %name%
-			Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w260 x105 yp-3,
+			Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w%hotkey_w% x105 yp-3,
 			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_display_%A_Index% w160 x105 yp-3, None
 			;Gui, Add, Edit, Disabled vadhd_hk_hotkey_%A_Index% w95 xp+165 yp,
-			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+270, Bind
+			Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+%hotkey_after%, Bind
 			adhd_hk_bind_%A_Index%_TT := this.private.hotkey_list[A_Index,"tooltip"]
 
 			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
