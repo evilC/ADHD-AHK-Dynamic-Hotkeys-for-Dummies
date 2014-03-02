@@ -4,7 +4,7 @@ Key:
 = : Change / Fix
 + : Added feature
 
-3.0.3
+3.0.3 2nd Mar 2014
 = Hotkeys now removed on rebind. Fixes #22
 = Debug info for hotkey adding / removing now also shows prefixes
 
