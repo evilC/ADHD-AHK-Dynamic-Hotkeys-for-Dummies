@@ -705,9 +705,10 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.0.2"
+		this.core_version := "3.0.3"
 
 		this.instantiated := 1
+		this.hotkeys_enabled := 0
 		this.hotkey_list := []
 		this.author_macro_name := "An ADHD Macro"					; Change this to your macro name
 		this.author_version := 1.0									; The version number of your script
@@ -1131,88 +1132,93 @@ Class ADHD_Private {
 	enable_hotkeys(){
 		global adhd_limit_application
 		global adhd_limit_application_on
-		
-		; ToDo: Should not submit gui here, triggering save...
-		this.debug("enable_hotkeys")
-		
-		Gui, Submit, NoHide
-		Loop % this.hotkey_list.MaxIndex(){
-			name := this.hotkey_index_to_name(A_Index)
-			if (this.hotkey_mappings[name].modified != ""){
-				;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
-				hotkey_string := this.hotkey_mappings[name].modified
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-				; Apply "Limit app" option
-				if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
-					; Enable Limit Application for all subsequently declared hotkeys
-					Hotkey, IfWinActive, ahk_class %adhd_limit_application%
-				} else {
+		if (!this.hotkeys_enabled){
+			this.hotkeys_enabled := 1
+			; ToDo: Should not submit gui here, triggering save...
+			this.debug("enable_hotkeys")
+			
+			Gui, Submit, NoHide
+			Loop % this.hotkey_list.MaxIndex(){
+				name := this.hotkey_index_to_name(A_Index)
+				if (this.hotkey_mappings[name].modified != ""){
+					;msgbox % this.hotkey_mappings[name].modified " -> " this.hotkey_list[A_Index,"subroutine"]
+					hotkey_string := this.hotkey_mappings[name].modified
+					hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+
+					; Apply "Limit app" option
+					if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
+						; Enable Limit Application for all subsequently declared hotkeys
+						Hotkey, IfWinActive, ahk_class %adhd_limit_application%
+					} else {
+						; Disable Limit Application for all subsequently declared hotkeys
+						Hotkey, IfWinActive
+					}
+
+					; Bind down action of hotkey
+					prefix := "~"
+					if (this.hotkey_mappings[name].wild){
+						prefix .= "*"
+					}
+					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
+					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
+					
+					this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+
+					if (IsLabel(hotkey_subroutine "Up")){
+						; Bind up action of hotkey
+						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
+						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
+					}
+
 					; Disable Limit Application for all subsequently declared hotkeys
 					Hotkey, IfWinActive
+					; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
+
 				}
-
-				; Bind down action of hotkey
-				prefix := "~"
-				if (this.hotkey_mappings[name].wild){
-					prefix .= "*"
-				}
-				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
-				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
-				
-				this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
-
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
-					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
-				}
-
-				; Disable Limit Application for all subsequently declared hotkeys
-				Hotkey, IfWinActive
-				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-
 			}
+			this.enable_heartbeat()
 		}
-
-		this.enable_heartbeat()
 	}
 
 	disable_hotkeys(mode){
 		global adhd_limit_application
 		global adhd_limit_application_on
-		
-		this.debug("disable_hotkeys")
-		this.disable_heartbeat()
 
-		max := this.hotkey_list.MaxIndex()
-		; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
-		if (mode){
-			max -= 1
-		}
-		Loop, % max
-		{
-			name := this.hotkey_index_to_name(A_Index)
-			if (this.hotkey_mappings[name].modified != ""){
-				hotkey_string := this.hotkey_mappings[name].modified
-				hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
+		if (this.hotkeys_enabled){
+			this.hotkeys_enabled := 0
+			this.debug("disable_hotkeys")
+			this.disable_heartbeat()
 
-				this.debug("Removing hotkey: " hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+			max := this.hotkey_list.MaxIndex()
+			; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
+			if (mode){
+				max -= 1
+			}
+			Loop, % max
+			{
+				name := this.hotkey_index_to_name(A_Index)
+				if (this.hotkey_mappings[name].modified != ""){
+					hotkey_string := this.hotkey_mappings[name].modified
+					hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-				prefix := "~"
-				if (this.hotkey_mappings[name].wild){
-					prefix .= "*"
+					prefix := "~"
+					if (this.hotkey_mappings[name].wild){
+						prefix .= "*"
+					}
+
+					this.debug("Removing hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+
+					; Bind down action of hotkey
+					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
+					
+					if (IsLabel(hotkey_subroutine "Up")){
+						; Bind up action of hotkey
+						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, Off
+					}
+					; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
+
 				}
-
-				; Bind down action of hotkey
-				Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
-				
-				if (IsLabel(hotkey_subroutine "Up")){
-					; Bind up action of hotkey
-					Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, Off
-				}
-				; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-
 			}
 		}
 		return
