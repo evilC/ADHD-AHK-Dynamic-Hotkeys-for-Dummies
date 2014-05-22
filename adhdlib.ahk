@@ -356,7 +356,7 @@ Class ADHDLib {
 			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
 
 			Gui, Add, Checkbox, vadhd_hk_passthru_%A_Index% gadhd_option_changed xp+30 yp w25 center Checked
-			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`n Warning! Binding to key A with PassThru OFF and WildMode also OFF will NOT block CTRL-A !"
+			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`n"
 
 			current_row := current_row + 30
 		}
@@ -715,7 +715,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.1.0"
+		this.core_version := "3.1.1"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0

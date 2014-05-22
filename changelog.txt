@@ -4,7 +4,7 @@ Key:
 = : Change / Fix
 + : Added feature
 
-3.1.0 22nd May 2014
+3.1.1 22nd May 2014
 ! New version REQUIRES AutoHotKey version 1.1.15.00
 * A big thanks to AHK Author Lexikos for changes to AHK to enable this long awaited feature!
   http://www.autohotkey.com/board/topic/102265-
