@@ -4,6 +4,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.2.0 22nd May 2014
+= PassThru mode is now ON by default if "Limit App" is OFF.
+  This is to stop you accidentally binding Left Mouse to something whilst Limit App is off, thus locking you out of Windows ;)
+= Major rework of (un)binding code
+  There should be less quirky behavior now when you change bindings or enable / disable pass-thru, wild, limit app etc.
+
 3.1.1 22nd May 2014
 ! New version REQUIRES AutoHotKey version 1.1.15.00
 * A big thanks to AHK Author Lexikos for changes to AHK to enable this long awaited feature!
