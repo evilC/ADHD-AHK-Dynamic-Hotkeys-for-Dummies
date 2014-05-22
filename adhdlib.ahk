@@ -481,6 +481,17 @@ Class ADHDLib {
 		Gui, 2:Add,Edit,w%tmp% h350 vadhd_log_contents hwndadhd_log ReadOnly,
 		Gui, 2:Add, Button, gadhd_clear_log, clear
 
+		; Create the Bind GUI
+		prompt := "Please press the desired key combination.`n`n"
+		prompt .= "Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n"
+		;prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
+		prompt .= "`nHit Escape to cancel."
+		prompt .= "`nHold Escape to clear a binding."
+		Gui, 3:Add, text, center, %prompt%
+		Gui, 3:-Border +AlwaysOnTop
+		;Gui, 3:Show
+
+
 	}
 
 	; --------------------------------------------------------------------------------------------------------------------------------------
@@ -1277,14 +1288,6 @@ Class ADHD_Private {
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
 		this.BindMode := 1
 
-		; Show the prompt
-		prompt := "Please press the desired key combination.`n`n"
-		prompt .= "Supports most keyboard keys and all mouse buttons. Also Ctrl, Alt, Shift, Win as modifiers or individual keys.`n"
-		;prompt .= "Joystick buttons are also supported, but currently not with modifiers.`n"
-		prompt .= "`nHit Escape to cancel."
-		prompt .= "`nHold Escape to clear a binding."
-		Gui, 3:Add, text, center, %prompt%
-		Gui, 3:-Border +AlwaysOnTop
 		Gui, 3:Show
 
 		outhk := ""
