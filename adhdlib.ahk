@@ -335,7 +335,7 @@ Class ADHDLib {
 		; Add hotkeys
 	
 		; Add functionality toggle as last item in list
-		this.private.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
+		this.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
 
 		xpos := 105 + hotkey_w + 45
 		Gui, Add, Text, x%xpos% y30 w30 center, Wild`nMode
@@ -730,9 +730,10 @@ Class ADHD_Private {
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
-		this.hotkey_list := []
-		this.author_macro_name := "An ADHD Macro"					; Change this to your macro name
-		this.author_version := 1.0									; The version number of your script
+		this.hotkey_list := []									; list of all possible hotkeys
+		this.defined_hotkeys := []								; currently defined hotkeys
+		this.author_macro_name := "An ADHD Macro"				; Change this to your macro name
+		this.author_version := 1.0								; The version number of your script
 		this.author_name := "Unknown"							; Your Name
 		this.author_link := ""
 		
@@ -1160,6 +1161,8 @@ Class ADHD_Private {
 			this.debug("enable_hotkeys")
 			
 			Gui, Submit, NoHide
+			this.defined_hotkeys := []
+
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
 				if (this.hotkey_mappings[name].modified != ""){
@@ -1189,6 +1192,8 @@ Class ADHD_Private {
 					
 					this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild " passthru: " this.hotkey_mappings[name].passthru)
 
+					this.defined_hotkeys[A_Index] := {string: prefix hotkey_string, subroutine: hotkey_subroutine, limit_app_on: adhd_limit_application_on, limit_app: adhd_limit_application }
+
 					if (IsLabel(hotkey_subroutine "Up")){
 						; Bind up action of hotkey
 						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
@@ -1214,6 +1219,41 @@ Class ADHD_Private {
 			this.debug("disable_hotkeys")
 			this.disable_heartbeat()
 
+			; If "Functionality Toggle" is defined and 1 passed as mode, do not disable the last hotkey (Functionality Toggle)
+			max := this.defined_hotkeys.MaxIndex()
+			if (mode && this.defined_hotkeys[max].subroutine == "adhd_functionality_toggle"){
+				max -= 1
+			}
+
+			; If there are entries to be processed...
+			if (max){
+				; Set Limit App mode
+				limit_app_on := this.defined_hotkeys[1].limit_app_on
+				limit_app := this.defined_hotkeys[1].limit_app
+				if (limit_app_on){
+					Hotkey, IfWinActive, ahk_class %limit_app%
+				} else {
+					Hotkey, IfWinActive
+				}
+			}
+
+			Loop % max {
+				str := this.defined_hotkeys[A_Index].string
+				sub := this.defined_hotkeys[A_Index].subroutine
+				
+				
+				Hotkey, %str%, %sub%, Off
+				if (IsLabel(sub "Up")){
+					; Remove up action of hotkey
+					Hotkey, %str% up , %sub%Up, Off
+				}
+			}
+
+			Hotkey, IfWinActive
+
+			;MsgBox, 0, , Press OK to enable hotkeys
+
+			/*
 			max := this.hotkey_list.MaxIndex()
 			; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
 			if (mode){
@@ -1222,6 +1262,7 @@ Class ADHD_Private {
 			Loop, % max
 			{
 				name := this.hotkey_index_to_name(A_Index)
+				msgbox % this.defined_hotkeys[A_Index].string
 				if (this.hotkey_mappings[name].modified != ""){
 					hotkey_string := this.hotkey_mappings[name].modified
 					hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
@@ -1247,6 +1288,7 @@ Class ADHD_Private {
 
 				}
 			}
+			*/
 		}
 		return
 	}
