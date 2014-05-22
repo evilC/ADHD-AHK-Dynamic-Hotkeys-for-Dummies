@@ -4,6 +4,14 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.1.0 22nd May 2014
+! New version REQUIRES AutoHotKey version 1.1.15.00
+* A big thanks to AHK Author Lexikos for changes to AHK to enable this long awaited feature!
+  http://www.autohotkey.com/board/topic/102265-
++ Bindings can now be defined as "Pass-Thru" or not. This is analagous to AHK's ~ prefix.
+  When Enabled, the binding will not be hidden from the game.
+  When Disabled, ADHD will attempt to hide that key from the game.
+
 3.0.3 2nd Mar 2014
 = Hotkeys now removed on rebind. Fixes #22
 = Debug info for hotkey adding / removing now also shows prefixes

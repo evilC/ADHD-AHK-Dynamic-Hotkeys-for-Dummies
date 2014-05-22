@@ -324,17 +324,23 @@ Class ADHDLib {
 		Gui, Tab, %nexttab%
 		; BINDINGS TAB
 		Gui, Add, Text, x5 y40 W100 Center, Action
-		Gui, Add, Text, x190 yp W100 Center, Current Binding
+
+		hotkey_w := this.private.gui_w - 220
+		hotkey_after := hotkey_w + 10
+
+		xpos := 105 + (hotkey_w / 2) - 50
+
+		Gui, Add, Text, x%xpos% yp W100 Center, Current Binding
 
 		; Add hotkeys
 	
 		; Add functionality toggle as last item in list
 		this.private.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
 
-		Gui, Add, Text, x410 y30 w30 center, Wild`nMode
+		xpos := 105 + hotkey_w + 45
+		Gui, Add, Text, x%xpos% y30 w30 center, Wild`nMode
 
-		hotkey_w := this.private.gui_w - 190
-		hotkey_after := hotkey_w + 10
+		Gui, Add, Text, xp+30 y30 w30 center, Pass`nThru
 
 		Loop % this.private.hotkey_list.MaxIndex() {
 			local name := this.private.hotkey_list[A_Index,"uiname"]
@@ -348,6 +354,10 @@ Class ADHDLib {
 			;Gui, Add, Button, gadhd_set_binding vadhd_hk_bind_%A_Index% yp-1 xp+105, Bind
 			Gui, Add, Checkbox, vadhd_hk_wild_%A_Index% gadhd_option_changed xp+45 yp+5 w25 center
 			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
+
+			Gui, Add, Checkbox, vadhd_hk_passthru_%A_Index% gadhd_option_changed xp+30 yp w25 center Checked
+			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`n Warning! Binding to key A with PassThru OFF and WildMode also OFF will NOT block CTRL-A !"
+
 			current_row := current_row + 30
 		}
 		
@@ -705,7 +715,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.0.3"
+		this.core_version := "3.1.0"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
@@ -1156,14 +1166,17 @@ Class ADHD_Private {
 					}
 
 					; Bind down action of hotkey
-					prefix := "~"
+					prefix := ""
+					if (this.hotkey_mappings[name].passthru){
+						prefix .= "~"
+					}
 					if (this.hotkey_mappings[name].wild){
 						prefix .= "*"
 					}
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
 					
-					this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+					this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild " passthru: " this.hotkey_mappings[name].passthru)
 
 					if (IsLabel(hotkey_subroutine "Up")){
 						; Bind up action of hotkey
@@ -1202,12 +1215,15 @@ Class ADHD_Private {
 					hotkey_string := this.hotkey_mappings[name].modified
 					hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
 
-					prefix := "~"
+					prefix := ""
+					if (this.hotkey_mappings[name].passthru){
+						prefix .= "~"
+					}
 					if (this.hotkey_mappings[name].wild){
 						prefix .= "*"
 					}
 
-					this.debug("Removing hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild)
+					this.debug("Removing hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild " passthru: " this.hotkey_mappings[name].passthru)
 
 					; Bind down action of hotkey
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
@@ -1770,6 +1786,10 @@ Class ADHD_Private {
 			this.hotkey_mappings[name].wild := tmp
 			GuiControl,, adhd_hk_wild_%A_Index%, %tmp%
 
+			tmp := this.read_ini("adhd_hk_passthru_" A_Index,this.current_profile,1)
+			this.hotkey_mappings[name].passthru := tmp
+			GuiControl,, adhd_hk_passthru_%A_Index%, %tmp%
+
 			tmp := this.read_ini("adhd_hk_type_" A_Index,this.current_profile,0)
 			this.hotkey_mappings[name].type := tmp
 
@@ -1855,6 +1875,10 @@ Class ADHD_Private {
 				; Wild
 				this.hotkey_mappings[name].wild := adhd_hk_wild_%A_Index%
 				this.update_ini("adhd_hk_wild_" A_Index, this.current_profile, this.hotkey_mappings[name].wild, 0)
+
+				; PassThru
+				this.hotkey_mappings[name].passthru := adhd_hk_passthru_%A_Index%
+				this.update_ini("adhd_hk_passthru_" A_Index, this.current_profile, this.hotkey_mappings[name].passthru, 1)
 			}
 			
 			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
