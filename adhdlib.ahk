@@ -731,7 +731,7 @@ Class ADHD_Private {
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
 		this.hotkey_list := []									; list of all possible hotkeys
-		this.defined_hotkeys := []								; currently defined hotkeys
+		this.defined_hotkeys := {limit_app_on: 0, limit_app: "", hotkey_cache: []}								; currently defined hotkeys
 		this.author_macro_name := "An ADHD Macro"				; Change this to your macro name
 		this.author_version := 1.0								; The version number of your script
 		this.author_name := "Unknown"							; Your Name
@@ -1161,7 +1161,7 @@ Class ADHD_Private {
 			;this.debug("enable_hotkeys")
 			
 			Gui, Submit, NoHide
-			this.defined_hotkeys := []
+			this.defined_hotkeys.hotkey_cache := []
 
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
@@ -1194,7 +1194,9 @@ Class ADHD_Private {
 					
 					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
 
-					this.defined_hotkeys[A_Index] := {string: prefix hotkey_string, subroutine: hotkey_subroutine, limit_app_on: limit_app_on, limit_app: adhd_limit_application }
+					this.defined_hotkeys.hotkey_cache[A_Index] := {string: prefix hotkey_string, subroutine: hotkey_subroutine}
+					this.defined_hotkeys.limit_app_on := limit_app_on
+					this.defined_hotkeys.limit_app := adhd_limit_application
 
 					if (IsLabel(hotkey_subroutine "Up")){
 						; Bind up action of hotkey
@@ -1222,16 +1224,17 @@ Class ADHD_Private {
 			this.disable_heartbeat()
 
 			; If "Functionality Toggle" is defined and 1 passed as mode, do not disable the last hotkey (Functionality Toggle)
-			max := this.defined_hotkeys.MaxIndex()
-			if (mode && this.defined_hotkeys[max].subroutine == "adhd_functionality_toggle"){
+			max := this.defined_hotkeys.hotkey_cache.MaxIndex()
+			if (mode && this.defined_hotkeys.hotkey_cache[max].subroutine == "adhd_functionality_toggle"){
 				max -= 1
 			}
+
+			limit_app_on := this.defined_hotkeys.limit_app_on
+			limit_app := this.defined_hotkeys.limit_app
 
 			; If there are entries to be processed...
 			if (max){
 				; Set Limit App mode
-				limit_app_on := this.defined_hotkeys[1].limit_app_on
-				limit_app := this.defined_hotkeys[1].limit_app
 				if (limit_app_on){
 					Hotkey, IfWinActive, ahk_class %limit_app%
 				} else {
@@ -1240,8 +1243,8 @@ Class ADHD_Private {
 			}
 
 			Loop % max {
-				str := this.defined_hotkeys[A_Index].string
-				sub := this.defined_hotkeys[A_Index].subroutine
+				str := this.defined_hotkeys.hotkey_cache[A_Index].string
+				sub := this.defined_hotkeys.hotkey_cache[A_Index].subroutine
 				
 				this.debug("Removing hotkey: " str ", sub: " sub)
 
