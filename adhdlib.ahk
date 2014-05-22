@@ -1163,6 +1163,7 @@ Class ADHD_Private {
 			
 			Gui, Submit, NoHide
 			this.defined_hotkeys.hotkey_cache := []
+			cache_idx := 1
 
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
@@ -1195,7 +1196,8 @@ Class ADHD_Private {
 					
 					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
 
-					this.defined_hotkeys.hotkey_cache[A_Index] := {string: prefix hotkey_string, subroutine: hotkey_subroutine}
+					this.defined_hotkeys.hotkey_cache[cache_idx] := {string: prefix hotkey_string, subroutine: hotkey_subroutine}
+					cache_idx++
 					this.defined_hotkeys.limit_app_on := limit_app_on
 					this.defined_hotkeys.limit_app := adhd_limit_application
 
@@ -1248,7 +1250,6 @@ Class ADHD_Private {
 				sub := this.defined_hotkeys.hotkey_cache[A_Index].subroutine
 				
 				this.debug("Removing hotkey: " str ", sub: " sub)
-
 				Hotkey, %str%, %sub%, Off
 				if (IsLabel(sub "Up")){
 					; Remove up action of hotkey
