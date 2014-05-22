@@ -1158,7 +1158,7 @@ Class ADHD_Private {
 		if (!this.hotkeys_enabled){
 			this.hotkeys_enabled := 1
 			; ToDo: Should not submit gui here, triggering save...
-			this.debug("enable_hotkeys")
+			;this.debug("enable_hotkeys")
 			
 			Gui, Submit, NoHide
 			this.defined_hotkeys := []
@@ -1172,9 +1172,11 @@ Class ADHD_Private {
 
 					; Apply "Limit app" option
 					if (adhd_limit_application_on == 1 && adhd_limit_application !=""){
+						limit_app_on := 1
 						; Enable Limit Application for all subsequently declared hotkeys
 						Hotkey, IfWinActive, ahk_class %adhd_limit_application%
 					} else {
+						limit_app_on := 0
 						; Disable Limit Application for all subsequently declared hotkeys
 						Hotkey, IfWinActive
 					}
@@ -1190,9 +1192,9 @@ Class ADHD_Private {
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
 					
-					this.debug("Adding hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild " passthru: " this.hotkey_mappings[name].passthru)
+					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
 
-					this.defined_hotkeys[A_Index] := {string: prefix hotkey_string, subroutine: hotkey_subroutine, limit_app_on: adhd_limit_application_on, limit_app: adhd_limit_application }
+					this.defined_hotkeys[A_Index] := {string: prefix hotkey_string, subroutine: hotkey_subroutine, limit_app_on: limit_app_on, limit_app: adhd_limit_application }
 
 					if (IsLabel(hotkey_subroutine "Up")){
 						; Bind up action of hotkey
@@ -1216,7 +1218,7 @@ Class ADHD_Private {
 
 		if (this.hotkeys_enabled){
 			this.hotkeys_enabled := 0
-			this.debug("disable_hotkeys")
+			;this.debug("disable_hotkeys")
 			this.disable_heartbeat()
 
 			; If "Functionality Toggle" is defined and 1 passed as mode, do not disable the last hotkey (Functionality Toggle)
@@ -1241,7 +1243,7 @@ Class ADHD_Private {
 				str := this.defined_hotkeys[A_Index].string
 				sub := this.defined_hotkeys[A_Index].subroutine
 				
-				this.debug("Removing hotkey: " str " sub: " sub)
+				this.debug("Removing hotkey: " str ", sub: " sub)
 
 				Hotkey, %str%, %sub%, Off
 				if (IsLabel(sub "Up")){
