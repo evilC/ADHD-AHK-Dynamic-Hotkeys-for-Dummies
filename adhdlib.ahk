@@ -1241,7 +1241,8 @@ Class ADHD_Private {
 				str := this.defined_hotkeys[A_Index].string
 				sub := this.defined_hotkeys[A_Index].subroutine
 				
-				
+				this.debug("Removing hotkey: " str " sub: " sub)
+
 				Hotkey, %str%, %sub%, Off
 				if (IsLabel(sub "Up")){
 					; Remove up action of hotkey
