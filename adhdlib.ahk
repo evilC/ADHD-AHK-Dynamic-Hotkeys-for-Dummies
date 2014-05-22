@@ -356,7 +356,7 @@ Class ADHDLib {
 			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
 
 			Gui, Add, Checkbox, vadhd_hk_passthru_%A_Index% gadhd_option_changed xp+30 yp w25 center Checked
-			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`n"
+			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`nNote, PassThru is FORCED ON if Limit App is OFF.`nThis is to prevent yourself from eg blocking the Left mouse button in all apps"
 
 			current_row := current_row + 30
 		}
@@ -537,6 +537,7 @@ Class ADHDLib {
 
 		; Finish setup =====================================
 		this.private.profile_changed()
+		this.private.option_changed()
 		this.private.debug_window_change()
 
 		this.private.debug("Finished startup")
@@ -726,7 +727,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.1.1"
+		this.core_version := "3.2.0"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
@@ -1183,7 +1184,7 @@ Class ADHD_Private {
 
 					; Bind down action of hotkey
 					prefix := ""
-					if (this.hotkey_mappings[name].passthru){
+					if (this.hotkey_mappings[name].passthru || !limit_app_on){
 						prefix .= "~"
 					}
 					if (this.hotkey_mappings[name].wild){
@@ -1257,49 +1258,11 @@ Class ADHD_Private {
 
 			Hotkey, IfWinActive
 
-			;MsgBox, 0, , Press OK to enable hotkeys
-
-			/*
-			max := this.hotkey_list.MaxIndex()
-			; If 1 passed to mode, do not disable the last hotkey (Functionality Toggle)
-			if (mode){
-				max -= 1
-			}
-			Loop, % max
-			{
-				name := this.hotkey_index_to_name(A_Index)
-				msgbox % this.defined_hotkeys[A_Index].string
-				if (this.hotkey_mappings[name].modified != ""){
-					hotkey_string := this.hotkey_mappings[name].modified
-					hotkey_subroutine := this.hotkey_list[A_Index,"subroutine"]
-
-					prefix := ""
-					if (this.hotkey_mappings[name].passthru){
-						prefix .= "~"
-					}
-					if (this.hotkey_mappings[name].wild){
-						prefix .= "*"
-					}
-
-					this.debug("Removing hotkey: " prefix hotkey_string " sub: " hotkey_subroutine " wild: " this.hotkey_mappings[name].wild " passthru: " this.hotkey_mappings[name].passthru)
-
-					; Bind down action of hotkey
-					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, Off
-					
-					if (IsLabel(hotkey_subroutine "Up")){
-						; Bind up action of hotkey
-						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, Off
-					}
-					; ToDo: Up event does not fire for wheel "buttons" - send dupe event or something?
-
-				}
-			}
-			*/
 		}
 		return
 	}
 
-	; Removes a hotkey - called at end of a timer, not a general purpose functions
+	; Removes (clears) a hotkey - called at end of a timer, not a general purpose functions
 	delete_hotkey(){
 		soundbeep
 		this.disable_hotkeys()
@@ -1899,15 +1862,26 @@ Class ADHD_Private {
 		global adhd_limit_application
 		global adhd_limit_application_on
 		global adhd_debug_window
-		
-		; Disable existing hotkeys
-		this.disable_hotkeys(0)
 
+		; Pull state of UI vars through
+		Gui, Submit, NoHide
+
+		; Disable Pass Thru boxes if not in Limit App mode to indicate that passthru is not under user control
+		Loop % this.hotkey_list.MaxIndex(){
+			if (adhd_limit_application_on){
+				GuiControl, Enable , adhd_hk_passthru_%A_Index%
+			} else {
+				GuiControl, Disable, adhd_hk_passthru_%A_Index%
+			}
+		}
+
+		; If not starting up, update hotkeys
 		if (this.starting_up != 1){
 			;this.debug("option_changed - control: " A_guicontrol)
-			
-			Gui, Submit, NoHide
 
+			; Disable existing hotkeys
+			this.disable_hotkeys(0)
+			
 			; Hotkey bindings
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
