@@ -1295,7 +1295,7 @@ Class ADHD_Private {
 		this.disable_hotkeys(0)
 
 		; Enable Joystick detection hotkeys
-		;joystick_detection(1)
+		;this.joystick_detection(1)
 
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
 		this.BindMode := 1
