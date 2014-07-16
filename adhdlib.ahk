@@ -727,7 +727,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.2.0"
+		this.core_version := "3.2.1"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
@@ -926,7 +926,7 @@ Class ADHD_Private {
 		if (url == ""){
 			return 0
 		}
-		
+		/*
 		pwhr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 		pwhr.Open("GET",url) 
 		pwhr.Send()
@@ -936,7 +936,8 @@ Class ADHD_Private {
 		if (InStr(ret, "<html>")){
 			return 0
 		}		
-		
+		*/
+		ret := this.download_to_string(url)
 		out := {}
 		
 		Loop, Parse, ret, `n`r, %A_Space%%A_Tab%
@@ -960,7 +961,27 @@ Class ADHD_Private {
 		}
 		return out[version]
 	}
-	
+
+	download_to_string(url, encoding = "utf-8")	{
+		; Code by Bentschi, from http://ahkscript.org/boards/viewtopic.php?f=6&t=3291#p16243
+	    static a := "AutoHotkey/" A_AhkVersion
+	    if (!DllCall("LoadLibrary", "str", "wininet") || !(h := DllCall("wininet\InternetOpen", "str", a, "uint", 1, "ptr", 0, "ptr", 0, "uint", 0, "ptr")))
+	        return 0
+	    c := s := 0, o := ""
+	    if (f := DllCall("wininet\InternetOpenUrl", "ptr", h, "str", url, "ptr", 0, "uint", 0, "uint", 0x80003000, "ptr", 0, "ptr"))
+	    {
+	        while (DllCall("wininet\InternetQueryDataAvailable", "ptr", f, "uint*", s, "uint", 0, "ptr", 0) && s > 0)
+	        {
+	            VarSetCapacity(b, s, 0)
+	            DllCall("wininet\InternetReadFile", "ptr", f, "ptr", &b, "uint", s, "uint*", r)
+	            o .= StrGet(&b, r >> (encoding = "utf-16" || encoding = "cp1200"), encoding)
+	        }
+	        DllCall("wininet\InternetCloseHandle", "ptr", f)
+	    }
+	    DllCall("wininet\InternetCloseHandle", "ptr", h)
+	    return o
+	}
+
 	; Semantic version comparison from http://www.autohotkey.com/board/topic/81789-semverahk-compare-version-numbers/
 	semver_validate(version){
 		return !!RegExMatch(version, "^(\d+)\.(\d+)\.(\d+)(\-([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?(\+([0-9A-Za-z\-]+\.)*[0-9A-Za-z\-]+)?$")
