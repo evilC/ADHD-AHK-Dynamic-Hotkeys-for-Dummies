@@ -80,7 +80,8 @@ axis_list_ahk := Array("X","Y","Z","R","U","V")
 ; Start vJoy setup
 axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
 
-#include <VJoy_lib>
+#include <VJoyLib\VJoy_lib>
+; Loads the vJoy DLL
 LoadPackagedLibrary() {
 	SplitPath, A_AhkPath,,tmp
     if (A_PtrSize < 8) {
@@ -93,7 +94,8 @@ LoadPackagedLibrary() {
         MsgBox, [%A_ThisFunc%] Failed to find DLL at %dllpath%
     }
     return hDLL
-}
+} 
+
 ; Load DLL
 LoadPackagedLibrary()
 
