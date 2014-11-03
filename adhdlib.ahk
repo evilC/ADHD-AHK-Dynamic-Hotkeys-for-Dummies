@@ -1212,7 +1212,7 @@ Class ADHD_Private {
 					if (this.hotkey_mappings[name].wild){
 						prefix .= "*"
 					}
-					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
+					;Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
 					
 					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
@@ -1224,7 +1224,7 @@ Class ADHD_Private {
 
 					if (IsLabel(hotkey_subroutine "Up")){
 						; Bind up action of hotkey
-						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
+						;Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
 						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
 					}
 
@@ -1320,6 +1320,7 @@ Class ADHD_Private {
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
 		this.BindMode := 1
 
+		; Show instructions
 		Gui, 3:Show
 
 		outhk := ""
@@ -1327,6 +1328,9 @@ Class ADHD_Private {
 		EXTRA_KEY_LIST := this.EXTRA_KEY_LIST
 
 		Input, detectedkey, L1 M, %EXTRA_KEY_LIST%
+
+		; Hide Instructions
+		Gui, 3:Submit
 
 		if (substr(ErrorLevel,1,7) == "EndKey:"){
 			; A "Special" (Non-printable) key was pressed
@@ -1352,9 +1356,6 @@ Class ADHD_Private {
 		this.BindMode := 0
 
 		this.joystick_detection(0)
-
-		; Hide prompt
-		Gui, 3:Submit
 
 		;msgbox % detectedkey "`n" this.HKModifierState.ctrl
 		;msgbox % detectedkey "`n" this.HKControlType "`n" this.HKSecondaryInput
@@ -1400,17 +1401,24 @@ Class ADHD_Private {
 	}
 
 	; Adds / removes joystick hoykeys to enable detection of joystick buttons
-	joystick_detection(mode := 1){
+	joystick_detection(mode){
+		/*
 		if (mode){
 			mode := "ON"
 		} else {
 			mode := "OFF"
 		}
+		*/
+		;Hotkey, IfWinActive
 		Loop , 16 {
 			stickid := A_Index
 			Loop, 32 {
 				buttonid := A_Index
-				hotkey, %stickid%Joy%buttonid%, adhd_joystick_pressed, %mode%
+				if (mode){
+					hotkey, %stickid%Joy%buttonid%, adhd_joystick_pressed, On
+				} else {
+					hotkey, %stickid%Joy%buttonid%, Off
+				}
 			}
 		}
 	}
@@ -2205,7 +2213,13 @@ adhd_mouse_move(){
 ; A Joystick button was pressed while in Binding mode
 adhd_joystick_pressed:
 	ADHD.private.HKControlType := 3
-	ADHD.private.HKSecondaryInput := A_ThisHotkey
+
+	; Dirty bodge fix due to AHK limitation	
+	if (substr(A_ThisHotkey,1,1) == "~"){
+		ADHD.private.HKSecondaryInput := substr(A_ThisHotkey,2)
+	} else {
+		ADHD.private.HKSecondaryInput := A_ThisHotkey
+	}
 	Send {Escape}
 	return
 
