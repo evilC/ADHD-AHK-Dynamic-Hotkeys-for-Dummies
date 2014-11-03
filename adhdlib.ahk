@@ -1186,6 +1186,8 @@ Class ADHD_Private {
 			this.defined_hotkeys.hotkey_cache := []
 			cache_idx := 1
 
+			this.joystick_lookup := {}
+
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
 				if (this.hotkey_mappings[name].modified != ""){
@@ -1212,7 +1214,12 @@ Class ADHD_Private {
 					if (this.hotkey_mappings[name].wild){
 						prefix .= "*"
 					}
-					;Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%
+
+					; If Joystick type, redirect to joystick_handler
+					if (this.hotkey_mappings[name].type == 3){
+						hotkey_subroutine := "adhd_joystick_handler"
+						this.joystick_lookup[hotkey_string] := name
+					}
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
 					
 					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
@@ -1222,7 +1229,7 @@ Class ADHD_Private {
 					this.defined_hotkeys.limit_app_on := limit_app_on
 					this.defined_hotkeys.limit_app := adhd_limit_application
 
-					if (IsLabel(hotkey_subroutine "Up")){
+					if (IsLabel(hotkey_subroutine "Up") && this.hotkey_mappings[name].type != 3){
 						; Bind up action of hotkey
 						;Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up
 						Hotkey, %prefix%%hotkey_string% up , %hotkey_subroutine%Up, On
@@ -1271,10 +1278,17 @@ Class ADHD_Private {
 				sub := this.defined_hotkeys.hotkey_cache[A_Index].subroutine
 				
 				this.debug("Removing hotkey: " str ", sub: " sub)
-				Hotkey, %str%, %sub%, Off
-				if (IsLabel(sub "Up")){
+
+				if (this.hotkey_mappings[sub].type == 3){
+					this.joystick_lookup.remove(hotkey_string)
+				}
+
+				;Hotkey, %str%, %sub%, Off
+				Hotkey, %str%, Off
+				if (IsLabel(sub "Up") && this.hotkey_mappings[sub].type != 3){
 					; Remove up action of hotkey
-					Hotkey, %str% up , %sub%Up, Off
+					;Hotkey, %str% up , %sub%Up, Off
+					Hotkey, %str% up , Off
 				}
 			}
 
@@ -1282,6 +1296,34 @@ Class ADHD_Private {
 
 		}
 		return
+	}
+
+	; AHK does not support Up events for joystick hotkeys - eg the hotkey "1Joy1 Up" fires on button down.
+	; Intercept joystick button mappings, and simulate up event.
+	joystick_handler(){
+		hotkey_string := this.strip_prefix(A_ThisHotkey)
+		hotkey_subroutine := this.joystick_lookup[hotkey_string]
+		Gosub % hotkey_subroutine
+
+		while(GetKeyState(hotkey_string)){
+			; do nothing
+		}
+
+		if (IsLabel(hotkey_subroutine "Up")){
+			Gosub % hotkey_subroutine "Up"
+		}
+	}
+
+	; Joystick button was pressed at bind time.
+	; Set appropriate flags and quit the escape routine
+	bind_joystick_button(){
+		this.HKControlType := 3
+
+		; Dirty bodge fix due to AHK limitation	
+		this.HKSecondaryInput := this.strip_prefix(A_ThisHotkey)
+
+		; Send escape to quit bind routine - bind routine will inspect flags.
+		Send {Escape}
 	}
 
 	; Removes (clears) a hotkey - called at end of a timer, not a general purpose functions
@@ -1415,7 +1457,7 @@ Class ADHD_Private {
 			Loop, 32 {
 				buttonid := A_Index
 				if (mode){
-					hotkey, %stickid%Joy%buttonid%, adhd_joystick_pressed, On
+					hotkey, %stickid%Joy%buttonid%, adhd_bind_joystick_button, On
 				} else {
 					hotkey, %stickid%Joy%buttonid%, Off
 				}
@@ -2211,16 +2253,13 @@ adhd_mouse_move(){
 }
 
 ; A Joystick button was pressed while in Binding mode
-adhd_joystick_pressed:
-	ADHD.private.HKControlType := 3
+adhd_bind_joystick_button:
+	ADHD.private.bind_joystick_button()
+	return
 
-	; Dirty bodge fix due to AHK limitation	
-	if (substr(A_ThisHotkey,1,1) == "~"){
-		ADHD.private.HKSecondaryInput := substr(A_ThisHotkey,2)
-	} else {
-		ADHD.private.HKSecondaryInput := A_ThisHotkey
-	}
-	Send {Escape}
+; A Joystick button was pressed in normal usage
+adhd_joystick_handler:
+	ADHD.private.joystick_handler()
 	return
 
 ; Label triggers
