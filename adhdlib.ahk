@@ -727,7 +727,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.2.1"
+		this.core_version := "3.2.2"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
@@ -1307,7 +1307,6 @@ Class ADHD_Private {
 
 	; Detects key combinations
 	set_binding(ctrlnum){
-
 		; init vars
 		this.HKControlType := 0
 		this.HKModifierState := {ctrl: 0, alt: 0, shift: 0, win: 0}
@@ -1316,7 +1315,7 @@ Class ADHD_Private {
 		this.disable_hotkeys(0)
 
 		; Enable Joystick detection hotkeys
-		;this.joystick_detection(1)
+		this.joystick_detection(1)
 
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
 		this.BindMode := 1
@@ -1326,6 +1325,7 @@ Class ADHD_Private {
 		outhk := ""
 
 		EXTRA_KEY_LIST := this.EXTRA_KEY_LIST
+
 		Input, detectedkey, L1 M, %EXTRA_KEY_LIST%
 
 		if (substr(ErrorLevel,1,7) == "EndKey:"){
@@ -1351,12 +1351,13 @@ Class ADHD_Private {
 		; Stop listening to mouse, keyboard etc
 		this.BindMode := 0
 
-		;joystick_detection(0)
+		this.joystick_detection(0)
 
 		; Hide prompt
 		Gui, 3:Submit
 
 		;msgbox % detectedkey "`n" this.HKModifierState.ctrl
+		;msgbox % detectedkey "`n" this.HKControlType "`n" this.HKSecondaryInput
 
 		; Process results
 
@@ -2203,8 +2204,8 @@ adhd_mouse_move(){
 
 ; A Joystick button was pressed while in Binding mode
 adhd_joystick_pressed:
-	HKControlType := 3
-	HKSecondaryInput := A_ThisHotkey
+	ADHD.private.HKControlType := 3
+	ADHD.private.HKSecondaryInput := A_ThisHotkey
 	Send {Escape}
 	return
 
