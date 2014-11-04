@@ -754,6 +754,8 @@ Class ADHD_Private {
 		this.events.on_exit := ""
 		this.events.app_active := ""		; When the "Limited" app comes into focus
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
+		this.events.bind_mode_on := ""		; Bind mode started
+		this.events.bind_mode_off := ""		; Bind Mode stopped
 		
 		this.limit_app_w := -1				; Used for resolution change detection
 		this.limit_app_h := -1
@@ -1349,6 +1351,8 @@ Class ADHD_Private {
 
 	; Detects key combinations
 	set_binding(ctrlnum){
+		this.fire_event(this.events.bind_mode_on)
+
 		; init vars
 		this.HKControlType := 0
 		this.HKModifierState := {ctrl: 0, alt: 0, shift: 0, win: 0}
@@ -1438,6 +1442,7 @@ Class ADHD_Private {
 			; Escape was pressed - resotre original hotkey, if any
 			this.enable_hotkeys()
 		}
+		this.fire_event(this.events.bind_mode_off)
 		return
 
 	}
