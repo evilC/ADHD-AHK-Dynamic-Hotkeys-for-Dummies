@@ -4,6 +4,11 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.2.2 4th Nov 2014
++ Joystick buttons can now be bound on the Bindings tab.
++ Joystick button up event simulated as if it were a key
++ bind_mode_on and bind_mode_off events added
+
 3.2.1 16th July 2014
 = Update Notification system no longer throws an error if the URL is unreachable.
 
