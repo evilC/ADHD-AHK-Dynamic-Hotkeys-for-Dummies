@@ -1,4 +1,5 @@
-﻿/*
+﻿#SingleInstance, force
+/*
 vJoy Template for ADHD
 An example script to show how to build a virtual joystick app with ADHD
 
@@ -31,10 +32,13 @@ ADHD.config_about({name: "vJoy Template", version: 0.1, author: "evilC", link: "
 ; The default application to limit hotkeys to.
 
 ; GUI size
-ADHD.config_size(375,200)
+ADHD.config_size(375,230)
 
 ; We need no actions, so disable warning
-ADHD.config_ignore_noaction_warning()
+;ADHD.config_ignore_noaction_warning()
+
+ADHD.config_hotkey_add({uiname: "Binding 1", subroutine: "Binding1"})
+adhd_hk_k_1_TT := "Bind something to this and push it to press a virtual button"
 
 ; Hook into ADHD events
 ; First parameter is name of event to hook into, second parameter is a function name to launch on that event
@@ -50,15 +54,17 @@ Gui, Tab, 1
 ; ============================================================================================
 ; GUI SECTION
 
-axis_list_ahk := Array("X","Y","Z","R","U","V")
+Gui, Add, Text, x10 y35, vJoy Stick ID
+ADHD.gui_add("DropDownList", "virtual_stick_id", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
+Gui, Add, Text, xp+60 yp+5 w200 vvirtual_stick_status, 
 
 Gui, Add, GroupBox, x5 yp+25 W365 R2 section, Input Configuration
 Gui, Add, Text, x15 ys+20, Joystick ID
 ADHD.gui_add("DropDownList", "JoyID", "xp+80 yp-5 W50", "1|2|3|4|5|6|7|8", "1")
 JoyID_TT := "The ID (Order in Windows Game Controllers?) of your Joystick"
 
-Gui, Add, Text, xp+60 ys+20, Axis
-ADHD.gui_add("DropDownList", "JoyAxis", "xp+80 yp-5 W50", "1|2|3|4|5|6", "1")
+Gui, Add, Text, xp+100 ys+20, Axis
+ADHD.gui_add("DropDownList", "JoyAxis", "xp+40 yp-5 W50", "1|2|3|4|5|6", "1")
 JoyAxis_TT := "The Axis on that stick that you wish to use"
 
 ADHD.gui_add("CheckBox", "InvertAxis", "xp+60  yp+5", "Invert Axis", 0)
@@ -76,40 +82,41 @@ AxisValueOut_TT := "Input value adjusted according to options`nShould be 0 at ce
 ; End GUI creation section
 ; ============================================================================================
 
-
+; Useful arrays to convert axis number to axis name
 axis_list_ahk := Array("X","Y","Z","R","U","V")
-
-; Start vJoy setup
 axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
-
-; ID of the virtual stick (1st virtual stick is 1)
-vjoy_id := 1
-
-; Init Vjoy library
-VJoy_Init(vjoy_id)
-; End vjoy setup
 
 ADHD.finish_startup()
 
 ; Loop runs endlessly...
 Loop, {
-	; Get the value of the axis the user has selected as input
-	axis := conform_axis()
-	
-	; Assemble the string which sets which virtual axis will be manipulated
-	vjaxis := axis_list_vjoy[2]
-	
-	; input is in range 0->100, but vjoy operates in 0->32767, so convert to correct output format
-	axis := axis * 327.67
-	
-	; Set the vjoy axis
-	VJoy_SetAxis(axis, vjoy_id, HID_USAGE_%vjaxis%)
+	;if (vjoy_ready){
+		; Get the value of the axis the user has selected as input
+		axis := conform_axis()
+		
+		; Assemble the string which sets which virtual axis will be manipulated
+		vjaxis := axis_list_vjoy[2]
+		
+		; input is in range 0->100, but vjoy operates in 0->32767, so convert to correct output format
+		axis := axis * 327.67
+		
+		; Set the vjoy axis
+		VJoy_SetAxis(axis, vjoy_id, HID_USAGE_%vjaxis%)
+	;}
 	
 	; Sleep a bit to chew up less CPU time
 	Sleep, 10
 	
 }
 return
+
+Binding1:
+	VJoy_SetBtn(1, vjoy_id, 1)
+	Return
+
+Binding1Up:
+	VJoy_SetBtn(0, vjoy_id, 1)
+	Return
 
 ; Conform the input value from an axis to a range between 0 and 100
 ; Handles invert, half axis usage (eg xbox left trigger) etc
@@ -150,6 +157,51 @@ app_inactive_hook(){
 option_changed_hook(){
 	global ADHD
 
+	ConnectToVJoy()
+}
+
+ConnectToVJoy(){
+	global ADHD, vjoy_id, virtual_stick_id
+	global vjoy_ready ;store this global, 
+	; Connect to virtual stick
+	if (vjoy_id != virtual_stick_id){
+
+		if (VJoy_Ready(vjoy_id)){
+			VJoy_RelinquishVJD(vjoy_id)
+			VJoy_Close()
+		}
+		vjoy_id := virtual_stick_id
+		vjoy_status := DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
+		if (vjoy_status == 2){
+			GuiControl, +Cred, virtual_stick_status
+			GuiControl, , virtual_stick_status, Busy - Other app controlling this device?
+		}  else if (vjoy_status >= 3){
+			; 3-4 not available
+			GuiControl, +Cred, virtual_stick_status
+			GuiControl, , virtual_stick_status, Not Available - Add more virtual sticks using the vJoy config app
+		} else if (vjoy_status == 0){
+			; already owned by this app - should not come here as we want to release non used sticks
+			GuiControl, +Cred, virtual_stick_status
+			GuiControl, , virtual_stick_status, Already Owned by this app (Should not see this!)
+		}
+		if (vjoy_status <= 1){
+			VJoy_Init(vjoy_id)
+			if (VJoy_Ready(vjoy_id)){
+				; Seem to need this to allow reconnecting to sticks (ie you selected id 1 then 2 then 1 again. Else control of stick does not resume
+				VJoy_AcquireVJD(vjoy_id)
+				VJoy_ResetVJD(vjoy_id)
+				vjoy_ready := 1
+				GuiControl, +Cgreen, virtual_stick_status
+				GuiControl, , virtual_stick_status, Connected
+			} else {
+				GuiControl, +Cred, virtual_stick_status
+				GuiControl, , virtual_stick_status, Problem Connecting
+				vjoy_ready := 0
+			}
+		} else {
+			vjoy_ready := 0
+		}
+	}
 }
 
 ; KEEP THIS AT THE END!!
