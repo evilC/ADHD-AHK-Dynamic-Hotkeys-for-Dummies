@@ -6,6 +6,7 @@ Key:
 
 3.3.0
 + Pass-Thru can now be disabled for all inputs except LMB and RMB when not in "Limit App" mode.
++ Added functionality_toggled event
 
 3.2.2 4th Nov 2014
 + Joystick buttons can now be bound on the Bindings tab.
