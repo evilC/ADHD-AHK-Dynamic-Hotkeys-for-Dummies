@@ -15,6 +15,15 @@ https://github.com/evilC/AHK-vJoy-Library
 ; Create an instance of the library
 ADHD := New ADHDLib
 
+; Build Button String for DropDown boxes
+ButtonString := ""
+Loop 32 {
+	ButtonString .= A_Index
+	if (A_Index != 32){
+		ButtonString .= "|"
+	}
+}
+
 ; ============================================================================================
 ; CONFIG SECTION - Configure ADHD
 
@@ -32,7 +41,7 @@ ADHD.config_about({name: "vJoy Template", version: 0.1, author: "evilC", link: "
 ; The default application to limit hotkeys to.
 
 ; GUI size
-ADHD.config_size(375,230)
+ADHD.config_size(375,250)
 
 ; We need no actions, so disable warning
 ;ADHD.config_ignore_noaction_warning()
@@ -54,11 +63,10 @@ Gui, Tab, 1
 ; ============================================================================================
 ; GUI SECTION
 
-Gui, Add, Text, x10 y35, vJoy Stick ID
-ADHD.gui_add("DropDownList", "virtual_stick_id", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
-Gui, Add, Text, xp+60 yp+5 w200 vvirtual_stick_status, 
+; Add the GUI for vJoy selection
+ADHD.add_vjoy_select()
 
-Gui, Add, GroupBox, x5 yp+25 W365 R2 section, Input Configuration
+Gui, Add, GroupBox, x5 yp+25 W365 R1.5 section, Input Configuration
 Gui, Add, Text, x15 ys+20, Joystick ID
 ADHD.gui_add("DropDownList", "JoyID", "xp+80 yp-5 W50", "1|2|3|4|5|6|7|8", "1")
 JoyID_TT := "The ID (Order in Windows Game Controllers?) of your Joystick"
@@ -69,6 +77,10 @@ JoyAxis_TT := "The Axis on that stick that you wish to use"
 
 ADHD.gui_add("CheckBox", "InvertAxis", "xp+60  yp+5", "Invert Axis", 0)
 InvertAxis_TT := "Inverts the input axis.`nNot intended to be used with ""Use Half Axis"""
+
+Gui, Add, GroupBox, x5 yp+35 W365 R1.5 section, Output Configuration
+Gui, Add, Text, x15 ys+20, Binding 1 pushes virtual button
+ADHD.gui_add("DropDownList", "OutputButton1", "xp+160 yp-5 W50", ButtonString, "1")
 
 Gui, Add, GroupBox, x5 yp+45 R2 W365 section, Debugging
 Gui, Add, Text, x15 ys+15, Current axis value
@@ -90,7 +102,7 @@ ADHD.finish_startup()
 
 ; Loop runs endlessly...
 Loop, {
-	;if (vjoy_ready){
+	if (ADHD.vjoy_ready){
 		; Get the value of the axis the user has selected as input
 		axis := conform_axis()
 		
@@ -101,8 +113,8 @@ Loop, {
 		axis := axis * 327.67
 		
 		; Set the vjoy axis
-		VJoy_SetAxis(axis, vjoy_id, HID_USAGE_%vjaxis%)
-	;}
+		VJoy_SetAxis(axis, ADHD.vjoy_id, HID_USAGE_%vjaxis%)
+	}
 	
 	; Sleep a bit to chew up less CPU time
 	Sleep, 10
@@ -111,11 +123,11 @@ Loop, {
 return
 
 Binding1:
-	VJoy_SetBtn(1, vjoy_id, 1)
+	VJoy_SetBtn(1, ADHD.vjoy_id, OutputButton1)
 	Return
 
 Binding1Up:
-	VJoy_SetBtn(0, vjoy_id, 1)
+	VJoy_SetBtn(0, ADHD.vjoy_id, OutputButton1)
 	Return
 
 ; Conform the input value from an axis to a range between 0 and 100
@@ -157,51 +169,14 @@ app_inactive_hook(){
 option_changed_hook(){
 	global ADHD
 
-	ConnectToVJoy()
-}
-
-ConnectToVJoy(){
-	global ADHD, vjoy_id, virtual_stick_id
-	global vjoy_ready ;store this global, 
-	; Connect to virtual stick
-	if (vjoy_id != virtual_stick_id){
-
-		if (VJoy_Ready(vjoy_id)){
-			VJoy_RelinquishVJD(vjoy_id)
-			VJoy_Close()
-		}
-		vjoy_id := virtual_stick_id
-		vjoy_status := DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
-		if (vjoy_status == 2){
-			GuiControl, +Cred, virtual_stick_status
-			GuiControl, , virtual_stick_status, Busy - Other app controlling this device?
-		}  else if (vjoy_status >= 3){
-			; 3-4 not available
-			GuiControl, +Cred, virtual_stick_status
-			GuiControl, , virtual_stick_status, Not Available - Add more virtual sticks using the vJoy config app
-		} else if (vjoy_status == 0){
-			; already owned by this app - should not come here as we want to release non used sticks
-			GuiControl, +Cred, virtual_stick_status
-			GuiControl, , virtual_stick_status, Already Owned by this app (Should not see this!)
-		}
-		if (vjoy_status <= 1){
-			VJoy_Init(vjoy_id)
-			if (VJoy_Ready(vjoy_id)){
-				; Seem to need this to allow reconnecting to sticks (ie you selected id 1 then 2 then 1 again. Else control of stick does not resume
-				VJoy_AcquireVJD(vjoy_id)
-				VJoy_ResetVJD(vjoy_id)
-				vjoy_ready := 1
-				GuiControl, +Cgreen, virtual_stick_status
-				GuiControl, , virtual_stick_status, Connected
-			} else {
-				GuiControl, +Cred, virtual_stick_status
-				GuiControl, , virtual_stick_status, Problem Connecting
-				vjoy_ready := 0
-			}
-		} else {
-			vjoy_ready := 0
+	; Release Buttons
+	if (ADHD.vjoy_ready){
+		Loop % VJoy_GetVJDButtonNumber(ADHD.vjoy_id) {
+			VJoy_SetBtn(0, ADHD.vjoy_id, A_Index)
 		}
 	}
+
+	ADHD.connect_to_vjoy()
 }
 
 ; KEEP THIS AT THE END!!
