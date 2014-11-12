@@ -1,13 +1,15 @@
-﻿; vJoy Template for ADHD
-; An example script to show how to build a virtual joystick app with ADHD
+﻿/*
+vJoy Template for ADHD
+An example script to show how to build a virtual joystick app with ADHD
 
-; Uses Shaul's vJoy - http://http://vjoystick.sourceforge.net/site/ - install this first
-; Then you need the AHK vJoy library - grab the VJoyLib folder from my UJR project: 
-; https://github.com/evilC/AHK-Universal-Joystick-Remapper/tree/master/VJoyLib
-; And place it in your AutoHotkey Lib folder (C:\Program Files\Autohotkey\Lib)
-; So you end up with a C:\Program Files\Autohotkey\Lib\VjoyLib folder.
-; (The vJoyLib folder is also packaged in the UJR release zip) - http://evilc.com/proj/ujr
+Make sure you are using AutoHotkey from http://ahkscript.org, NOT Autohotkey.com!
+Uses Shaul's vJoy - http://http://vjoystick.sourceforge.net - install this first
+Then you need the AHK vJoy library:
+https://github.com/evilC/AHK-vJoy-Library
+*/
 
+#include <VJoy_lib>
+;#include VJoy_lib.ahk
 
 ; Create an instance of the library
 ADHD := New ADHDLib
@@ -79,25 +81,6 @@ axis_list_ahk := Array("X","Y","Z","R","U","V")
 
 ; Start vJoy setup
 axis_list_vjoy := Array("X","Y","Z","RX","RY","RZ","SL0","SL1")
-
-#include <VJoyLib\VJoy_lib>
-; Loads the vJoy DLL
-LoadPackagedLibrary() {
-	SplitPath, A_AhkPath,,tmp
-    if (A_PtrSize < 8) {
-        dllpath := tmp "\Lib\VJoyLib\x86\vJoyInterface.dll"
-    } else {
-        dllpath := tmp "\Lib\VJoyLib\x64\vJoyInterface.dll"
-    }
-    hDLL := DLLCall("LoadLibrary", "Str", dllpath)
-    if (!hDLL) {
-        MsgBox, [%A_ThisFunc%] Failed to find DLL at %dllpath%
-    }
-    return hDLL
-} 
-
-; Load DLL
-LoadPackagedLibrary()
 
 ; ID of the virtual stick (1st virtual stick is 1)
 vjoy_id := 1
