@@ -895,6 +895,7 @@ Class ADHD_Private {
 		this.events.app_inactive := ""		; When the "Limited" app goes out of focus
 		this.events.bind_mode_on := ""		; Bind mode started
 		this.events.bind_mode_off := ""		; Bind Mode stopped
+		this.events.functionality_toggled := ""		; Bind Mode stopped
 		
 		this.limit_app_w := -1				; Used for resolution change detection
 		this.limit_app_h := -1
@@ -1801,13 +1802,15 @@ Class ADHD_Private {
 	functionality_toggle(){
 		if (this.functionality_enabled){
 			this.functionality_enabled := 0
+			this.disable_hotkeys(1)
+			this.fire_event(this.events.functionality_toggled)
 			soundbeep, 400, 200
 			; pass 1 as a parameter to disable_hotkeys to tell it to not disable functionality toggle
-			this.disable_hotkeys(1)
 		} else {
 			this.functionality_enabled := 1
-			soundbeep, 800, 200
 			this.enable_hotkeys()
+			this.fire_event(this.events.functionality_toggled)
+			soundbeep, 800, 200
 		}
 	}
 	
