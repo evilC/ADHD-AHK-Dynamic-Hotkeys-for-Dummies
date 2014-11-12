@@ -64,7 +64,9 @@ Gui, Tab, 1
 ; GUI SECTION
 
 ; Add the GUI for vJoy selection
-ADHD.add_vjoy_select()
+Gui, Add, Text, x15 y40, vJoy Stick ID
+ADHD.gui_add("DropDownList", "selected_virtual_stick", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
+Gui, Add, Text, xp+60 yp+5 w200 vadhd_virtual_stick_status, 
 
 Gui, Add, GroupBox, x5 yp+25 W365 R1.5 section, Input Configuration
 Gui, Add, Text, x15 ys+20, Joystick ID
@@ -102,7 +104,7 @@ ADHD.finish_startup()
 
 ; Loop runs endlessly...
 Loop, {
-	if (ADHD.vjoy_ready){
+	if (vjoy_is_ready){
 		; Get the value of the axis the user has selected as input
 		axis := conform_axis()
 		
@@ -113,7 +115,7 @@ Loop, {
 		axis := axis * 327.67
 		
 		; Set the vjoy axis
-		VJoy_SetAxis(axis, ADHD.vjoy_id, HID_USAGE_%vjaxis%)
+		VJoy_SetAxis(axis, vjoy_id, HID_USAGE_%vjaxis%)
 	}
 	
 	; Sleep a bit to chew up less CPU time
@@ -123,11 +125,11 @@ Loop, {
 return
 
 Binding1:
-	VJoy_SetBtn(1, ADHD.vjoy_id, OutputButton1)
+	VJoy_SetBtn(1, vjoy_id, OutputButton1)
 	Return
 
 Binding1Up:
-	VJoy_SetBtn(0, ADHD.vjoy_id, OutputButton1)
+	VJoy_SetBtn(0, vjoy_id, OutputButton1)
 	Return
 
 ; Conform the input value from an axis to a range between 0 and 100
@@ -170,13 +172,60 @@ option_changed_hook(){
 	global ADHD
 
 	; Release Buttons
-	if (ADHD.vjoy_ready){
-		Loop % VJoy_GetVJDButtonNumber(ADHD.vjoy_id) {
-			VJoy_SetBtn(0, ADHD.vjoy_id, A_Index)
+	if (vjoy_is_ready){
+		Loop % VJoy_GetVJDButtonNumber(vjoy_id) {
+			VJoy_SetBtn(0, vjoy_id, A_Index)
 		}
 	}
 
-	ADHD.connect_to_vjoy()
+	connect_to_vjoy()
+}
+
+; Connect to vJoy stick.
+connect_to_vjoy(){
+	;global ADHD, this.vjoy_id ; What ID we are connected to now
+	global vjoy_id, vjoy_is_ready
+	global selected_virtual_stick	; What ID is selected in the UI
+	;global adhd_vjoy_ready ;store this global, so loops outside can see whether vjoy is ready or not.
+	; Connect to virtual stick
+	if (vjoy_id != selected_virtual_stick){
+
+		if (VJoy_Ready(vjoy_id)){
+			VJoy_RelinquishVJD(vjoy_id)
+			VJoy_Close()
+		}
+		vjoy_id := selected_virtual_stick
+		vjoy_status := DllCall("vJoyInterface\GetVJDStatus", "UInt", vjoy_id)
+		if (vjoy_status == 2){
+			GuiControl, +Cred, adhd_virtual_stick_status
+			GuiControl, , adhd_virtual_stick_status, Busy - Other app controlling this device?
+		}  else if (vjoy_status >= 3){
+			; 3-4 not available
+			GuiControl, +Cred, adhd_virtual_stick_status
+			GuiControl, , adhd_virtual_stick_status, Not Available - Add more virtual sticks using the vJoy config app
+		} else if (vjoy_status == 0){
+			; already owned by this app - should not come here as we want to release non used sticks
+			GuiControl, +Cred, adhd_virtual_stick_status
+			GuiControl, , adhd_virtual_stick_status, Already Owned by this app (Should not see this!)
+		}
+		if (vjoy_status <= 1){
+			VJoy_Init(vjoy_id)
+			if (VJoy_Ready(vjoy_id)){
+				; Seem to need this to allow reconnecting to sticks (ie you selected id 1 then 2 then 1 again. Else control of stick does not resume
+				VJoy_AcquireVJD(vjoy_id)
+				VJoy_ResetVJD(vjoy_id)
+				vjoy_is_ready := 1
+				GuiControl, +Cgreen, adhd_virtual_stick_status
+				GuiControl, , adhd_virtual_stick_status, Connected
+			} else {
+				GuiControl, +Cred, adhd_virtual_stick_status
+				GuiControl, , adhd_virtual_stick_status, Problem Connecting
+				vjoy_is_ready := 0
+			}
+		} else {
+			vjoy_is_ready := 0
+		}
+	}
 }
 
 ; KEEP THIS AT THE END!!

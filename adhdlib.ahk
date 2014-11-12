@@ -294,9 +294,6 @@ Class ADHDLib {
 		IniRead, iv, %ini%, Settings, adhd_ini_version, 1
 		this.private.loaded_ini_version := iv
 
-		; vJoy vars
-		this.vjoy_id := 0
-		this.vjoy_ready := 0
 	}
 
 	; --------------------------------------------------------------------------------------------------------------------------------------
@@ -667,60 +664,6 @@ Class ADHDLib {
 	; Useful stuff that does not fit into any other category
 	*/
 
-	; Adds the UI elements for virtual joystick selection to a script
-	add_vjoy_select(){
-		global adhd_virtual_stick_status
-		Gui, Add, Text, x15 y40, vJoy Stick ID
-		this.gui_add("DropDownList", "adhd_selected_virtual_stick", "xp+70 yp-5 w50 h20 R9", "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16", "1")
-		Gui, Add, Text, xp+60 yp+5 w200 vadhd_virtual_stick_status, 
-	}
-
-	; Connect to vJoy stick.
-	; Used by add_vjoy_select() to connect selected stick
-	connect_to_vjoy(){
-		;global ADHD, this.vjoy_id ; What ID we are connected to now
-		global adhd_selected_virtual_stick	; What ID is selected in the UI
-		;global adhd_vjoy_ready ;store this global, so loops outside can see whether vjoy is ready or not.
-		; Connect to virtual stick
-		if (this.vjoy_id != adhd_selected_virtual_stick){
-
-			if (VJoy_Ready(this.vjoy_id)){
-				VJoy_RelinquishVJD(this.vjoy_id)
-				VJoy_Close()
-			}
-			this.vjoy_id := adhd_selected_virtual_stick
-			vjoy_status := DllCall("vJoyInterface\GetVJDStatus", "UInt", this.vjoy_id)
-			if (vjoy_status == 2){
-				GuiControl, +Cred, adhd_virtual_stick_status
-				GuiControl, , adhd_virtual_stick_status, Busy - Other app controlling this device?
-			}  else if (vjoy_status >= 3){
-				; 3-4 not available
-				GuiControl, +Cred, adhd_virtual_stick_status
-				GuiControl, , adhd_virtual_stick_status, Not Available - Add more virtual sticks using the vJoy config app
-			} else if (vjoy_status == 0){
-				; already owned by this app - should not come here as we want to release non used sticks
-				GuiControl, +Cred, adhd_virtual_stick_status
-				GuiControl, , adhd_virtual_stick_status, Already Owned by this app (Should not see this!)
-			}
-			if (vjoy_status <= 1){
-				VJoy_Init(this.vjoy_id)
-				if (VJoy_Ready(this.vjoy_id)){
-					; Seem to need this to allow reconnecting to sticks (ie you selected id 1 then 2 then 1 again. Else control of stick does not resume
-					VJoy_AcquireVJD(this.vjoy_id)
-					VJoy_ResetVJD(this.vjoy_id)
-					this.vjoy_ready := 1
-					GuiControl, +Cgreen, adhd_virtual_stick_status
-					GuiControl, , adhd_virtual_stick_status, Connected
-				} else {
-					GuiControl, +Cred, adhd_virtual_stick_status
-					GuiControl, , adhd_virtual_stick_status, Problem Connecting
-					this.vjoy_ready := 0
-				}
-			} else {
-				this.vjoy_ready := 0
-			}
-		}
-	}
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Writes something to the debug window
