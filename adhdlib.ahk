@@ -356,7 +356,7 @@ Class ADHDLib {
 			adhd_hk_wild_%A_Index%_TT := "Wild Mode allows hotkeys to trigger when other modifiers are also held.`nFor example, if you bound Ctrl+C to an action...`nWild Mode ON: Ctrl+Alt+C, Ctrl+Shift+C etc would still trigger the action`nWild Mode OFF: Ctrl+Alt+C etc would not trigger the action."
 
 			Gui, Add, Checkbox, vadhd_hk_passthru_%A_Index% gadhd_option_changed xp+30 yp w25 center Checked
-			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`nNote, PassThru is FORCED ON if Limit App is OFF.`nThis is to prevent yourself from eg blocking the Left mouse button in all apps"
+			adhd_hk_passthru_%A_Index%_TT := "Pass Thru mode off tries to stop the game from seeing the pressed key.`nNote, PassThru is FORCED ON if you bind just the Left Mouse or Right Mouse buttons."
 
 			current_row := current_row + 30
 		}
@@ -866,7 +866,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.2.2"
+		this.core_version := "3.3.0"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
@@ -1349,7 +1349,7 @@ Class ADHD_Private {
 
 					; Bind down action of hotkey
 					prefix := ""
-					if (this.hotkey_mappings[name].passthru || !limit_app_on){
+					if (this.hotkey_mappings[name].passthru){
 						prefix .= "~"
 					}
 					if (this.hotkey_mappings[name].wild){
@@ -1490,6 +1490,8 @@ Class ADHD_Private {
 
 	; Detects key combinations
 	set_binding(ctrlnum){
+		global adhd_limit_application_on
+
 		this.fire_event(this.events.bind_mode_on)
 
 		; init vars
@@ -1555,6 +1557,12 @@ Class ADHD_Private {
 		}
 
 		if (detectedkey){
+			if ( (adhd_limit_application_on == 0) && (detectedkey = "lbutton" || detectedkey = "rbutton") ) {
+				GuiControl,, adhd_hk_passthru_%ctrlnum%, 1
+				GuiControl, Disable, adhd_hk_passthru_%ctrlnum%
+			} else {
+				GuiControl, Enable, adhd_hk_passthru_%ctrlnum%
+			}
 			clash := 0
 			hk := this.build_hotkey_string(detectedkey,this.HKControlType)
 			clash := 0
@@ -2076,19 +2084,19 @@ Class ADHD_Private {
 	option_changed(){
 		global adhd_debug_mode
 
-		global adhd_limit_application
 		global adhd_limit_application_on
 		global adhd_debug_window
 
 		; Pull state of UI vars through
 		Gui, Submit, NoHide
 
-		; Disable Pass Thru boxes if not in Limit App mode to indicate that passthru is not under user control
+		; Disable Pass Thru boxes if not in Limit App mode and binding is lbutton or rbutton
 		Loop % this.hotkey_list.MaxIndex(){
-			if (adhd_limit_application_on){
-				GuiControl, Enable , adhd_hk_passthru_%A_Index%
+			name := this.hotkey_index_to_name(A_Index)
+			if ( (adhd_limit_application_on == 0 ) && (this.hotkey_mappings[name].modified = "lbutton" || this.hotkey_mappings[name].modified = "rbutton") ){
+				GuiControl, Disable , adhd_hk_passthru_%A_Index%
 			} else {
-				GuiControl, Disable, adhd_hk_passthru_%A_Index%
+				GuiControl, Enable , adhd_hk_passthru_%A_Index%
 			}
 		}
 
