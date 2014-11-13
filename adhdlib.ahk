@@ -915,7 +915,7 @@ Class ADHD_Private {
 		this.EXTRA_KEY_LIST := "{Escape}"	; DO NOT REMOVE! - Used to quit binding
 		; Standard non-printables
 		this.EXTRA_KEY_LIST .= "{F1}{F2}{F3}{F4}{F5}{F6}{F7}{F8}{F9}{F10}{F11}{F12}{Left}{Right}{Up}{Down}"
-		this.EXTRA_KEY_LIST .= "{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BackSpace}{Pause}"
+		this.EXTRA_KEY_LIST .= "{Home}{End}{PgUp}{PgDn}{Del}{Ins}{BackSpace}{Pause}{Space}"
 		; Numpad - Numlock ON
 		this.EXTRA_KEY_LIST .= "{Numpad0}{Numpad1}{Numpad2}{Numpad3}{Numpad4}{Numpad5}{Numpad6}{Numpad7}{Numpad8}{Numpad9}{NumpadDot}{NumpadMult}{NumpadAdd}{NumpadSub}"
 		; Numpad - Numlock OFF
@@ -1508,6 +1508,13 @@ Class ADHD_Private {
 		; Start Bind Mode - this starts detection for mouse buttons and modifier keys
 		this.BindMode := 1
 
+		; Turn off caps lock if on
+		caps_state := GetKeyState("Capslock", "T") 
+		if (caps_state){
+			SetCapsLockState, Off
+		}
+
+
 		; Show instructions
 		Gui, 3:Show
 
@@ -1542,6 +1549,11 @@ Class ADHD_Private {
 
 		; Stop listening to mouse, keyboard etc
 		this.BindMode := 0
+
+		; turn caps Lock back on if it was on
+		if (caps_state){
+			SetCapsLockState, On
+		}
 
 		this.joystick_detection(0)
 
@@ -2097,6 +2109,7 @@ Class ADHD_Private {
 		Loop % this.hotkey_list.MaxIndex(){
 			name := this.hotkey_index_to_name(A_Index)
 			if ( (adhd_limit_application_on == 0 ) && (this.hotkey_mappings[name].modified = "lbutton" || this.hotkey_mappings[name].modified = "rbutton") ){
+				GuiControl,, adhd_hk_passthru_%A_Index%, 1
 				GuiControl, Disable , adhd_hk_passthru_%A_Index%
 			} else {
 				GuiControl, Enable , adhd_hk_passthru_%A_Index%
