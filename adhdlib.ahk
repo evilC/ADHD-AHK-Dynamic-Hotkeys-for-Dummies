@@ -2099,6 +2099,7 @@ Class ADHD_Private {
 	option_changed(){
 		global adhd_debug_mode
 
+		global adhd_limit_application
 		global adhd_limit_application_on
 		global adhd_debug_window
 
