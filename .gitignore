@@ -4,6 +4,7 @@
 *.lnk
 *.scc
 *.png
+*.gif
 *.tmp.*
 Setup.ahk
 !Setup*.exe
