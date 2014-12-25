@@ -28,7 +28,7 @@ If there are updates to this Library, you can then Synch with GitHub to get the 
 This will check you are all set up to use the library and configure AutoHotkey so you can easily include the library in any script in any folder on your computer.
 2. Check the *DEVELOPER NOTES* section to see if there are any special instructions, then click *Install*.
 3. You are now set up and can use this library by putting the following line at the start of your script:  
-`#include <CGDipSnapshot>`
+`#include <ADHDLib>`
 
 #####Manual Method
 If you know what you are doing, or paranoid, or both, you can just obtain the files and `#include` as normal. The Setup app simply makes it easy for people who don't really know what they are doing to get up and running with this library.
