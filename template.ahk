@@ -61,5 +61,5 @@ Fire:
 ; FOOTER SECTION
 
 ; KEEP THIS AT THE END!!
-#Include ADHDLib.ahk		; If you have the library in the same folder as your macro, use this
-;#Include <ADHDLib>			; If you have the library in the Lib folder (C:\Program Files\Autohotkey\Lib), use this
+;#Include ADHDLib.ahk		; If you have the library in the same folder as your macro, use this
+#Include <ADHDLib>			; If you have the library in the Lib folder (C:\Program Files\Autohotkey\Lib), use this
