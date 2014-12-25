@@ -2,4 +2,8 @@
 *.exe
 *.zip
 *.lnk
-*.tmp.ahk
+*.scc
+*.png
+*.tmp.*
+Setup.ahk
+!Setup*.exe
