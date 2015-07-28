@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.3.1
++ Changing settings when the INI file is stored on a HDD that is in power saving mode will no longer freeze the script until the disk spins up.
+
 3.3.0
 + Pass-Thru can now be disabled for all inputs except LMB and RMB when not in "Limit App" mode.
 + Added functionality_toggled event

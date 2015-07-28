@@ -866,7 +866,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.3.0"
+		this.core_version := "3.3.1"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
@@ -955,20 +955,26 @@ Class ADHD_Private {
 
 	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 	update_ini(key, section, value, default){
-		tmp := this.ini_name
+		update_fn := this.asynch_update_ini.bind(this, key, section, value, default)
+		SetTimer % update_fn, -0
+	}
+	
+	; Asynchronously update ini file
+	; If INI is stored on HDD which is powered down, this will stop script freezing when you change settings
+	asynch_update_ini(key, section, value, default){
 		if (value != default){
 			; Only write the value if it differs from what is already written
 			if (this.read_ini(key,section,-1) != value){
-				IniWrite,  %value%, %tmp%, %section%, %key%
+				IniWrite,  %value%, % this.ini_name, %section%, %key%
 			}
 		} else {
 			; Only delete the value if there is already a value to delete
 			if (this.read_ini(key,section,-1) != -1){
-				IniDelete, %tmp%, %section%, %key%
+				IniDelete, % this.ini_name, %section%, %key%
 			}
 		}
 	}
-
+	
 	read_ini(key,section,default){
 		ini := this.ini_name
 		IniRead, out, %ini%, %section%, %key%, %default%
