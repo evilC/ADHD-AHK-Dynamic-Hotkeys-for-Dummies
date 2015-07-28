@@ -522,7 +522,42 @@ Class ADHDLib {
 		local y := this.private.gui_y
 		local w := this.private.gui_w
 		local h := this.private.gui_h
+
+		local l := 0,r := 0,t := 0,b := 0
+		local mon, monleft, monright, montop, monbottom
+
+		SysGet, Count, 80
+		Loop % Count {
+			SysGet, Mon, Monitor, % A_Index
+			if (monleft < l){
+				l := monleft
+			}
+			if (monright > r){
+				r := monright
+			}
+			if (montop < t){
+				t := montop
+			}
+			if (monbottom > b){
+				b := monbottom
+			}
+		}
+		if (x < l){
+			x := l
+		}
+		if (x + w > r){
+			x := r - w
+		}
+		if (y < t){
+			y := t
+		}
+		if (y + h > b){
+			y := b - h
+		}
+
 		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
+
+		
 
 		this.private.debug_ready := 1
 
