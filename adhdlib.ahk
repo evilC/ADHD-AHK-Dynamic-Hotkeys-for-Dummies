@@ -526,6 +526,7 @@ Class ADHDLib {
 		local l := 0,r := 0,t := 0,b := 0
 		local mon, monleft, monright, montop, monbottom
 
+		; Check GUI is not at non-visible location (ie off screen)
 		SysGet, Count, 80
 		Loop % Count {
 			SysGet, Mon, Monitor, % A_Index
