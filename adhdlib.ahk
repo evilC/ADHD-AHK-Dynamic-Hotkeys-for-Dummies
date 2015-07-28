@@ -598,6 +598,9 @@ Class ADHDLib {
 		if (this.private.auto_profile_switching){
 			If (lParam) { ; id of 0 is desktop
 				WinGetClass, class, ahk_id %lParam%
+				if (lParam <= 2 || class = ""){
+					return
+				}
 				profile := this.private.app_list[class]
 				if (profile){
 					GuiControl,ChooseString, adhd_current_profile, %profile%
