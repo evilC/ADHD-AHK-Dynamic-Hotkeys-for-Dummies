@@ -4,11 +4,12 @@ Key:
 = : Change / Fix
 + : Added feature
 
-3.3.1 28th Jul 2015
+3.3.1
 = Limit to Application moved to the Profiles tab.
-+ Automatic app switching added - this can be used to automatically change profile depending on the active app.
-+ Fix for gui drawn off-screen
-If an ADHD app starts and the GUI would appear off-screen (eg you had 2 monitors and the app was sitting on the 2nd monitor, but now you don't), then the GUI will be moved on-screen.
++ Automatic profile switching added.
+This can be used to automatically change profile depending on the active app.
+Tick the "Enable automatic profile switching" checkbox on the profiles tab.
+If this feature is turned on and no profile matches the current app, the Default profile will be used.
 
 3.3.0
 + Pass-Thru can now be disabled for all inputs except LMB and RMB when not in "Limit App" mode.
