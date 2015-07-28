@@ -361,16 +361,6 @@ Class ADHDLib {
 			current_row := current_row + 30
 		}
 		
-		; Limit application toggle
-		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
-
-		; Limit application Text box
-		Gui, Add, Edit, xp+170 yp+2 W120 vadhd_limit_application gadhd_option_changed,
-
-		; Launch window spy
-		Gui, Add, Button, xp+125 yp-1 W15 gadhd_show_window_spy, ?
-		adhd_limit_application_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
-
 		local nexttab := this.private.tab_list.MaxIndex() + 2
 		Gui, Tab, %nexttab%
 		; PROFILES TAB
@@ -384,6 +374,17 @@ Class ADHDLib {
 		Gui, Add, Button, xp+47 yp gadhd_duplicate_profile, Copy
 		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename
 		GuiControl,ChooseString, adhd_current_profile, %cp%
+		
+		; Limit application toggle
+		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
+
+		; Limit application Text box
+		Gui, Add, Edit, xp+170 yp+2 W120 vadhd_limit_application gadhd_option_changed,
+		
+		; Launch window spy
+		Gui, Add, Button, xp+125 yp-1 W70 gadhd_show_window_spy, Window Spy
+		dhd_show_window_spy_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
+
 
 		local nexttab := this.private.tab_list.MaxIndex() + 3
 		Gui, Tab, %nexttab%
@@ -539,6 +540,14 @@ Class ADHDLib {
 		this.private.profile_changed()
 		this.private.option_changed()
 		this.private.debug_window_change()
+		
+		; Auto app switching
+		Gui +LastFound 
+		hWnd := WinExist()
+		DllCall( "RegisterShellHookWindow", UInt,Hwnd )
+		MsgNum := DllCall( "RegisterWindowMessage", Str,"SHELLHOOK" )
+		fn := this.active_window_changed.bind(this)
+		OnMessage( MsgNum, fn )
 
 		this.private.debug("Finished startup")
 
@@ -547,6 +556,20 @@ Class ADHDLib {
 
 	}
 
+	active_window_changed( wParam,lParam ){
+		If (lParam) { ; id of 0 is desktop
+			WinGetClass, class, ahk_id %lParam%
+			profile := this.private.app_list[class]
+			if (profile){
+				GuiControl,ChooseString, adhd_current_profile, %profile%
+				this.private.profile_changed()
+				return
+			}
+		}
+		; Change to default profile
+		GuiControl,ChooseString, adhd_current_profile, Default
+		this.private.profile_changed()
+	}
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
@@ -953,15 +976,21 @@ Class ADHD_Private {
 	Functions to handle persistent data storage
 	*/
 
+	/*
 	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
 	update_ini(key, section, value, default){
 		update_fn := this.asynch_update_ini.bind(this, key, section, value, default)
 		SetTimer % update_fn, -0
 	}
-	
+	*/
+
+	/*
 	; Asynchronously update ini file
 	; If INI is stored on HDD which is powered down, this will stop script freezing when you change settings
 	asynch_update_ini(key, section, value, default){
+	*/
+	; Updates the settings file. If value is default, it deletes the setting to keep the file as tidy as possible
+	update_ini(key, section, value, default){
 		if (value != default){
 			; Only write the value if it differs from what is already written
 			if (this.read_ini(key,section,-1) != value){
@@ -976,6 +1005,7 @@ Class ADHD_Private {
 	}
 	
 	read_ini(key,section,default){
+		sleep 0
 		ini := this.ini_name
 		IniRead, out, %ini%, %section%, %key%, %default%
 		return out
@@ -2161,6 +2191,7 @@ Class ADHD_Private {
 				this.limit_app := A_Space
 			}
 			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.limit_app)
+			;MsgBox % "HERE"
 			;SB_SetText("Current profile: " this.current_profile, 2)
 			this.set_profile_statusbar()
 			
@@ -2187,6 +2218,18 @@ Class ADHD_Private {
 		} else {
 			this.debug("ignoring option_changed - " A_Guicontrol)
 		}
+		; Build app-switching list
+		this.app_list := {}
+		pl := "default|" this.profile_list
+		StringSplit, tmp, pl, |
+		Loop, %tmp0%{
+			limit_app := this.read_ini("adhd_limit_app_on",tmp%a_index%,0)
+			if (limit_app){
+				app := this.read_ini("adhd_limit_app",tmp%a_index%,-1)
+				this.app_list[app] := tmp%a_index%
+			}
+		}
+
 		return
 	}
 
