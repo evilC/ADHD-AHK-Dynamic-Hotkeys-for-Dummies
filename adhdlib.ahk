@@ -383,8 +383,10 @@ Class ADHDLib {
 		
 		; Launch window spy
 		Gui, Add, Button, xp+125 yp-1 W70 gadhd_show_window_spy, Window Spy
-		dhd_show_window_spy_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
+		adhd_show_window_spy_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
 
+		; Auto profile switching
+		Gui, Add, CheckBox, x5 yp+25 W260 vadhd_auto_profile_switching gadhd_option_changed, Enable automatic profile switching
 
 		local nexttab := this.private.tab_list.MaxIndex() + 3
 		Gui, Tab, %nexttab%
@@ -541,7 +543,7 @@ Class ADHDLib {
 		this.private.option_changed()
 		this.private.debug_window_change()
 		
-		; Auto app switching
+		; Auto profile switching
 		Gui +LastFound 
 		hWnd := WinExist()
 		DllCall( "RegisterShellHookWindow", UInt,Hwnd )
@@ -557,18 +559,20 @@ Class ADHDLib {
 	}
 
 	active_window_changed( wParam,lParam ){
-		If (lParam) { ; id of 0 is desktop
-			WinGetClass, class, ahk_id %lParam%
-			profile := this.private.app_list[class]
-			if (profile){
-				GuiControl,ChooseString, adhd_current_profile, %profile%
-				this.private.profile_changed()
-				return
+		if (this.private.auto_profile_switching){
+			If (lParam) { ; id of 0 is desktop
+				WinGetClass, class, ahk_id %lParam%
+				profile := this.private.app_list[class]
+				if (profile){
+					GuiControl,ChooseString, adhd_current_profile, %profile%
+					this.private.profile_changed()
+					return
+				}
 			}
+			; Change to default profile
+			GuiControl,ChooseString, adhd_current_profile, Default
+			this.private.profile_changed()
 		}
-		; Change to default profile
-		GuiControl,ChooseString, adhd_current_profile, Default
-		this.private.profile_changed()
 	}
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2048,7 +2052,6 @@ Class ADHD_Private {
 		
 		GuiControlGet,cp,,adhd_current_profile
 		this.current_profile := cp
-		;msgbox % this.current_profile
 		this.debug("profile_changed - " this.current_profile)
 		Gui, Submit, NoHide
 
@@ -2100,6 +2103,11 @@ Class ADHD_Private {
 		tmp := this.read_ini("adhd_limit_app_on",this.current_profile,0)
 		GuiControl,, adhd_limit_application_on, %tmp%
 		
+		; Auto profile switching
+		tmp := this.read_ini("adhd_auto_profile_switching","Settings",0)
+		GuiControl,, adhd_auto_profile_switching, % tmp
+		this.auto_profile_switching := tmp
+		
 		; Get author vars from ini
 		Loop, % this.ini_vars.MaxIndex()
 		{
@@ -2138,6 +2146,7 @@ Class ADHD_Private {
 		global adhd_limit_application
 		global adhd_limit_application_on
 		global adhd_debug_window
+		global adhd_auto_profile_switching
 
 		; Pull state of UI vars through
 		Gui, Submit, NoHide
@@ -2191,12 +2200,14 @@ Class ADHD_Private {
 				this.limit_app := A_Space
 			}
 			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.limit_app)
-			;MsgBox % "HERE"
 			;SB_SetText("Current profile: " this.current_profile, 2)
 			this.set_profile_statusbar()
 			
 			; Limit app toggle
 			this.update_ini("adhd_limit_app_on", this.current_profile, adhd_limit_application_on, 0)
+			
+			; App switch toggle (NOT per-profile!)
+			this.update_ini("adhd_auto_profile_switching", "settings", adhd_auto_profile_switching, 0)
 			
 			; Add author vars to ini
 			Loop, % this.ini_vars.MaxIndex()
