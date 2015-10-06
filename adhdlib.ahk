@@ -1445,7 +1445,7 @@ Class ADHD_Private {
 					
 					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
 
-					this.defined_hotkeys.hotkey_cache[cache_idx] := {string: prefix hotkey_string, subroutine: hotkey_subroutine}
+					this.defined_hotkeys.hotkey_cache[cache_idx] := {string: prefix hotkey_string, noprefix: hotkey_string, subroutine: hotkey_subroutine}
 					cache_idx++
 					this.defined_hotkeys.limit_app_on := limit_app_on
 					this.defined_hotkeys.limit_app := adhd_limit_application
@@ -1477,10 +1477,7 @@ Class ADHD_Private {
 
 			; If "Functionality Toggle" is defined and 1 passed as mode, do not disable the last hotkey (Functionality Toggle)
 			max := this.defined_hotkeys.hotkey_cache.MaxIndex()
-			if (mode && this.defined_hotkeys.hotkey_cache[max].subroutine == "adhd_functionality_toggle"){
-				max -= 1
-			}
-
+			
 			limit_app_on := this.defined_hotkeys.limit_app_on
 			limit_app := this.defined_hotkeys.limit_app
 
@@ -1500,9 +1497,12 @@ Class ADHD_Private {
 				
 				this.debug("Removing hotkey: " str ", sub: " sub)
 
-				if (this.hotkey_mappings[sub].type == 3){
-					this.joystick_lookup.remove(hotkey_string)
+				if (mode && (this.defined_hotkeys.hotkey_cache[A_Index].subroutine = "adhd_functionality_toggle" || this.joystick_lookup[this.defined_hotkeys.hotkey_cache[A_Index].noprefix] == "adhd_functionality_toggle")){
+					continue
 				}
+				;if (this.hotkey_mappings[sub].type == 3){
+				;	this.joystick_lookup.remove(hotkey_string)
+				;}
 
 				;Hotkey, %str%, %sub%, Off
 				Hotkey, %str%, Off
