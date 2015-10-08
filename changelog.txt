@@ -4,6 +4,15 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.3.3 - 8th Oct 2015
+= Changed run_as_admin code to use the new "RunAsTask" method.
+Users with UAC enabled should now only have to accept the UAC prompt once, then it will never appear again.
+
+3.3.2 - 6th Oct 2015
+= Functionality toggle fixes.
+Previously,if you mapped a joystick button to Functionality Toggle, you would only be able to turn functionality off, but not on again.
+Also, miscellaneous other improvements to functionality toggle code.
+
 3.3.1
 = Limit to Application moved to the Profiles tab.
 + Automatic profile switching added.
