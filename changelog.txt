@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.3.4 - 2nd Nov 2015
+= Reverted out 3.3.3 changes - ADHD apps (eg UJR) were not running for many users.
+
 3.3.3 - 8th Oct 2015
 = Changed run_as_admin code to use the new "RunAsTask" method.
 Users with UAC enabled should now only have to accept the UAC prompt once, then it will never appear again.

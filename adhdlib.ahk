@@ -930,7 +930,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.3.3"
+		this.core_version := "3.3.4"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
