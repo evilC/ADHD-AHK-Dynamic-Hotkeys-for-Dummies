@@ -4,6 +4,9 @@ Key:
 = : Change / Fix
 + : Added feature
 
+3.3.5 - 11th Jul 2022
+= evilC.com is down, so I moved update checking to GitHub
+
 3.3.4 - 2nd Nov 2015
 = Reverted out 3.3.3 changes - ADHD apps (eg UJR) were not running for many users.
 
