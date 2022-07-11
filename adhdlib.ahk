@@ -62,7 +62,7 @@ Class ADHDLib {
 			: A_AhkPath),str,(A_IsCompiled ? "": """" . A_ScriptFullPath . """" . A_Space) params,str,A_WorkingDir,int,1)
 		ExitApp
 	}
-	
+
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Configure the About tab
@@ -90,7 +90,7 @@ Class ADHDLib {
 	config_limit_app(app){
 		this.private.limit_app := app
 	}
-	
+
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	; Sets the size of the GUI
@@ -124,7 +124,7 @@ Class ADHDLib {
 	}
 
 	; --------------------------------------------------------------------------------------------------------------------------------------
-	
+
 	; Adds a "hook" into ADHD - when a specific event happens, the specified label will be called
 	; Available events:
 	; option_changed		An option changed
@@ -142,7 +142,7 @@ Class ADHDLib {
 	; Configures tabs used by ADHD.
 	; If you wish to add aditional tabs, or change the name of the "Main" tab, pass an array of names to this function
 	; The FIRST item will ALWAYS be the "Main" tab.
-	; ADHD will add the other default tabs (Bindings, Profiles, About) at the end of these tabs. 
+	; ADHD will add the other default tabs (Bindings, Profiles, About) at the end of these tabs.
 	; eg: ADHD.config_tabs(Array("Axes 1", "Axes 2", "Buttons 1", "Buttons 2", "Hats"))
 	config_tabs(tabs){
 		this.private.tab_list := tabs
@@ -172,13 +172,13 @@ Class ADHDLib {
 	config_ignore_x64_warning(){
 		this.private.x64_warning := 0
 	}
-	
+
 	; On startup, ADHD will check to see if you have any actions defined, and will exit if not.
 	; You can override that behaviour with this function
 	config_ignore_noaction_warning(){
 		this.private.noaction_warning := 0
 	}
-	
+
 	; --------------------------------------------------------------------------------------------------------------------------------------
 
 	/*
@@ -199,7 +199,7 @@ Class ADHDLib {
 	; Load settings, staring profile etc.
 	init(){
 		; Perform some sanity checks
-		
+
 		; Check if compiled and x64
 		if (A_IsCompiled){
 			if (A_Ptrsize == 8 && this.private.x64_warning){
@@ -213,7 +213,7 @@ Class ADHDLib {
 			msgbox You must use an instance of this class, not the class itself.`nPut something like ADHD := New ADHDLib at the start of your script
 			ExitApp
 		}
-		
+
 		; Check the user defined a hotkey
 		if (this.private.hotkey_list.MaxIndex() < 1){
 			if (this.private.noaction_warning){
@@ -232,7 +232,7 @@ Class ADHDLib {
 
 		}
 		this.private.debug_ready := 0
-		
+
 		; Indicates that we are starting up - ignore errant events, always log until we have loaded settings etc use this value
 		this.private.starting_up := 1
 
@@ -280,7 +280,7 @@ Class ADHDLib {
 		}
 		this.private.gui_x := x
 		this.private.gui_y := y
-		
+
 		; Get list of profiles
 		IniRead, pl, %ini%, Settings, adhd_profile_list, %A_Space%
 		this.private.profile_list := pl
@@ -307,7 +307,7 @@ Class ADHDLib {
 		; Set up the GUI ====================================================
 		local w := this.private.gui_w
 		local h := this.private.gui_h - 30
-		
+
 		local tabs := ""
 		Loop, % this.private.tab_list.MaxIndex()
 		{
@@ -317,7 +317,7 @@ Class ADHDLib {
 
 		local tabtop := 40
 		local current_row := tabtop + 20
-		
+
 		local nexttab := this.private.tab_list.MaxIndex() + 1
 		Gui, Tab, %nexttab%
 		; BINDINGS TAB
@@ -331,7 +331,7 @@ Class ADHDLib {
 		Gui, Add, Text, x%xpos% yp W100 Center, Current Binding
 
 		; Add hotkeys
-	
+
 		; Add functionality toggle as last item in list
 		this.config_hotkey_add({uiname: "Functionality Toggle", subroutine: "adhd_functionality_toggle"})
 
@@ -358,7 +358,7 @@ Class ADHDLib {
 
 			current_row := current_row + 30
 		}
-		
+
 		local nexttab := this.private.tab_list.MaxIndex() + 2
 		Gui, Tab, %nexttab%
 		; PROFILES TAB
@@ -372,13 +372,13 @@ Class ADHDLib {
 		Gui, Add, Button, xp+47 yp gadhd_duplicate_profile, Copy
 		Gui, Add, Button, xp+40 yp gadhd_rename_profile, Rename
 		GuiControl,ChooseString, adhd_current_profile, %cp%
-		
+
 		; Limit application toggle
 		Gui, Add, CheckBox, x5 yp+25 W160 vadhd_limit_application_on gadhd_option_changed, Limit to Application: ahk_class
 
 		; Limit application Text box
 		Gui, Add, Edit, xp+170 yp+2 W120 vadhd_limit_application gadhd_option_changed,
-		
+
 		; Launch window spy
 		Gui, Add, Button, xp+125 yp-1 W70 gadhd_show_window_spy, Window Spy
 		adhd_show_window_spy_TT := "Enter a value here to make hotkeys only trigger when a specific application is open.`nUse the window spy (? Button to the right) to find the ahk_class of your application.`nCaSe SenSitIve !!!"
@@ -416,7 +416,7 @@ Class ADHDLib {
 
 		; Build version info
 		local bad := 0
-		
+
 		; Check versions:
 		local tt := "Versions found on the internet:`n`nADHD library:`n"
 
@@ -470,7 +470,7 @@ Class ADHDLib {
 		local tmp
 		tmp := w - 90
 		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_window gadhd_debug_window_change, Show Window
-			
+
 		tmp := w - 180
 		Gui, Add, CheckBox, x%tmp% y10 vadhd_debug_mode gadhd_debug_change, Debug Mode
 
@@ -511,7 +511,7 @@ Class ADHDLib {
 	; Call once you are ready to actually start the macro.
 	finish_startup(){
 		global	; Remove! phase out mass use of globals
-		
+
 		; Show the GUI =====================================
 		local ver := this.private.core_version
 		local aver := this.private.author_version
@@ -556,7 +556,7 @@ Class ADHDLib {
 
 		Gui, Show, x%x% y%y% w%w% h%h%, %name% v%aver% (ADHD v%ver%)
 
-		
+
 
 		this.private.debug_ready := 1
 
@@ -576,9 +576,9 @@ Class ADHDLib {
 		this.private.profile_changed()
 		this.private.option_changed()
 		this.private.debug_window_change()
-		
+
 		; Auto profile switching
-		Gui +LastFound 
+		Gui +LastFound
 		hWnd := WinExist()
 		DllCall( "RegisterShellHookWindow", UInt,Hwnd )
 		MsgNum := DllCall( "RegisterWindowMessage", Str,"SHELLHOOK" )
@@ -621,7 +621,7 @@ Class ADHDLib {
 	 #  ##  #####   #      #     #####  #       ###           ####  #   #  #   #             #  #####   #      #     #####  #       ###
 	 #   #  #       #  #   #  #  #      #          #         #   #  #   #  #  ##         #   #  #       #  #   #  #  #      #          #
 	  ###    ###     ##     ##    ###   #      ####           ####  #   #   ## #          ###    ###     ##     ##    ###   #      ####
-	
+
 	; Functions to get and set values
 	*/
 
@@ -648,7 +648,7 @@ Class ADHDLib {
 	}
 
 	; --------------------------------------------------------------------------------------------------------------------------------------
-	
+
 	; Gets the LAST size of the application specified in the "Limit to Application" box
 	; This is useful for example to detect an game going from windowed mode (lobby) to fullscreen (game)
 	; returns  an object with .w and .h properties
@@ -724,7 +724,7 @@ Class ADHDLib {
 	 #   #    #     ###   #             #      #   #  #   #  #       #       #    #   #  #   #   ###
 	 #   #    #        #  #   #         #      #  ##  #   #  #   #   #  #    #    #   #  #   #      #
 	 #   #   ###   ####    ###          #       ## #  #   #   ###     ##    ###    ###   #   #  ####
-	
+
 	; Useful stuff that does not fit into any other category
 	*/
 
@@ -781,7 +781,7 @@ Class ADHDLib {
 		HKLM := HKEY_LOCAL_MACHINE
 		HKU	 := HKEY_USERS
 		HKCC := HKEY_CURRENT_CONFIG
-		
+
 		REG_NONE 				:= 0	; http://msdn.microsoft.com/en-us/library/ms724884.aspx
 		REG_SZ 					:= 1
 		REG_EXPAND_SZ			:= 2
@@ -802,9 +802,9 @@ Class ADHDLib {
 			ErrorLevel := 3
 			return ""
 		}
-		
+
 		RegAccessRight := KEY_QUERY_VALUE + KEY_WOW64_64KEY
-		
+
 		DllCall("Advapi32.dll\RegOpenKeyExA", "uint", myhKey, "str", sKeyName, "uint", 0, "uint", RegAccessRight, "uint*", hKey)	; open key
 		DllCall("Advapi32.dll\RegQueryValueExA", "uint", hKey, "str", sValueName, "uint", 0, "uint*", sValueType, "uint", 0, "uint", 0)		; get value type
 		If (sValueType == REG_SZ or sValueType == REG_EXPAND_SZ) {
@@ -820,7 +820,7 @@ Class ADHDLib {
 			Loop {
 				If (errorLevel+2 >= &sTmp + vValueSize)
 					Break
-				sValue := sValue this.ExtractData( errorLevel+1 ) "`n" 
+				sValue := sValue this.ExtractData( errorLevel+1 ) "`n"
 			}
 		} Else If (sValueType == REG_BINARY) {
 			VarSetCapacity(sTmp, vValueSize:=DataMaxSize)
@@ -854,7 +854,7 @@ Class ADHDLib {
 		HKLM := HKEY_LOCAL_MACHINE
 		HKU	 := HKEY_USERS
 		HKCC := HKEY_CURRENT_CONFIG
-		
+
 		REG_NONE 				:= 0	; http://msdn.microsoft.com/en-us/library/ms724884.aspx
 		REG_SZ 					:= 1
 		REG_EXPAND_SZ			:= 2
@@ -869,7 +869,7 @@ Class ADHDLib {
 		KEY_WOW64_64KEY := 0x0100	; http://msdn.microsoft.com/en-gb/library/aa384129.aspx (do not redirect to Wow6432Node on 64-bit machines)
 		KEY_SET_VALUE	:= 0x0002
 		KEY_WRITE		:= 0x20006
-		
+
 		myhKey := %sRootKey%			; pick out value (0x8000000x) from list of HKEY_xx vars
 		myValueType := %sValueType%		; pick out value (0-8) from list of REG_SZ,REG_DWORD etc. types
 		IfEqual,myhKey,, {		; Error - Invalid root key
@@ -880,9 +880,9 @@ Class ADHDLib {
 			ErrorLevel := 2
 			return ErrorLevel
 		}
-		
+
 		RegAccessRight := KEY_QUERY_VALUE + KEY_WOW64_64KEY + KEY_WRITE
-		
+
 		DllCall("Advapi32.dll\RegCreateKeyExA", "uint", myhKey, "str", sKeyName, "uint", 0, "uint", 0, "uint", 0, "uint", RegAccessRight, "uint", 0, "uint*", hKey)	; open/create key
 		If (myValueType == REG_SZ or myValueType == REG_EXPAND_SZ) {
 			vValueSize := StrLen(sValue) + 1
@@ -940,15 +940,15 @@ Class ADHD_Private {
 		this.author_version := 1.0								; The version number of your script
 		this.author_name := "Unknown"							; Your Name
 		this.author_link := ""
-		
+
 		this.limit_app := ""
 		this.gui_w := 450
 		this.gui_h := 200
 		this.guis_used := 3					; The number of GUIs used by ADHD. 1 = Main GUI, 2 = Debug Window, 3 = Bind popup
-		
+
 		this.ini_version := 1
 		this.write_version := 1				; set to 0 to stop writing of version to INI file on exit
-		
+
 		; Hooks
 		this.events := {}
 		;this.events.profile_load := ""
@@ -960,19 +960,19 @@ Class ADHD_Private {
 		this.events.bind_mode_on := ""		; Bind mode started
 		this.events.bind_mode_off := ""		; Bind Mode stopped
 		this.events.functionality_toggled := ""		; Bind Mode stopped
-		
+
 		this.limit_app_w := -1				; Used for resolution change detection
 		this.limit_app_h := -1
 		this.limit_app_last_w := -1
 		this.limit_app_last_h := -1
 		this.tab_list := Array("Main")
-		
+
 		this.x64_warning := 1
 		this.noaction_warning := 1
 		; strip extension from end of script name for basis of INI name
 		;this.ini_name := this.build_ini_name()
 		this.build_ini_name()
-		
+
 		this.functionality_enabled := 1
 
 		; Build list of "End Keys" for Input command
@@ -1044,7 +1044,7 @@ Class ADHD_Private {
 			}
 		}
 	}
-	
+
 	read_ini(key,section,default){
 		sleep 0
 		ini := this.ini_name
@@ -1091,15 +1091,15 @@ Class ADHD_Private {
 	get_macro_name(){
 		return this.author_macro_name
 	}
-	
+
 	limit_app_get_size(){
 		return {w: this.limit_app_w, h:this.limit_app_h}
 	}
-	
+
 	limit_app_get_last_size(){
-		return {w: this.limit_app_last_w, h:this.limit_app_last_h}	
+		return {w: this.limit_app_last_w, h:this.limit_app_last_h}
 	}
-	
+
 	limit_app_is_active(){
 		if (this.app_act_curr){
 			return true
@@ -1111,23 +1111,23 @@ Class ADHD_Private {
 	get_gui_h(){
 		return this.gui_h
 	}
-	
+
 	get_gui_w(){
 		return this.gui_w
 	}
-	
+
 	get_limit_app_on(){
 		global adhd_limit_application_on
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application_on
 	}
-	
+
 	get_limit_app(){
 		global adhd_limit_application
 		;Gets the state of the Limit App checkbox
 		return adhd_limit_application
 	}
-	
+
 	/*
 	 #   #             #          #                                  #       #      ##     #                   #       #
 	 #   #             #          #                                  #             #  #                        #
@@ -1147,18 +1147,18 @@ Class ADHD_Private {
 		}
 		/*
 		pwhr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-		pwhr.Open("GET",url) 
+		pwhr.Open("GET",url)
 		pwhr.Send()
 		ret := pwhr.ResponseText
-		
+
 		; Cater for 404s etc
 		if (InStr(ret, "<html>")){
 			return 0
-		}		
+		}
 		*/
 		ret := this.download_to_string(url)
 		out := {}
-		
+
 		Loop, Parse, ret, `n`r, %A_Space%%A_Tab%
 		{
 			c := SubStr(A_LoopField, 1, 1)
@@ -1219,7 +1219,7 @@ Class ADHD_Private {
 			throw Exception("Invalid version: " version1)
 		if (!this.semver_parts(version2, maj2, min2, pat2, pre2, bld2))
 			throw Exception("Invalid version: " version2)
-	 
+
 		for each, part in ["maj", "min", "pat"]
 		{
 			%part%1 += 0, %part%2 += 0
@@ -1228,7 +1228,7 @@ Class ADHD_Private {
 			else if (%part%1 > %part%2)
 				return +1
 		}
-	 
+
 		for each, part in ["pre", "bld"] ; { "pre" : 1, "bld" : -1 }
 		{
 			if (%part%1 && %part%2)
@@ -1316,7 +1316,7 @@ Class ADHD_Private {
 	}
 
 	; Called on app exit
-	exit_app(){	
+	exit_app(){
 		Gui, +Hwndgui_id
 		WinGetPos, gui_x, gui_y,,, ahk_id %gui_id%
 		ini := this.ini_name
@@ -1331,7 +1331,7 @@ Class ADHD_Private {
 			tmp := this.ini_version
 			IniWrite, %tmp%, %ini%, Settings, adhd_ini_version
 		}
-		
+
 		this.fire_event(this.events.on_exit)
 		ExitApp
 		return
@@ -1345,7 +1345,7 @@ Class ADHD_Private {
 			%event%()
 		}
 	}
-	
+
 	/*
 	  ###   #   #   ###                                                                          #
 	 #   #  #   #    #                                                                           #
@@ -1404,7 +1404,7 @@ Class ADHD_Private {
 			this.hotkeys_enabled := 1
 			; ToDo: Should not submit gui here, triggering save...
 			;this.debug("enable_hotkeys")
-			
+
 			Gui, Submit, NoHide
 			this.defined_hotkeys.hotkey_cache := []
 			cache_idx := 1
@@ -1444,7 +1444,7 @@ Class ADHD_Private {
 						this.joystick_lookup[hotkey_string] := name
 					}
 					Hotkey, %prefix%%hotkey_string% , %hotkey_subroutine%, On
-					
+
 					this.debug("Adding hotkey: " prefix hotkey_string ", sub: " hotkey_subroutine ", wild: " this.hotkey_mappings[name].wild ", passthru: " this.hotkey_mappings[name].passthru)
 
 					this.defined_hotkeys.hotkey_cache[cache_idx] := {string: prefix hotkey_string, noprefix: hotkey_string, subroutine: hotkey_subroutine}
@@ -1479,7 +1479,7 @@ Class ADHD_Private {
 
 			; If "Functionality Toggle" is defined and 1 passed as mode, do not disable the last hotkey (Functionality Toggle)
 			max := this.defined_hotkeys.hotkey_cache.MaxIndex()
-			
+
 			limit_app_on := this.defined_hotkeys.limit_app_on
 			limit_app := this.defined_hotkeys.limit_app
 
@@ -1496,7 +1496,7 @@ Class ADHD_Private {
 			Loop % max {
 				str := this.defined_hotkeys.hotkey_cache[A_Index].string
 				sub := this.defined_hotkeys.hotkey_cache[A_Index].subroutine
-				
+
 				this.debug("Removing hotkey: " str ", sub: " sub)
 
 				if (mode && (this.defined_hotkeys.hotkey_cache[A_Index].subroutine = "adhd_functionality_toggle" || this.joystick_lookup[this.defined_hotkeys.hotkey_cache[A_Index].noprefix] == "adhd_functionality_toggle")){
@@ -1542,7 +1542,7 @@ Class ADHD_Private {
 	bind_joystick_button(){
 		this.HKControlType := 3
 
-		; Dirty bodge fix due to AHK limitation	
+		; Dirty bodge fix due to AHK limitation
 		this.HKSecondaryInput := this.strip_prefix(A_ThisHotkey)
 
 		; Send escape to quit bind routine - bind routine will inspect flags.
@@ -1556,7 +1556,7 @@ Class ADHD_Private {
 		name := this.hotkey_index_to_name(this.HKLastHotkey)
 		this.hotkey_mappings[name].modified := ""
 		this.hotkey_mappings[name].type := 0
-		
+
 		this.option_changed()
 		return
 	}
@@ -1590,7 +1590,7 @@ Class ADHD_Private {
 		this.BindMode := 1
 
 		; Turn off caps lock if on
-		caps_state := GetKeyState("Capslock", "T") 
+		caps_state := GetKeyState("Capslock", "T")
 		if (caps_state){
 			SetCapsLockState, Off
 		}
@@ -1675,7 +1675,7 @@ Class ADHD_Private {
 			} else {
 				this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].modified := hk
 				this.hotkey_mappings[this.hotkey_index_to_name(ctrlnum)].type := this.HKControlType
-	
+
 			}
 			; Rebuild rest of hotkey object, save settings etc
 			this.option_changed()
@@ -1906,7 +1906,7 @@ Class ADHD_Private {
 			soundbeep, 800, 200
 		}
 	}
-	
+
 	/*
 	 ####                   ##     #     ##                  #                        #   ##      #
 	 #   #                 #  #           #                  #                        #    #
@@ -1921,7 +1921,7 @@ Class ADHD_Private {
 
 	add_profile(name){
 		global adhd_current_profile
-		
+
 		Loop, {
 			if (name == ""){
 				InputBox, name, Profile Name, Please enter a profile name
@@ -1944,7 +1944,7 @@ Class ADHD_Private {
 		pl := this.profile_list
 		Sort, pl, D|
 		this.profile_list := pl
-		
+
 		GuiControl,, adhd_current_profile, |Default||%pl%
 		GuiControl,ChooseString, adhd_current_profile, %name%
 		adhd_current_profile := name
@@ -1959,7 +1959,7 @@ Class ADHD_Private {
 	; Deletes a profile
 	delete_profile(name, gotoprofile = "Default"){
 		Global adhd_current_profile
-		
+
 		if (name != "Default"){
 			pl := this.profile_list
 			StringSplit, tmp, pl, |
@@ -1974,20 +1974,20 @@ Class ADHD_Private {
 			}
 			pl := out
 			this.profile_list := pl
-			
+
 			ini := this.ini_name
 			IniDelete, %ini%, %name%
-			this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")		
-			
+			this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")
+
 			; Set new contents of list
 			GuiControl,, adhd_current_profile, |Default|%pl%
-			
+
 			; Select the desired new current profile
 			GuiControl, ChooseString, adhd_current_profile, %gotoprofile%
-			
+
 			; Trigger save
 			Gui, Submit, NoHide
-			
+
 			this.profile_changed()
 		}
 		return
@@ -1996,7 +1996,7 @@ Class ADHD_Private {
 	; Copies a profile
 	duplicate_profile(name){
 		global adhd_current_profile
-		
+
 		Loop, {
 			; Blank name specified - prompt for name
 			if (name == ""){
@@ -2021,7 +2021,7 @@ Class ADHD_Private {
 		pl := this.profile_list
 		Sort, pl, D|
 		this.profile_list := pl
-		
+
 		this.current_profile := name
 		adhd_current_profile := name
 		; Push the new list to the profile select box
@@ -2030,11 +2030,11 @@ Class ADHD_Private {
 		GuiControl,ChooseString, adhd_current_profile, %name%
 		; Update the profile list in the INI
 		this.update_ini("adhd_profile_list", "Settings", this.profile_list, "")
-		
+
 		; Firing option_changed saves the current state to the new profile name in the INI
 		this.debug("duplicate_profile calling option_changed")
 		this.option_changed()
-		
+
 		; Fire profile changed to update current profile in ini
 		this.profile_changed()
 
@@ -2086,23 +2086,23 @@ Class ADHD_Private {
 		global adhd_limit_application
 		global adhd_limit_application_on
 		global adhd_debug_window
-		
+
 		; Remove old bindings before changing profile
 		;this.disable_hotkeys(1)
 		this.disable_hotkeys(0)
-		
+
 		GuiControlGet,cp,,adhd_current_profile
 		this.current_profile := cp
 		this.debug("profile_changed - " this.current_profile)
 		Gui, Submit, NoHide
 
 		this.update_ini("adhd_current_profile", "Settings", this.current_profile,"")
-		
-		;SB_SetText("Current profile: " this.current_profile,2) 
-		this.set_profile_statusbar() 
-		
+
+		;SB_SetText("Current profile: " this.current_profile,2)
+		this.set_profile_statusbar()
+
 		this.hotkey_mappings := {}
-		
+
 		; Load hotkey bindings
 		Loop, % this.hotkey_list.MaxIndex()
 		{
@@ -2130,7 +2130,7 @@ Class ADHD_Private {
 			tmp := this.build_hotkey_name(this.hotkey_mappings[name].modified, this.hotkey_mappings[name].type)
 			GuiControl,, adhd_hk_hotkey_%A_Index%, %tmp%
 		}
-		
+
 		; limit application name
 		this.remove_glabel("adhd_limit_application")
 		if (this.limit_app == "" || this.limit_app == null){
@@ -2139,16 +2139,16 @@ Class ADHD_Private {
 		tmp := this.read_ini("adhd_limit_app",this.current_profile,this.limit_app)
 		GuiControl,, adhd_limit_application, %tmp%
 		this.add_glabel("adhd_limit_application")
-		
+
 		; limit application status
 		tmp := this.read_ini("adhd_limit_app_on",this.current_profile,0)
 		GuiControl,, adhd_limit_application_on, %tmp%
-		
+
 		; Auto profile switching
 		tmp := this.read_ini("adhd_auto_profile_switching","Settings",0)
 		GuiControl,, adhd_auto_profile_switching, % tmp
 		this.auto_profile_switching := tmp
-		
+
 		; Get author vars from ini
 		Loop, % this.ini_vars.MaxIndex()
 		{
@@ -2158,7 +2158,7 @@ Class ADHD_Private {
 			}
 			key := this.ini_vars[A_Index,1]
 			sm := this.control_name_to_set_method(this.ini_vars[A_Index,2])
-			
+
 			this.remove_glabel(key)
 			tmp := this.read_ini(key,this.current_profile,def)
 			GuiControl,%sm%, %key%, %tmp%
@@ -2168,12 +2168,12 @@ Class ADHD_Private {
 		; Debug settings
 		adhd_debug_mode := this.read_ini("adhd_debug_mode","Settings",0)
 		GuiControl,, adhd_debug_mode, %adhd_debug_mode%
-		
+
 		adhd_debug_window := this.read_ini("adhd_debug_window","Settings",0)
 		GuiControl,, adhd_debug_window, %adhd_debug_window%
 
 		this.enable_hotkeys()
-		
+
 		; Fire the Author hook
 		this.fire_event(this.events.option_changed)
 
@@ -2209,7 +2209,7 @@ Class ADHD_Private {
 
 			; Disable existing hotkeys
 			this.disable_hotkeys(0)
-			
+
 			; Hotkey bindings
 			Loop % this.hotkey_list.MaxIndex(){
 				name := this.hotkey_index_to_name(A_Index)
@@ -2233,9 +2233,9 @@ Class ADHD_Private {
 				this.hotkey_mappings[name].passthru := adhd_hk_passthru_%A_Index%
 				this.update_ini("adhd_hk_passthru_" A_Index, this.current_profile, this.hotkey_mappings[name].passthru, 1)
 			}
-			
+
 			this.update_ini("adhd_profile_list", "Settings", this.profile_list,"")
-			
+
 			; Limit app
 			if (this.limit_app == "" || this.limit_app == null){
 				this.limit_app := A_Space
@@ -2243,13 +2243,13 @@ Class ADHD_Private {
 			this.update_ini("adhd_limit_app", this.current_profile, adhd_limit_application, this.limit_app)
 			;SB_SetText("Current profile: " this.current_profile, 2)
 			this.set_profile_statusbar()
-			
+
 			; Limit app toggle
 			this.update_ini("adhd_limit_app_on", this.current_profile, adhd_limit_application_on, 0)
-			
+
 			; App switch toggle (NOT per-profile!)
 			this.update_ini("adhd_auto_profile_switching", "settings", adhd_auto_profile_switching, 0)
-			
+
 			; Add author vars to ini
 			Loop, % this.ini_vars.MaxIndex()
 			{
@@ -2257,16 +2257,16 @@ Class ADHD_Private {
 				this.update_ini(tmp, this.current_profile, %tmp%, this.ini_vars[A_Index,3])
 			}
 
-			; Re-enable the hotkeys			
+			; Re-enable the hotkeys
 			this.enable_hotkeys()
 
 			; Fire the Author hook
 			this.fire_event(this.events.option_changed)
-			
+
 			; Debug settings
 			this.update_ini("adhd_debug_mode", "settings", adhd_debug_mode, 0)
 			this.update_ini("adhd_debug_window", "settings", adhd_debug_window, 0)
-			
+
 		} else {
 			this.debug("ignoring option_changed - " A_Guicontrol)
 		}
@@ -2299,7 +2299,7 @@ Class ADHD_Private {
 
 	debug_window_change(){
 		global adhd_debug_window
-		
+
 		gui, submit, nohide
 		if (adhd_debug_window == 1){
 			Gui, +Hwndgui_id
@@ -2340,7 +2340,7 @@ Class ADHD_Private {
 			}
 		}
 	}
-	
+
 	clear_log(){
 		global adhd_log_contents
 		adhd_log_contents := ""
@@ -2365,7 +2365,7 @@ Class ADHD_Private {
 		this.debug("Enabling Heartbeat")
 		global adhd_limit_application
 		global adhd_limit_application_on
-		
+
 		if (adhd_limit_application_on == 1 && adhd_limit_application != ""){
 			SetTimer, adhd_heartbeat, 500
 		}
@@ -2406,7 +2406,7 @@ Class ADHD_Private {
 				if (fire_change){
 					this.debug("Resolution change detected (" this.limit_app_last_w "x" this.limit_app_last_h " --> " this.limit_app_w "x" this.limit_app_h ")- firing change")
 					this.fire_event(this.events.resolution_changed)
-					  
+
 				} else {
 					this.debug("First detection of resolution - not firing change")
 				}
@@ -2433,7 +2433,7 @@ Class ADHD_Private {
 				; Changing from active to inactive or on startup
 				; Stop Author Timers
 				this.app_act_curr := 0
-				
+
 				; Fire event hooks
 				this.debug("Firing app_inactive")
 				this.fire_event(this.events.app_inactive)
@@ -2506,7 +2506,7 @@ adhd_mouse_move(){
 				PrevControl := CurrControl
 		}
 		return
-		
+
 		adhd_display_tooltip:
 		try
 				ToolTip % %CurrControl%_TT
@@ -2514,7 +2514,7 @@ adhd_mouse_move(){
 				ToolTip
 		SetTimer, adhd_remove_tooltip, -10000
 		return
-		
+
 		adhd_remove_tooltip:
 		ToolTip
 		return
@@ -2558,7 +2558,7 @@ adhd_delete_profile:
 adhd_duplicate_profile:
 	ADHD.private.duplicate_profile("")
 	return
-	
+
 adhd_rename_profile:
 	ADHD.private.rename_profile()
 	return
@@ -2578,7 +2578,7 @@ adhd_debug_window_change:
 adhd_debug_change:
 	ADHD.private.debug_change()
 	return
-	
+
 adhd_clear_log:
 	ADHD.private.clear_log()
 	return
@@ -2600,7 +2600,7 @@ adhd_escape_released:
 	hotkey, Escape up, adhd_escape_released, OFF
 	SetTimer, adhd_delete_hotkey, Off
 	return
-	
+
 ; === SHOULD NOT NEED TO EDIT BELOW HERE! ===========================================================================
 
 
