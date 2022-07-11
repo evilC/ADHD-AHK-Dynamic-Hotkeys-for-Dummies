@@ -421,7 +421,7 @@ Class ADHDLib {
 		local tt := "Versions found on the internet:`n`nADHD library:`n"
 
 		; ADHD version
-		ver := this.private.get_ver("http://evilc.com/files/ahk/adhd/adhd.au.txt")
+		ver := this.private.get_ver("https://raw.githubusercontent.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies/master/adhd.au.txt")
 		if (ver){
 			cv := this.private.pad_version(this.private.core_version)
 			rv := this.private.pad_version(ver)
@@ -930,7 +930,7 @@ Class ADHD_Private {
 
 	; Constructor - init default values
 	__New(){
-		this.core_version := "3.3.4"
+		this.core_version := "3.3.5"
 
 		this.instantiated := 1
 		this.hotkeys_enabled := 0
