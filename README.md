@@ -1,10 +1,10 @@
-#ADHD-AHK-Dynamic-Hotkeys-for-Dummies
+# ADHD-AHK-Dynamic-Hotkeys-for-Dummies
 
 An AutoHotKey GUI library that allows authors to easily create AHK macros.   
 Provides functionality to allow the end-user to configure which button triggers a macro via a GUI.(Similar to binding a key to a function in a game's options.)   
 Key bindings and other settings are stored in an INI file and are remembered between runs.   
 
-##Features
+## Features
 * Bind any key (Except Escape), mouse button (With optional Ctrl, Shift, Alt, Win modifiers), or Joystick Button to each macro   
 Powered by a user-friendly custom binding system   
 ![Gihub Logo](http://evilc.com/files/ahk/adhd/bindmode.gif)
@@ -19,9 +19,9 @@ Powered by a user-friendly custom binding system
 * Built-in system to link to a URL for information on your macro
 * Built-in system to notify users of updates.
  
-##Using this library in your projects
-####Setup
-#####Easy Method
+## Using this library in your projects
+#### Setup
+##### Easy Method
 1. Clone this project using GitHub for Windows.  
 If viewing this page on Github, click **Clone in Desktop** on the right edge of the page.  
 This will clone this Project ("Repository") onto your computer.  
@@ -32,8 +32,8 @@ This will check you are all set up to use the library and configure AutoHotkey s
 3. You are now set up and can use this library by putting the following line at the start of your script:  
 `#include <ADHDLib>`
 
-#####Manual Method
+##### Manual Method
 If you know what you are doing, or paranoid, or both, you can just obtain the files and `#include` as normal. The Setup app simply makes it easy for people who don't really know what they are doing to get up and running with this library.
 
-###Usage
+### Usage
 Please see the [Wiki](https://github.com/evilC/ADHD-AHK-Dynamic-Hotkeys-for-Dummies/wiki)
